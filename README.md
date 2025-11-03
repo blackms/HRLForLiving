@@ -279,16 +279,21 @@ The system tracks the following metrics:
 
 ## Quick Start
 
-Run the basic example to see BudgetEnv in action:
+Run the examples to see the system in action:
 
 ```bash
-python examples/basic_budget_env_usage.py
+# BudgetEnv demonstration
+PYTHONPATH=. python3 examples/basic_budget_env_usage.py
+
+# RewardEngine demonstration
+PYTHONPATH=. python3 examples/reward_engine_usage.py
 ```
 
-This example demonstrates:
-- Creating and configuring a BudgetEnv
+These examples demonstrate:
+- Creating and configuring environments and reward engines
 - Taking actions and observing results
-- Running a complete 12-month episode with adaptive strategy
+- Understanding reward components and their effects
+- Running complete episodes with adaptive strategies
 
 ## Documentation
 

@@ -17,7 +17,7 @@ Demonstrates the core functionality of the BudgetEnv:
 
 **Run:**
 ```bash
-python examples/basic_budget_env_usage.py
+PYTHONPATH=. python3 examples/basic_budget_env_usage.py
 ```
 
 **What you'll learn:**
@@ -40,7 +40,7 @@ Demonstrates the multi-objective reward computation system:
 
 **Run:**
 ```bash
-python examples/reward_engine_usage.py
+PYTHONPATH=. python3 examples/reward_engine_usage.py
 ```
 
 **What you'll learn:**
@@ -71,6 +71,8 @@ All examples require the dependencies listed in `requirements.txt`:
 ```bash
 pip install -r requirements.txt
 ```
+
+**Note:** Examples must be run from the project root directory with `PYTHONPATH=.` to ensure proper module imports.
 
 ## Notes
 
