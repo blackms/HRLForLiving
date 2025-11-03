@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- FinancialStrategist (High-Level Agent) implementation
+  - HIRO-style agent for strategic goal generation
+  - Custom StrategistNetwork with [64, 64] hidden layers
+  - 5-dimensional aggregated state input (avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed)
+  - 3-dimensional goal output with automatic constraint enforcement
+  - aggregate_state() method for computing macro features from state history
+  - select_goal() method for generating strategic goals with sigmoid/softplus constraints
+  - learn() method implementing simplified HIRO algorithm
+  - Discount factor γ_high = 0.99 for long-term strategic planning
+  - Gradient clipping for training stability
+  - Model save/load functionality for checkpointing
+  - Training metrics tracking (loss, policy entropy)
+- Unit tests for FinancialStrategist (`tests/test_financial_strategist.py`)
+  - Initialization tests
+  - State aggregation tests (basic, empty, single state, averages)
+  - Goal generation tests (basic, valid ranges, deterministic, invalid dimensions)
+  - Learning tests (basic, empty, single transition, terminal states)
+  - Policy update mechanics tests
+  - Different states influence tests
 - BudgetExecutor (Low-Level Agent) implementation
   - PPO-based agent for monthly allocation decisions
   - Custom PolicyNetwork with [128, 128] hidden layers and softmax output
@@ -49,6 +68,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Marked Task 6 (Implement High-Level Agent) as complete in tasks.md
+- Updated README.md with FinancialStrategist usage examples and API documentation
+- Updated HLD/LLD document with FinancialStrategist implementation details
 - Marked Task 5 (Implement Low-Level Agent) as complete in tasks.md
 - Updated README.md with BudgetExecutor usage examples and API documentation
 - Updated HLD/LLD document with BudgetExecutor implementation status
@@ -103,4 +125,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv and RewardEngine implementations complete with full integration, ready for agent implementation
+- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, and FinancialStrategist implementations complete with full integration and comprehensive tests. Ready for Training Orchestrator implementation.

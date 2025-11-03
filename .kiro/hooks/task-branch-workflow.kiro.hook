@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Task Branch Workflow",
+  "description": "Automatically manages git branches for tasks: creates a new branch with a meaningful name when starting a task, and commits, pushes, and merges with meaningful messages when finishing a task",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*",
+      "tests/**/*",
+      "requirements.txt",
+      "README.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the recent file changes to determine if this represents starting a new task or completing a task. \n\nIf STARTING a new task:\n- Create a new git branch with a meaningful name based on the work being started (e.g., feature/add-authentication, fix/budget-calculation-bug, refactor/agent-structure)\n- Explain what branch was created and why\n\nIf COMPLETING a task:\n- Review all changes made in the current branch\n- Create a meaningful commit message that describes what was accomplished\n- Commit and push the changes\n- Merge the branch back to main/master\n- Explain what was committed and merged\n\nProvide clear feedback on the git operations performed."
+  }
+}

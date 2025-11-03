@@ -16,7 +16,8 @@ The system implements a two-level hierarchical architecture:
 │   ├── __init__.py              # Main package initialization
 │   ├── agents/                  # HRL agent implementations
 │   │   ├── __init__.py
-│   │   └── budget_executor.py  # ✅ Low-Level Agent (PPO-based)
+│   │   ├── budget_executor.py  # ✅ Low-Level Agent (PPO-based)
+│   │   └── financial_strategist.py # ✅ High-Level Agent (HIRO-style)
 │   ├── environment/             # Financial environment simulation
 │   │   ├── __init__.py
 │   │   ├── budget_env.py       # ✅ BudgetEnv implementation
@@ -35,6 +36,7 @@ The system implements a two-level hierarchical architecture:
 │   ├── __init__.py
 │   ├── test_budget_env.py      # ✅ BudgetEnv tests
 │   ├── test_budget_executor.py # ✅ BudgetExecutor tests
+│   ├── test_financial_strategist.py # 🚧 FinancialStrategist tests
 │   └── test_reward_engine.py   # ✅ RewardEngine tests
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
@@ -202,6 +204,19 @@ The `BudgetExecutor` is the low-level agent that executes concrete monthly alloc
 - PPO-based learning with discount factor γ = 0.95
 - Model save/load functionality
 
+### FinancialStrategist - High-Level Agent
+
+The `FinancialStrategist` is the high-level agent that defines medium-term financial strategy. It observes aggregated state information and generates strategic goals for the Low-Level Agent to follow.
+
+**Key Features:**
+- 5-dimensional aggregated state input (avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed)
+- 3-dimensional goal output [target_invest_ratio, safety_buffer, aggressiveness]
+- Custom policy network with [64, 64] hidden layers
+- State aggregation from historical observations
+- HIRO-style learning with discount factor γ = 0.99
+- Automatic goal constraint enforcement (sigmoid/softplus)
+- Model save/load functionality
+
 **Usage Example:**
 ```python
 from src.agents.budget_executor import BudgetExecutor
@@ -260,6 +275,69 @@ The executor uses a simplified policy gradient approach with:
 - Return normalization for stable training
 - Entropy bonus (0.01 coefficient) for exploration
 - Adam optimizer with configurable learning rate
+
+**Usage Example:**
+```python
+from src.agents.financial_strategist import FinancialStrategist
+from src.utils.config import TrainingConfig
+import numpy as np
+
+# Create training configuration
+training_config = TrainingConfig(
+    num_episodes=5000,
+    gamma_low=0.95,
+    gamma_high=0.99,
+    high_period=6,
+    batch_size=32,
+    learning_rate_low=3e-4,
+    learning_rate_high=1e-4
+)
+
+# Initialize strategist
+strategist = FinancialStrategist(training_config)
+
+# Aggregate state from history
+state_history = [
+    np.array([3200, 1400, 700, 1000, 0.02, 0.5, 50]),
+    np.array([3200, 1400, 720, 1100, 0.02, 0.5, 49]),
+    np.array([3200, 1400, 690, 1200, 0.02, 0.5, 48]),
+    # ... more states
+]
+aggregated_state = strategist.aggregate_state(state_history)
+
+# Generate strategic goal
+goal = strategist.select_goal(aggregated_state)
+print(f"Goal: target_invest={goal[0]:.2f}, safety_buffer={goal[1]:.2f}, aggressiveness={goal[2]:.2f}")
+
+# Learn from high-level experience
+high_level_transitions = [
+    Transition(aggregated_state, goal, None, high_level_reward, next_aggregated_state, done)
+    for aggregated_state, goal, high_level_reward, next_aggregated_state, done in episode_data
+]
+metrics = strategist.learn(high_level_transitions)
+
+print(f"Training metrics: loss={metrics['loss']:.4f}, entropy={metrics['policy_entropy']:.4f}")
+
+# Save trained model
+strategist.save('models/financial_strategist.pth')
+
+# Load trained model
+strategist.load('models/financial_strategist.pth')
+```
+
+**State Aggregation:**
+The strategist aggregates recent state history to compute strategic-level features:
+- Average cash balance over last N months
+- Average investment return (estimated from cash changes)
+- Spending trend (linear fit slope of variable expenses)
+- Current wealth (most recent cash balance)
+- Months elapsed in the episode
+
+**Goal Generation:**
+Goals are constrained to valid ranges:
+- `target_invest_ratio`: [0, 1] using sigmoid activation
+- `safety_buffer`: [0, ∞) using softplus activation
+- `aggressiveness`: [0, 1] using sigmoid activation
 
 **Reward Components:**
 
@@ -328,14 +406,14 @@ config = RewardConfig(
 - [x] Reward Engine - Multi-objective reward computation for both high-level and low-level agents
 - [x] RewardEngine integration with BudgetEnv - Production-ready reward computation
 - [x] Low-Level Agent (Budget Executor) - PPO-based agent with policy network, action generation, and learning capabilities
+- [x] High-Level Agent (Financial Strategist) - HIRO-style agent with state aggregation, goal generation, and strategic learning
 
 ### 🚧 In Progress
-- [ ] High-Level Agent (Financial Strategist)
 - [ ] Training Orchestrator
 - [ ] Analytics Module
 
 ### ✅ Recently Completed
-- [x] Low-Level Agent (Budget Executor) - PPO-based agent for monthly allocation decisions
+- [x] High-Level Agent (Financial Strategist) - HIRO-style agent for strategic goal generation
 
 ## Architecture
 

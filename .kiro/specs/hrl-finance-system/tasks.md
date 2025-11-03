@@ -124,38 +124,49 @@
     - ✅ Training metrics tracking (loss, policy entropy)
     - ✅ Robust error handling and validation
 
-- [ ] 6. Implement High-Level Agent (Financial Strategist)
-  - [ ] 6.1 Create FinancialStrategist class structure
-    - Implement `FinancialStrategist` class in `src/agents/financial_strategist.py`
-    - Initialize with neural network policy (custom implementation or Option-Critic)
-    - Accept TrainingConfig for hyperparameters
+- [x] 6. Implement High-Level Agent (Financial Strategist) ✅ COMPLETE
+  - [x] 6.1 Create FinancialStrategist class structure
+    - ✅ Implemented `FinancialStrategist` class in `src/agents/financial_strategist.py`
+    - ✅ Custom StrategistNetwork with [64, 64] hidden layers
+    - ✅ Accepts TrainingConfig for hyperparameters
+    - ✅ 5-dimensional aggregated state input
+    - ✅ 3-dimensional goal output
     - _Requirements: 2.1, 2.2, 2.3, 4.2_
   
-  - [ ] 6.2 Implement state aggregation
-    - Implement `aggregate_state(history)` method to compute macro features
-    - Calculate average cash over last N months
-    - Calculate average investment return
-    - Calculate spending trend
-    - Return 5-dimensional aggregated state
+  - [x] 6.2 Implement state aggregation
+    - ✅ Implemented `aggregate_state(history)` method to compute macro features
+    - ✅ Calculates average cash over last N months
+    - ✅ Calculates average investment return from cash changes
+    - ✅ Calculates spending trend using linear fit
+    - ✅ Returns 5-dimensional aggregated state: [avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed]
     - _Requirements: 2.2_
   
-  - [ ] 6.3 Implement goal generation
-    - Implement `select_goal(state)` method to generate goal vector
-    - Output 3-dimensional goal: [target_invest_ratio, safety_buffer, aggressiveness]
-    - Ensure values are within valid ranges
+  - [x] 6.3 Implement goal generation
+    - ✅ Implemented `select_goal(state)` method to generate goal vector
+    - ✅ Outputs 3-dimensional goal: [target_invest_ratio, safety_buffer, aggressiveness]
+    - ✅ Ensures values are within valid ranges using sigmoid/softplus constraints
+    - ✅ target_invest_ratio: [0, 1] using sigmoid
+    - ✅ safety_buffer: [0, ∞) using softplus
+    - ✅ aggressiveness: [0, 1] using sigmoid
     - _Requirements: 2.1, 2.3_
   
-  - [ ] 6.4 Implement learning method
-    - Implement `learn(transitions)` method to update high-level policy
-    - Apply discount factor γ_high = 0.99
-    - Use HIRO or Option-Critic algorithm
-    - Return training metrics
+  - [x] 6.4 Implement learning method
+    - ✅ Implemented `learn(transitions)` method to update high-level policy
+    - ✅ Applies discount factor γ_high = 0.99
+    - ✅ Uses simplified HIRO-style algorithm
+    - ✅ Return normalization for stable training
+    - ✅ Gradient clipping (max_norm=1.0) for stability
+    - ✅ Returns training metrics (loss, policy_entropy, n_updates)
     - _Requirements: 4.2, 4.4_
   
-  - [ ] 6.5 Write unit tests for FinancialStrategist
-    - Test goal generation within valid ranges
-    - Test state aggregation from history
-    - Test policy update mechanics
+  - [x] 6.5 Write unit tests for FinancialStrategist
+    - ✅ Test goal generation within valid ranges
+    - ✅ Test state aggregation from history (basic, empty, single state, averages)
+    - ✅ Test policy update mechanics
+    - ✅ Test deterministic goal generation
+    - ✅ Test invalid state dimension handling
+    - ✅ Test learning with terminal states
+    - ✅ Test different states produce different goals
     - _Requirements: 2.1, 2.2, 2.3, 4.2, 4.4_
 
 - [ ] 7. Implement Training Orchestrator

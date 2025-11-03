@@ -410,6 +410,12 @@ high_reward = reward_engine.compute_high_level_reward(episode_history)
 
 **Status:** Fully implemented and tested. Ready for integration with training orchestrator.
 
+### 4.4 High-Level Agent: `FinancialStrategist` ✅ IMPLEMENTED
+
+**Location:** `src/agents/financial_strategist.py`
+
+**Status:** Fully implemented. Ready for integration with training orchestrator and testing.
+
 **Implementation Details:**
 
 ```python
@@ -566,19 +572,169 @@ executor.save('models/executor.pth')
 executor.load('models/executor.pth')
 ```
 
-### 4.4 High-Level Policy (Strategist)
+**Implementation Details:**
 
 ```python
 class FinancialStrategist:
-    def __init__(self, model):
-        self.model = model
+    """
+    High-Level Agent that defines medium-term financial strategy.
+    Uses HIRO-style algorithm for hierarchical learning.
+    """
+    
+    def __init__(self, config: TrainingConfig, aggregated_state_dim: int = 5):
+        """Initialize with custom policy network"""
+        self.config = config
+        self.aggregated_state_dim = aggregated_state_dim
+        self.goal_dim = 3  # [target_invest_ratio, safety_buffer, aggressiveness]
+        
+        # Initialize policy network [64, 64]
+        self.policy_network = StrategistNetwork(self.aggregated_state_dim, self.goal_dim)
+        self.optimizer = torch.optim.Adam(
+            self.policy_network.parameters(),
+            lr=config.learning_rate_high
+        )
 
-    def select_goal(self, state):
-        goal_vector = self.model.predict(state)
-        return goal_vector  # [target_invest_ratio, safety_buffer, aggressiveness]
+    def aggregate_state(self, history: List[np.ndarray]) -> np.ndarray:
+        """
+        Compute macro features from state history.
+        
+        Returns 5-dimensional aggregated state:
+        [avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed]
+        """
+        if not history:
+            return np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+        
+        history_array = np.array(history, dtype=np.float32)
+        cash_balances = history_array[:, 3]
+        variable_expenses = history_array[:, 2]
+        
+        avg_cash = np.mean(cash_balances)
+        avg_investment_return = np.mean(np.diff(cash_balances)) if len(cash_balances) > 1 else 0.0
+        spending_trend = np.polyfit(np.arange(len(variable_expenses)), variable_expenses, 1)[0] if len(variable_expenses) > 1 else 0.0
+        current_wealth = cash_balances[-1]
+        months_elapsed = history_array[0, 6] - history_array[-1, 6] if len(history_array) > 0 else 0.0
+        
+        return np.array([avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed], dtype=np.float32)
 
-    def learn(self, transition_batch):
-        self.model.update(transition_batch)
+    def select_goal(self, state: np.ndarray) -> np.ndarray:
+        """
+        Generate goal vector from aggregated state.
+        
+        Applies constraints to ensure valid ranges:
+        - target_invest_ratio: [0, 1] using sigmoid
+        - safety_buffer: [0, inf) using softplus
+        - aggressiveness: [0, 1] using sigmoid
+        """
+        if state.shape[0] != self.aggregated_state_dim:
+            raise ValueError(f"Expected aggregated state dimension {self.aggregated_state_dim}")
+        
+        with torch.no_grad():
+            state_tensor = torch.FloatTensor(state).unsqueeze(0)
+            goal_raw = self.policy_network(state_tensor).squeeze(0).numpy()
+        
+        target_invest_ratio = 1.0 / (1.0 + np.exp(-goal_raw[0]))
+        safety_buffer = np.log(1.0 + np.exp(goal_raw[1]))
+        aggressiveness = 1.0 / (1.0 + np.exp(-goal_raw[2]))
+        
+        return np.array([target_invest_ratio, safety_buffer, aggressiveness], dtype=np.float32)
+
+    def learn(self, transitions: List[Transition]) -> Dict[str, float]:
+        """
+        Update high-level policy using HIRO-style algorithm.
+        
+        Implements simplified HIRO with:
+        - Discounted returns (γ_high = 0.99)
+        - Return normalization
+        - Gradient clipping for stability
+        """
+        if not transitions:
+            return {'loss': 0.0, 'policy_entropy': 0.0}
+        
+        # Extract and prepare data
+        states = np.array([t.state for t in transitions])
+        goals = np.array([t.goal for t in transitions])
+        rewards = np.array([t.reward for t in transitions])
+        dones = np.array([t.done for t in transitions])
+        
+        # Calculate discounted returns
+        returns = []
+        G = 0
+        for reward, done in zip(reversed(rewards), reversed(dones)):
+            if done:
+                G = 0
+            G = reward + self.config.gamma_high * G
+            returns.insert(0, G)
+        returns = np.array(returns)
+        if len(returns) > 1:
+            returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        
+        # Convert to tensors
+        states_tensor = torch.FloatTensor(states)
+        goals_tensor = torch.FloatTensor(goals)
+        returns_tensor = torch.FloatTensor(returns)
+        
+        # Policy update
+        self.optimizer.zero_grad()
+        goal_predictions = self.policy_network(states_tensor)
+        mse_loss = torch.mean((goal_predictions - goals_tensor) ** 2, dim=1)
+        policy_loss = (mse_loss * returns_tensor).mean()
+        
+        goal_variance = torch.var(goal_predictions, dim=0).mean()
+        loss = policy_loss - 0.01 * goal_variance
+        
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.policy_network.parameters(), max_norm=1.0)
+        self.optimizer.step()
+        
+        return {
+            'loss': loss.item(),
+            'policy_entropy': goal_variance.item(),
+            'n_updates': 1
+        }
+    
+    def save(self, path: str):
+        """Save model to disk"""
+        torch.save({
+            'policy_network_state_dict': self.policy_network.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'config': self.config
+        }, path)
+    
+    def load(self, path: str):
+        """Load model from disk"""
+        checkpoint = torch.load(path)
+        self.policy_network.load_state_dict(checkpoint['policy_network_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+```
+
+**Usage:**
+```python
+from src.agents.financial_strategist import FinancialStrategist
+from src.utils.config import TrainingConfig
+
+config = TrainingConfig(
+    gamma_high=0.99,
+    learning_rate_high=1e-4,
+    high_period=6
+)
+
+strategist = FinancialStrategist(config)
+
+# Aggregate state from history
+state_history = [state1, state2, state3, ...]
+aggregated_state = strategist.aggregate_state(state_history)
+
+# Generate strategic goal
+goal = strategist.select_goal(aggregated_state)
+print(f"Goal: invest={goal[0]:.2f}, buffer={goal[1]:.2f}, aggr={goal[2]:.2f}")
+
+# Learn from experience
+metrics = strategist.learn(high_level_transitions)
+print(f"Loss: {metrics['loss']:.4f}, Entropy: {metrics['policy_entropy']:.4f}")
+
+# Save/load model
+strategist.save('models/strategist.pth')
+strategist.load('models/strategist.pth')
 ```
 
 ### 4.5 Trainer
@@ -668,28 +824,29 @@ training:
 | **RewardEngine** | ✅ Complete | `src/environment/reward_engine.py` | Multi-objective reward computation for both agents with configurable coefficients |
 | **RewardEngine Integration** | ✅ Complete | `src/environment/budget_env.py` | BudgetEnv now uses RewardEngine for all reward calculations |
 | **BudgetExecutor (Low-Level Agent)** | ✅ Complete | `src/agents/budget_executor.py` | PPO-based agent with custom policy network, action generation, learning, and model persistence |
+| **FinancialStrategist (High-Level Agent)** | ✅ Complete | `src/agents/financial_strategist.py` | HIRO-style agent with state aggregation, goal generation, strategic learning, and model persistence |
 | **Configuration System** | ✅ Complete | `src/utils/config.py` | EnvironmentConfig, TrainingConfig, RewardConfig, BehavioralProfile |
 | **Data Models** | ✅ Complete | `src/utils/data_models.py` | Transition dataclass |
 | **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
 | **Unit Tests - RewardEngine** | ✅ Complete | `tests/test_reward_engine.py` | Comprehensive tests for RewardEngine with all reward components |
 | **Unit Tests - BudgetExecutor** | ✅ Complete | `tests/test_budget_executor.py` | Comprehensive tests for BudgetExecutor including action generation, learning, and policy updates |
+| **Unit Tests - FinancialStrategist** | ✅ Complete | `tests/test_financial_strategist.py` | Comprehensive tests for FinancialStrategist including goal generation, state aggregation, learning, and policy updates |
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
 
 ### 🚧 In Progress
 
 | Component | Status | Next Steps |
 |-----------|--------|------------|
-| **Low-Level Agent** | ✅ Complete | `src/agents/budget_executor.py` - PPO-based agent with custom policy network, action generation, learning, and model persistence |
-| **High-Level Agent** | Not started | Implement FinancialStrategist with HIRO/Option-Critic |
+| **High-Level Agent** | ✅ Complete | `src/agents/financial_strategist.py` - HIRO-style agent with state aggregation, goal generation, strategic learning, and model persistence |
 | **Training Orchestrator** | Not started | Implement HRLTrainer for coordinated training |
 | **Analytics Module** | Not started | Implement performance metrics tracking |
 
 ### 📋 Next Immediate Tasks
 
-1. **Implement High-Level Agent** (Task 6)
-   - Create FinancialStrategist class
-   - Implement state aggregation
-   - Implement goal generation
+1. **Implement Training Orchestrator** (Task 7)
+   - Create HRLTrainer class
+   - Implement main training loop
+   - Implement policy update coordination
 
 ## 9. Future Extensions
 - Multi-agent simulation (family / household)
