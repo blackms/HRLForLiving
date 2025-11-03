@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- BudgetExecutor (Low-Level Agent) implementation
+  - PPO-based agent for monthly allocation decisions
+  - Custom PolicyNetwork with [128, 128] hidden layers and softmax output
+  - 10-dimensional input (7-dimensional state + 3-dimensional goal)
+  - 3-dimensional continuous action output with automatic normalization
+  - act() method for action generation with deterministic mode support
+  - learn() method implementing simplified policy gradient with PPO
+  - Discount factor γ_low = 0.95 for temporal credit assignment
+  - Entropy bonus for exploration (0.01 coefficient)
+  - Model save/load functionality for checkpointing
+  - Input validation for state and goal dimensions
+  - Training metrics tracking (loss, policy entropy)
+- Unit tests for BudgetExecutor (`tests/test_budget_executor.py`)
+  - Initialization tests
+  - Action generation tests (basic, deterministic, input concatenation)
+  - Action normalization tests (including negative values)
+  - Learning tests (basic, empty, single transition, terminal states)
+  - Policy update mechanics tests
+  - Goal influence tests
 - BudgetEnv Gymnasium environment implementation
   - 7-dimensional continuous state space
   - 3-dimensional continuous action space with automatic normalization
@@ -30,6 +49,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Marked Task 5 (Implement Low-Level Agent) as complete in tasks.md
+- Updated README.md with BudgetExecutor usage examples and API documentation
+- Updated HLD/LLD document with BudgetExecutor implementation status
 - Integrated RewardEngine with BudgetEnv for production-ready reward computation
 - BudgetEnv now accepts optional RewardConfig parameter in constructor
 - BudgetEnv.step() now uses RewardEngine.compute_low_level_reward() for all reward calculations

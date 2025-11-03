@@ -404,7 +404,169 @@ reward = reward_engine.compute_low_level_reward(action, state, next_state)
 high_reward = reward_engine.compute_high_level_reward(episode_history)
 ```
 
-### 4.3 High-Level Policy (Strategist)
+### 4.3 Low-Level Agent: `BudgetExecutor` ✅ IMPLEMENTED
+
+**Location:** `src/agents/budget_executor.py`
+
+**Status:** Fully implemented and tested. Ready for integration with training orchestrator.
+
+**Implementation Details:**
+
+```python
+class BudgetExecutor:
+    """
+    Low-Level Agent that executes concrete monthly allocation decisions.
+    Uses PPO for learning optimal allocation policies.
+    """
+    
+    def __init__(self, config: TrainingConfig, state_dim: int = 7, goal_dim: int = 3):
+        """Initialize with custom policy network"""
+        self.config = config
+        self.state_dim = state_dim
+        self.goal_dim = goal_dim
+        self.input_dim = state_dim + goal_dim  # 10-dimensional
+        
+        # Define spaces
+        self.observation_space = spaces.Box(
+            low=-np.inf, high=np.inf,
+            shape=(self.input_dim,), dtype=np.float32
+        )
+        self.action_space = spaces.Box(
+            low=np.array([0, 0, 0]), high=np.array([1, 1, 1]),
+            shape=(3,), dtype=np.float32
+        )
+        
+        # Initialize policy network [128, 128] with softmax output
+        self.policy_network = PolicyNetwork(self.input_dim, 3)
+        self.optimizer = torch.optim.Adam(
+            self.policy_network.parameters(),
+            lr=config.learning_rate_low
+        )
+
+    def act(self, state: np.ndarray, goal: np.ndarray, deterministic: bool = False) -> np.ndarray:
+        """
+        Generate allocation action from state and goal.
+        
+        Concatenates state (7D) and goal (3D) to create 10D input,
+        passes through policy network to produce action [invest, save, consume].
+        """
+        # Validate dimensions
+        if state.shape[0] != self.state_dim:
+            raise ValueError(f"Expected state dimension {self.state_dim}")
+        if goal.shape[0] != self.goal_dim:
+            raise ValueError(f"Expected goal dimension {self.goal_dim}")
+        
+        # Concatenate and predict
+        concatenated_input = np.concatenate([state, goal])
+        with torch.no_grad():
+            input_tensor = torch.FloatTensor(concatenated_input).unsqueeze(0)
+            action_probs = self.policy_network(input_tensor)
+            action = action_probs.squeeze(0).numpy()
+        
+        # Normalize to ensure sum = 1
+        return self._normalize_action(action)
+
+    def learn(self, transitions: List[Transition]) -> Dict[str, float]:
+        """
+        Update PPO policy using collected transitions.
+        
+        Implements simplified policy gradient with:
+        - Discounted returns (γ_low = 0.95)
+        - Return normalization
+        - Entropy bonus for exploration
+        """
+        if not transitions:
+            return {'loss': 0.0, 'policy_entropy': 0.0}
+        
+        # Extract and prepare data
+        states = np.array([t.state for t in transitions])
+        goals = np.array([t.goal for t in transitions])
+        actions = np.array([t.action for t in transitions])
+        rewards = np.array([t.reward for t in transitions])
+        dones = np.array([t.done for t in transitions])
+        
+        # Concatenate observations
+        observations = np.concatenate([states, goals], axis=1)
+        
+        # Calculate discounted returns
+        returns = []
+        G = 0
+        for reward, done in zip(reversed(rewards), reversed(dones)):
+            if done:
+                G = 0
+            G = reward + self.config.gamma_low * G
+            returns.insert(0, G)
+        returns = np.array(returns)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        
+        # Convert to tensors
+        obs_tensor = torch.FloatTensor(observations)
+        actions_tensor = torch.FloatTensor(actions)
+        returns_tensor = torch.FloatTensor(returns)
+        
+        # Policy update
+        self.optimizer.zero_grad()
+        action_probs = self.policy_network(obs_tensor)
+        log_probs = torch.log(action_probs + 1e-8)
+        selected_log_probs = (log_probs * actions_tensor).sum(dim=1)
+        policy_loss = -(selected_log_probs * returns_tensor).mean()
+        
+        # Entropy for exploration
+        entropy = -(action_probs * log_probs).sum(dim=1).mean()
+        loss = policy_loss - 0.01 * entropy
+        
+        loss.backward()
+        self.optimizer.step()
+        
+        return {
+            'loss': loss.item(),
+            'policy_entropy': entropy.item(),
+            'n_updates': 1
+        }
+    
+    def save(self, path: str):
+        """Save model to disk"""
+        torch.save({
+            'policy_network_state_dict': self.policy_network.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'config': self.config
+        }, path)
+    
+    def load(self, path: str):
+        """Load model from disk"""
+        checkpoint = torch.load(path)
+        self.policy_network.load_state_dict(checkpoint['policy_network_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+```
+
+**Usage:**
+```python
+from src.agents.budget_executor import BudgetExecutor
+from src.utils.config import TrainingConfig
+
+config = TrainingConfig(
+    gamma_low=0.95,
+    learning_rate_low=3e-4,
+    batch_size=32
+)
+
+executor = BudgetExecutor(config)
+
+# Generate action
+state = np.array([3200, 1400, 700, 1000, 0.02, 0.5, 50])
+goal = np.array([0.3, 1000, 0.5])
+action = executor.act(state, goal)
+
+# Learn from experience
+metrics = executor.learn(transitions)
+print(f"Loss: {metrics['loss']:.4f}, Entropy: {metrics['policy_entropy']:.4f}")
+
+# Save/load model
+executor.save('models/executor.pth')
+executor.load('models/executor.pth')
+```
+
+### 4.4 High-Level Policy (Strategist)
 
 ```python
 class FinancialStrategist:
@@ -414,21 +576,6 @@ class FinancialStrategist:
     def select_goal(self, state):
         goal_vector = self.model.predict(state)
         return goal_vector  # [target_invest_ratio, safety_buffer, aggressiveness]
-
-    def learn(self, transition_batch):
-        self.model.update(transition_batch)
-```
-
-### 4.4 Low-Level Policy (Executor)
-
-```python
-class BudgetExecutor:
-    def __init__(self, model):
-        self.model = model
-
-    def act(self, state, goal_vector):
-        input_vec = np.concatenate([state, goal_vector])
-        return self.model.predict(input_vec)  # action [invest, save, consume]
 
     def learn(self, transition_batch):
         self.model.update(transition_batch)
@@ -520,29 +667,26 @@ training:
 | **BudgetEnv** | ✅ Complete | `src/environment/budget_env.py` | Fully functional Gymnasium environment with integrated RewardEngine, state management, action normalization, expense simulation, and episode termination |
 | **RewardEngine** | ✅ Complete | `src/environment/reward_engine.py` | Multi-objective reward computation for both agents with configurable coefficients |
 | **RewardEngine Integration** | ✅ Complete | `src/environment/budget_env.py` | BudgetEnv now uses RewardEngine for all reward calculations |
+| **BudgetExecutor (Low-Level Agent)** | ✅ Complete | `src/agents/budget_executor.py` | PPO-based agent with custom policy network, action generation, learning, and model persistence |
 | **Configuration System** | ✅ Complete | `src/utils/config.py` | EnvironmentConfig, TrainingConfig, RewardConfig, BehavioralProfile |
 | **Data Models** | ✅ Complete | `src/utils/data_models.py` | Transition dataclass |
 | **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
 | **Unit Tests - RewardEngine** | ✅ Complete | `tests/test_reward_engine.py` | Comprehensive tests for RewardEngine with all reward components |
+| **Unit Tests - BudgetExecutor** | ✅ Complete | `tests/test_budget_executor.py` | Comprehensive tests for BudgetExecutor including action generation, learning, and policy updates |
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
 
 ### 🚧 In Progress
 
 | Component | Status | Next Steps |
 |-----------|--------|------------|
-| **Low-Level Agent** | Not started | Implement BudgetExecutor with PPO |
+| **Low-Level Agent** | ✅ Complete | `src/agents/budget_executor.py` - PPO-based agent with custom policy network, action generation, learning, and model persistence |
 | **High-Level Agent** | Not started | Implement FinancialStrategist with HIRO/Option-Critic |
 | **Training Orchestrator** | Not started | Implement HRLTrainer for coordinated training |
 | **Analytics Module** | Not started | Implement performance metrics tracking |
 
 ### 📋 Next Immediate Tasks
 
-1. **Implement Low-Level Agent** (Task 5)
-   - Create BudgetExecutor class
-   - Integrate with Stable-Baselines3 PPO
-   - Implement action generation and learning
-
-3. **Implement High-Level Agent** (Task 6)
+1. **Implement High-Level Agent** (Task 6)
    - Create FinancialStrategist class
    - Implement state aggregation
    - Implement goal generation

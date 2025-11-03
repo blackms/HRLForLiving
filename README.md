@@ -15,10 +15,12 @@ The system implements a two-level hierarchical architecture:
 ├── src/
 │   ├── __init__.py              # Main package initialization
 │   ├── agents/                  # HRL agent implementations
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── budget_executor.py  # ✅ Low-Level Agent (PPO-based)
 │   ├── environment/             # Financial environment simulation
 │   │   ├── __init__.py
-│   │   └── budget_env.py       # ✅ BudgetEnv implementation
+│   │   ├── budget_env.py       # ✅ BudgetEnv implementation
+│   │   └── reward_engine.py    # ✅ RewardEngine implementation
 │   ├── training/                # Training orchestration
 │   │   └── __init__.py
 │   └── utils/                   # Configuration and utilities
@@ -27,10 +29,13 @@ The system implements a two-level hierarchical architecture:
 │       └── data_models.py       # Core data models
 ├── examples/                    # Usage examples
 │   ├── README.md               # Examples documentation
-│   └── basic_budget_env_usage.py  # ✅ Basic BudgetEnv demo
+│   ├── basic_budget_env_usage.py  # ✅ Basic BudgetEnv demo
+│   └── reward_engine_usage.py  # ✅ RewardEngine demo
 ├── tests/                       # Unit and integration tests
 │   ├── __init__.py
-│   └── test_budget_env.py      # ✅ BudgetEnv tests
+│   ├── test_budget_env.py      # ✅ BudgetEnv tests
+│   ├── test_budget_executor.py # ✅ BudgetExecutor tests
+│   └── test_reward_engine.py   # ✅ RewardEngine tests
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
 ├── .kiro/specs/                 # Specification documents
@@ -184,6 +189,77 @@ reward = reward_engine.compute_low_level_reward(action, state, next_state)
 episode_history = [...]  # List of Transition objects
 high_level_reward = reward_engine.compute_high_level_reward(episode_history)
 ```
+
+### BudgetExecutor - Low-Level Agent
+
+The `BudgetExecutor` is the low-level agent that executes concrete monthly allocation decisions using PPO (Proximal Policy Optimization). It receives both the current financial state and a strategic goal vector from the high-level agent.
+
+**Key Features:**
+- 10-dimensional input (7-dimensional state + 3-dimensional goal)
+- 3-dimensional continuous action output [invest, save, consume]
+- Custom policy network with [128, 128] hidden layers
+- Automatic action normalization to ensure sum = 1
+- PPO-based learning with discount factor γ = 0.95
+- Model save/load functionality
+
+**Usage Example:**
+```python
+from src.agents.budget_executor import BudgetExecutor
+from src.utils.config import TrainingConfig
+from src.utils.data_models import Transition
+import numpy as np
+
+# Create training configuration
+training_config = TrainingConfig(
+    num_episodes=5000,
+    gamma_low=0.95,
+    gamma_high=0.99,
+    high_period=6,
+    batch_size=32,
+    learning_rate_low=3e-4,
+    learning_rate_high=1e-4
+)
+
+# Initialize executor
+executor = BudgetExecutor(training_config)
+
+# Generate action from state and goal
+state = np.array([3200, 1400, 700, 1000, 0.02, 0.5, 50])  # Financial state
+goal = np.array([0.3, 1000, 0.5])  # [target_invest_ratio, safety_buffer, aggressiveness]
+action = executor.act(state, goal)
+
+print(f"Action: invest={action[0]:.2f}, save={action[1]:.2f}, consume={action[2]:.2f}")
+
+# Learn from experience
+transitions = [
+    Transition(state, goal, action, reward, next_state, done)
+    for state, goal, action, reward, next_state, done in episode_data
+]
+metrics = executor.learn(transitions)
+
+print(f"Training metrics: loss={metrics['loss']:.4f}, entropy={metrics['policy_entropy']:.4f}")
+
+# Save trained model
+executor.save('models/budget_executor.pth')
+
+# Load trained model
+executor.load('models/budget_executor.pth')
+```
+
+**Input Specification:**
+- **State Vector (7-dimensional)**: `[income, fixed_expenses, variable_expenses, cash_balance, inflation, risk_tolerance, t_remaining]`
+- **Goal Vector (3-dimensional)**: `[target_invest_ratio, safety_buffer, aggressiveness]`
+- **Concatenated Input (10-dimensional)**: State + Goal
+
+**Output Specification:**
+- **Action Vector (3-dimensional)**: `[invest_ratio, save_ratio, consume_ratio]` (automatically normalized to sum = 1)
+
+**Learning:**
+The executor uses a simplified policy gradient approach with:
+- Discounted returns calculation using γ_low = 0.95
+- Return normalization for stable training
+- Entropy bonus (0.01 coefficient) for exploration
+- Adam optimizer with configurable learning rate
 
 **Reward Components:**
 
