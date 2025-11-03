@@ -540,6 +540,89 @@ class BehavioralProfile(Enum):
     }
 ```
 
+### Main Training Script
+
+**Purpose**: Command-line tool for training the HRL Finance System
+
+**Status**: ✅ **IMPLEMENTED** - Fully functional with comprehensive CLI interface
+
+**Location**: `train.py` (project root)
+
+**Key Features**:
+- Comprehensive argument parsing with mutually exclusive config sources
+- Configuration loading from YAML files or behavioral profiles
+- System initialization with progress feedback
+- Training execution with monitoring every 100 episodes
+- Automatic model saving (high-level agent, low-level agent, training history)
+- Optional evaluation after training with comprehensive metrics
+- JSON serialization with numpy array conversion
+- Comprehensive error handling
+
+**Command-Line Interface**:
+```bash
+# Train with behavioral profile
+python train.py --profile balanced --episodes 5000
+
+# Train with YAML configuration
+python train.py --config configs/conservative.yaml
+
+# Train with custom settings
+python train.py --profile aggressive --episodes 10000 --output models/run1 --seed 42
+
+# Train with evaluation
+python train.py --profile balanced --eval-episodes 20
+```
+
+**Command-Line Options**:
+- `--config PATH`: Path to YAML configuration file (mutually exclusive with --profile)
+- `--profile {conservative,balanced,aggressive}`: Use predefined behavioral profile
+- `--episodes N`: Number of training episodes (overrides config)
+- `--output DIR`: Output directory for trained models (default: models/)
+- `--eval-episodes N`: Number of evaluation episodes after training (default: 10)
+- `--save-interval N`: Save checkpoint every N episodes (default: 1000)
+- `--seed N`: Random seed for reproducibility
+
+**Saved Files**:
+- `{config_name}_high_agent.pt`: Trained high-level agent (Strategist)
+- `{config_name}_low_agent.pt`: Trained low-level agent (Executor)
+- `{config_name}_history.json`: Complete training history with all metrics
+
+**Training History Structure**:
+```json
+{
+  "episode_rewards": [float, ...],
+  "episode_lengths": [int, ...],
+  "cash_balances": [float, ...],
+  "total_invested": [float, ...],
+  "low_level_losses": [float, ...],
+  "high_level_losses": [float, ...],
+  "cumulative_wealth_growth": [float, ...],
+  "cash_stability_index": [float, ...],
+  "sharpe_ratio": [float, ...],
+  "goal_adherence": [float, ...],
+  "policy_stability": [float, ...]
+}
+```
+
+**Training Output**:
+1. Configuration Summary - All environment, training, and reward parameters
+2. System Initialization - Progress for each component
+3. Training Progress - Updates every 100 episodes with average metrics
+4. Training Summary - Statistics over last 100 episodes (all 9 metrics)
+5. Model Saving - Confirmation of saved files with paths
+6. Evaluation Results - Comprehensive metrics with mean ± std
+
+**Implementation Functions**:
+- `parse_arguments()`: Parse and validate command-line arguments
+- `load_configuration()`: Load configuration from file or profile with error handling
+- `print_configuration()`: Display configuration summary before training
+- `initialize_system()`: Initialize all system components with progress feedback
+- `train_system()`: Execute training loop with progress monitoring
+- `save_models()`: Save trained models and training history to disk
+- `print_training_summary()`: Display training statistics over last 100 episodes
+- `evaluate_system()`: Run evaluation episodes and return comprehensive metrics
+- `print_evaluation_results()`: Display evaluation metrics with mean and std
+
 ## Error Handling
 
 ### Environment Errors

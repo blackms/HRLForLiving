@@ -1041,15 +1041,11 @@ training:
 
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
+| **Main Training Script** | ✅ Complete | `train.py` | Comprehensive CLI tool for training the HRL system with config/profile support, model saving, evaluation, and progress monitoring. Supports --config, --profile, --episodes, --output, --eval-episodes, --save-interval, and --seed options. |
 | **AnalyticsModule** | ✅ Complete | `src/utils/analytics.py` | Performance metrics tracking with 5 key metrics: cumulative wealth growth, cash stability index, Sharpe-like ratio, goal adherence, and policy stability. Comprehensive test coverage with 18 test cases. |
 | **AnalyticsModule Integration** | ✅ Complete | `src/training/hrl_trainer.py` | Fully integrated with HRLTrainer for automatic tracking during training and evaluation |
 | **HRLTrainer Evaluation Method** | ✅ Complete | `src/training/hrl_trainer.py` | Deterministic evaluation with comprehensive summary statistics including all 5 analytics metrics |
 | **Unit Tests - AnalyticsModule** | ✅ Complete | `tests/test_analytics.py` | 18 comprehensive test cases covering all functionality and edge cases |
-
-### ✅ Recently Completed (Continued)
-
-| Component | Status | Location | Notes |
-|-----------|--------|----------|-------|
 | **ConfigurationManager** | ✅ Complete | `src/utils/config_manager.py` | YAML loading, behavioral profiles (conservative, balanced, aggressive), comprehensive validation with descriptive error messages |
 | **Unit Tests - ConfigurationManager** | ✅ Complete | `tests/test_config_manager.py` | 50+ comprehensive test cases covering all validation rules, boundary values, error handling, and profile loading |
 
@@ -1068,13 +1064,31 @@ training:
    - ⏳ Test policy updates occur correctly
    - ⏳ Test analytics integration in training loop
 
-2. **Main Scripts** (Task 11-12)
-   - ⏳ Create train.py script
-   - ⏳ Create evaluate.py script
+2. **Evaluation Script** (Task 12)
+   - ⏳ Create evaluate.py script for loading and testing trained models
+   - ⏳ Support loading models from checkpoint
+   - ⏳ Run evaluation episodes without learning
+   - ⏳ Display comprehensive performance metrics
+   - ⏳ Generate visualizations of episode trajectories
 
 ### ✅ Completed Tasks
 
-1. **Configuration Manager** (Task 10) - ✅ COMPLETE
+1. **Main Training Script** (Task 11) - ✅ COMPLETE
+   - ✅ Create train.py script in project root
+   - ✅ Comprehensive CLI interface with argparse
+   - ✅ Support for YAML configuration files and behavioral profiles
+   - ✅ Command-line options: --config, --profile, --episodes, --output, --eval-episodes, --save-interval, --seed
+   - ✅ Configuration loading with error handling
+   - ✅ Configuration summary display
+   - ✅ System initialization with progress feedback
+   - ✅ Training execution with progress monitoring
+   - ✅ Training summary with comprehensive statistics
+   - ✅ Automatic model saving (high-level agent, low-level agent, training history)
+   - ✅ JSON serialization with numpy array conversion
+   - ✅ Optional evaluation after training
+   - ✅ Helpful usage examples in --help
+
+2. **Configuration Manager** (Task 10) - ✅ COMPLETE
    - ✅ Implement configuration loading utilities
    - ✅ Implement behavioral profile loading
    - ✅ Implement configuration validation
@@ -1086,9 +1100,189 @@ training:
    - ✅ Configuration loading tests (5 tests)
    - ✅ Override tests (1 test)
 
+### 4.6 Main Training Script: `train.py` ✅ IMPLEMENTED
+
+**Location:** `train.py` (project root)
+
+**Status:** Fully implemented with comprehensive CLI interface and features.
+
+**Purpose:** Command-line tool for training the HRL Finance System with flexible configuration options.
+
+**Key Features:**
+- Comprehensive argument parsing with mutually exclusive config sources
+- Configuration loading from YAML files or behavioral profiles
+- System initialization with progress feedback
+- Training execution with monitoring and checkpointing
+- Automatic model saving and training history export
+- Optional evaluation after training
+- Comprehensive error handling
+
+**Command-Line Interface:**
+
+```bash
+# Train with behavioral profile
+python train.py --profile balanced --episodes 5000
+
+# Train with YAML configuration
+python train.py --config configs/conservative.yaml
+
+# Train with custom settings
+python train.py --profile aggressive --episodes 10000 --output models/run1 --seed 42
+
+# Train with evaluation
+python train.py --profile balanced --eval-episodes 20
+```
+
+**Command-Line Options:**
+- `--config PATH`: Path to YAML configuration file (mutually exclusive with --profile)
+- `--profile {conservative,balanced,aggressive}`: Use predefined behavioral profile (mutually exclusive with --config)
+- `--episodes N`: Number of training episodes (overrides config)
+- `--output DIR`: Output directory for trained models (default: models/)
+- `--eval-episodes N`: Number of evaluation episodes after training (default: 10, set to 0 to skip)
+- `--save-interval N`: Save checkpoint every N episodes (default: 1000)
+- `--seed N`: Random seed for reproducibility
+
+**Implementation Functions:**
+
+```python
+def parse_arguments() -> argparse.Namespace:
+    """Parse and validate command-line arguments"""
+
+def load_configuration(args) -> Tuple[EnvironmentConfig, TrainingConfig, RewardConfig, str]:
+    """Load configuration from file or profile with error handling"""
+
+def print_configuration(env_config, training_config, reward_config):
+    """Display configuration summary before training"""
+
+def initialize_system(...) -> Tuple[BudgetEnv, FinancialStrategist, BudgetExecutor, RewardEngine, HRLTrainer]:
+    """Initialize all system components with progress feedback"""
+
+def train_system(...) -> Dict:
+    """Execute training loop with progress monitoring"""
+
+def save_models(trainer, output_dir, config_name):
+    """Save trained models and training history to disk"""
+
+def print_training_summary(history):
+    """Display training statistics over last 100 episodes"""
+
+def evaluate_system(trainer, num_episodes) -> Dict:
+    """Run evaluation episodes and return comprehensive metrics"""
+
+def print_evaluation_results(eval_results):
+    """Display evaluation metrics with mean and std"""
+```
+
+**Training Output:**
+
+The script provides comprehensive output throughout execution:
+
+1. **Configuration Summary**: Displays all environment, training, and reward parameters
+2. **System Initialization**: Shows progress for each component (environment, agents, trainer)
+3. **Training Progress**: Updates every 100 episodes with average metrics
+4. **Training Summary**: Statistics over last 100 episodes (all 9 metrics)
+5. **Model Saving**: Confirmation of saved files with paths
+6. **Evaluation Results**: Comprehensive metrics with mean ± std
+
+**Saved Files:**
+
+After training, the script saves three files:
+- `{config_name}_high_agent.pt`: Trained high-level agent (Strategist)
+- `{config_name}_low_agent.pt`: Trained low-level agent (Executor)
+- `{config_name}_history.json`: Complete training history with all metrics
+
+**Training History JSON Structure:**
+
+```json
+{
+  "episode_rewards": [float, ...],
+  "episode_lengths": [int, ...],
+  "cash_balances": [float, ...],
+  "total_invested": [float, ...],
+  "low_level_losses": [float, ...],
+  "high_level_losses": [float, ...],
+  "cumulative_wealth_growth": [float, ...],
+  "cash_stability_index": [float, ...],
+  "sharpe_ratio": [float, ...],
+  "goal_adherence": [float, ...],
+  "policy_stability": [float, ...]
+}
+```
+
+**Error Handling:**
+
+The script handles various error conditions gracefully:
+- Configuration file not found
+- Invalid YAML syntax
+- Configuration validation errors
+- Invalid behavioral profile names
+- Unexpected errors during initialization or training
+
+All errors are reported with descriptive messages and appropriate exit codes.
+
+**Usage Example:**
+
+```bash
+# Quick start with balanced profile
+python train.py --profile balanced --episodes 1000 --seed 42
+
+# Output:
+# ======================================================================
+# HRL Finance System - Training Script
+# ======================================================================
+# Loading behavioral profile: balanced
+# 
+# ======================================================================
+# Configuration Summary
+# ======================================================================
+# [... configuration details ...]
+# 
+# ======================================================================
+# Initializing HRL System
+# ======================================================================
+# Setting random seed: 42
+# 1. Creating BudgetEnv...
+#    ✓ BudgetEnv initialized
+# [... more initialization ...]
+# 
+# ======================================================================
+# Starting Training
+# ======================================================================
+# Training for 1000 episodes...
+# Progress:
+# ----------------------------------------------------------------------
+# Episode 100/1000 - Avg Reward: 45.23, Avg Cash: 1234.56, ...
+# [... training progress ...]
+# 
+# ======================================================================
+# Training Summary
+# ======================================================================
+# [... comprehensive statistics ...]
+# 
+# ======================================================================
+# Saving Models
+# ======================================================================
+# ✓ High-level agent saved to: models/balanced_high_agent.pt
+# ✓ Low-level agent saved to: models/balanced_low_agent.pt
+# ✓ Training history saved to: models/balanced_history.json
+# 
+# ======================================================================
+# Evaluating Trained System
+# ======================================================================
+# [... evaluation results ...]
+# 
+# ======================================================================
+# Training Complete!
+# ======================================================================
+```
+
+---
+
 ## 9. Future Extensions
 - Multi-agent simulation (family / household)
 - Integration with real macroeconomic data
 - Multi-objective reward (comfort + wealth)
 - Export results to dashboard
 - Integration with forecasting models (RL + LSTM)
+- Evaluation script (evaluate.py) for loading and testing trained models
+- Visualization tools for episode trajectories and learning curves

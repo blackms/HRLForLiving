@@ -204,7 +204,7 @@
     - ✅ Detailed per-episode results included in output
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
   
-  - [ ] 7.5 Write integration tests for training loop
+  - [-] 7.5 Write integration tests for training loop
     - Test complete episode execution
     - Test high-level/low-level coordination
     - Test policy updates occur correctly
