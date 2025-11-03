@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- HRLTrainer complete training loop implementation
+  - Full `train(num_episodes)` method in `src/training/hrl_trainer.py`
+  - Episode execution with environment reset and state initialization
+  - Initial goal generation from high-level agent
+  - Monthly action execution by low-level agent
+  - Automatic low-level policy updates when buffer reaches batch size
+  - High-level re-planning every `high_period` steps (default: 6)
+  - High-level reward computation over strategic periods
+  - High-level policy updates with transition management
+  - Final policy updates at episode termination
+  - Progress monitoring with status updates every 100 episodes
+  - Complete training history return with all metrics
 - HRLTrainer class structure implementation
   - Training orchestrator initialization in `src/training/hrl_trainer.py`
   - Episode buffer for storing low-level transitions
@@ -75,6 +87,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Marked Task 7.2 (Implement main training loop) as complete in tasks.md
+- Marked Task 7.3 (Implement policy update coordination) as complete in tasks.md
+- Updated implementation status in HLD/LLD document to reflect HRLTrainer training loop completion
+- Updated README.md with complete HRLTrainer usage examples and training process documentation
 - Marked Task 7.1 (Create HRLTrainer class structure) as complete in tasks.md
 - Updated implementation status in HLD/LLD document to reflect HRLTrainer progress
 - Marked Task 6 (Implement High-Level Agent) as complete in tasks.md
@@ -134,4 +150,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, and FinancialStrategist implementations complete with full integration and comprehensive tests. Ready for Training Orchestrator implementation.
+- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, and HRLTrainer training loop implementations complete with full integration and comprehensive tests. Core HRL training system is functional. Remaining: evaluation method, analytics module, and integration tests.

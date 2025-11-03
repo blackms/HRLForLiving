@@ -286,9 +286,11 @@ The `HRLTrainer` coordinates the hierarchical training loop, managing interactio
 - State history tracking for high-level state aggregation
 - Training metrics tracking (rewards, lengths, cash balances, investments, losses)
 - Configurable high-level decision period (default: 6 months)
+- Automatic policy updates for both agents
+- Progress monitoring with periodic status updates
 - Supports both training and evaluation modes
 
-**Usage Example (Structure):**
+**Usage Example:**
 ```python
 from src.training.hrl_trainer import HRLTrainer
 from src.environment.budget_env import BudgetEnv
@@ -298,9 +300,36 @@ from src.environment.reward_engine import RewardEngine
 from src.utils.config import EnvironmentConfig, TrainingConfig, RewardConfig
 
 # Create configurations
-env_config = EnvironmentConfig(income=3200, fixed_expenses=1400, ...)
-training_config = TrainingConfig(num_episodes=5000, gamma_low=0.95, gamma_high=0.99, ...)
-reward_config = RewardConfig(alpha=10.0, beta=0.1, ...)
+env_config = EnvironmentConfig(
+    income=3200,
+    fixed_expenses=1400,
+    variable_expense_mean=700,
+    variable_expense_std=100,
+    inflation=0.02,
+    safety_threshold=1000,
+    max_months=60,
+    initial_cash=0,
+    risk_tolerance=0.5
+)
+
+training_config = TrainingConfig(
+    num_episodes=5000,
+    gamma_low=0.95,
+    gamma_high=0.99,
+    high_period=6,
+    batch_size=32,
+    learning_rate_low=3e-4,
+    learning_rate_high=1e-4
+)
+
+reward_config = RewardConfig(
+    alpha=10.0,
+    beta=0.1,
+    gamma=5.0,
+    delta=20.0,
+    lambda_=1.0,
+    mu=0.5
+)
 
 # Initialize components
 env = BudgetEnv(env_config, reward_config)
@@ -311,18 +340,45 @@ executor = BudgetExecutor(training_config)
 # Create trainer
 trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
 
-# Training loop (to be implemented)
-# training_history = trainer.train(num_episodes=5000)
+# Train the HRL system
+print("Starting training...")
+training_history = trainer.train(num_episodes=5000)
+
+# Access training metrics
+print(f"\nTraining Complete!")
+print(f"Final average reward: {np.mean(training_history['episode_rewards'][-100:]):.2f}")
+print(f"Final average cash: {np.mean(training_history['cash_balances'][-100:]):.2f}")
+print(f"Final average invested: {np.mean(training_history['total_invested'][-100:]):.2f}")
+
+# Save trained models
+strategist.save('models/strategist.pth')
+executor.save('models/executor.pth')
 
 # Evaluation (to be implemented)
 # eval_metrics = trainer.evaluate(num_episodes=100)
 ```
 
 **Training Process:**
-1. High-level agent generates strategic goal every N steps (default: 6)
-2. Low-level agent executes monthly allocation decisions following the goal
-3. Both agents learn from their respective experiences
-4. Metrics are tracked throughout training for analysis
+1. Reset environment and initialize state history
+2. High-level agent generates initial strategic goal
+3. Low-level agent executes monthly allocation decisions following the goal
+4. Store transitions in episode buffer
+5. Update low-level policy when buffer reaches batch size
+6. Every `high_period` steps (default: 6):
+   - Compute high-level reward over the period
+   - Update high-level policy
+   - Generate new strategic goal
+7. Handle final updates at episode termination
+8. Track and print progress every 100 episodes
+
+**Training Metrics:**
+The trainer tracks comprehensive metrics throughout training:
+- `episode_rewards`: Cumulative reward per episode
+- `episode_lengths`: Number of steps per episode
+- `cash_balances`: Final cash balance per episode
+- `total_invested`: Total invested capital per episode
+- `low_level_losses`: Policy loss for low-level agent
+- `high_level_losses`: Policy loss for high-level agent
 
 **Usage Example:**
 ```python
@@ -455,14 +511,16 @@ config = RewardConfig(
 - [x] RewardEngine integration with BudgetEnv - Production-ready reward computation
 - [x] Low-Level Agent (Budget Executor) - PPO-based agent with policy network, action generation, and learning capabilities
 - [x] High-Level Agent (Financial Strategist) - HIRO-style agent with state aggregation, goal generation, and strategic learning
+- [x] Training Orchestrator (HRLTrainer) - Complete training loop with policy coordination and metrics tracking
 
 ### 🚧 In Progress
-- [ ] Training Orchestrator (HRLTrainer class structure complete, implementing training loop)
+- [ ] Training Orchestrator - Evaluation method
 - [ ] Analytics Module
+- [ ] Integration tests for training loop
 
 ### ✅ Recently Completed
-- [x] HRLTrainer class structure - Training orchestrator initialization with episode buffer and metrics tracking
-- [x] High-Level Agent (Financial Strategist) - HIRO-style agent for strategic goal generation
+- [x] HRLTrainer training loop - Complete implementation with high-level/low-level coordination, policy updates, and progress monitoring
+- [x] Policy update coordination - Automatic updates for both agents with proper timing and transition management
 
 ## Architecture
 

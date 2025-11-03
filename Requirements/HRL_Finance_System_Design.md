@@ -737,11 +737,11 @@ strategist.save('models/strategist.pth')
 strategist.load('models/strategist.pth')
 ```
 
-### 4.5 Training Orchestrator: `HRLTrainer` 🚧 IN PROGRESS
+### 4.5 Training Orchestrator: `HRLTrainer` ✅ IMPLEMENTED
 
 **Location:** `src/training/hrl_trainer.py`
 
-**Status:** Class structure implemented. Training loop and evaluation methods in progress.
+**Status:** Fully implemented with complete training loop. Evaluation method pending.
 
 **Implementation Details:**
 
@@ -762,16 +762,7 @@ class HRLTrainer:
         reward_engine: RewardEngine,
         config: TrainingConfig
     ):
-        """
-        Initialize the HRLTrainer with all necessary components.
-        
-        Args:
-            env: BudgetEnv instance for financial simulation
-            high_agent: FinancialStrategist for strategic goal generation
-            low_agent: BudgetExecutor for monthly allocation decisions
-            reward_engine: RewardEngine for reward computation
-            config: TrainingConfig containing hyperparameters
-        """
+        """Initialize with all necessary components and tracking structures"""
         self.env = env
         self.high_agent = high_agent
         self.low_agent = low_agent
@@ -796,24 +787,126 @@ class HRLTrainer:
     
     def train(self, num_episodes: int) -> Dict:
         """
-        Execute training loop for specified number of episodes.
+        Execute the main HRL training loop.
         
         Training process:
         1. Reset environment and get initial state
-        2. High-level agent generates strategic goal
-        3. Low-level agent executes monthly actions following goal
-        4. Every high_period steps, update high-level policy and generate new goal
+        2. Generate initial goal from high-level agent
+        3. Execute monthly steps with low-level agent
+        4. Store transitions in episode buffer
         5. Update low-level policy when buffer reaches batch size
-        6. Track metrics throughout training
+        6. Every high_period steps: compute high-level reward, update high-level policy, generate new goal
+        7. Handle final updates at episode termination
+        8. Track and print progress metrics
         
         Args:
-            num_episodes: Number of training episodes
+            num_episodes: Number of training episodes to run
             
         Returns:
-            dict: Training history with metrics
+            dict: Training history with all collected metrics
         """
-        # TODO: Implement training loop
-        pass
+        for episode in range(num_episodes):
+            # Reset environment and initialize
+            state, _ = self.env.reset()
+            self.state_history = [state]
+            
+            # Generate initial strategic goal
+            aggregated_state = self.high_agent.aggregate_state(self.state_history)
+            goal = self.high_agent.select_goal(aggregated_state)
+            
+            # Episode tracking
+            episode_reward = 0
+            episode_length = 0
+            self.episode_buffer = []
+            steps_since_high_update = 0
+            high_level_transitions = []
+            
+            # Execute episode
+            done = False
+            while not done:
+                # Low-level agent generates action
+                action = self.low_agent.act(state, goal)
+                
+                # Execute action in environment
+                next_state, reward, terminated, truncated, info = self.env.step(action)
+                done = terminated or truncated
+                
+                # Store transition
+                transition = Transition(state, goal, action, reward, next_state, done)
+                self.episode_buffer.append(transition)
+                self.state_history.append(next_state)
+                
+                # Track metrics
+                episode_reward += reward
+                episode_length += 1
+                steps_since_high_update += 1
+                
+                # Update low-level policy
+                if len(self.episode_buffer) >= self.config.batch_size:
+                    low_metrics = self.low_agent.learn(self.episode_buffer[-self.config.batch_size:])
+                    self.training_history['low_level_losses'].append(low_metrics['loss'])
+                
+                # High-level re-planning every high_period steps
+                if steps_since_high_update >= self.config.high_period and not done:
+                    # Compute high-level reward over period
+                    period_transitions = self.episode_buffer[-steps_since_high_update:]
+                    high_level_reward = self.reward_engine.compute_high_level_reward(period_transitions)
+                    
+                    # Create and store high-level transition
+                    high_transition = Transition(
+                        aggregated_state, goal, goal,
+                        high_level_reward,
+                        self.high_agent.aggregate_state(self.state_history),
+                        False
+                    )
+                    high_level_transitions.append(high_transition)
+                    
+                    # Update high-level policy
+                    high_metrics = self.high_agent.learn(high_level_transitions)
+                    self.training_history['high_level_losses'].append(high_metrics['loss'])
+                    
+                    # Generate new goal
+                    aggregated_state = self.high_agent.aggregate_state(self.state_history)
+                    goal = self.high_agent.select_goal(aggregated_state)
+                    steps_since_high_update = 0
+                
+                state = next_state
+            
+            # Episode termination: final updates
+            if len(self.episode_buffer) > 0:
+                # Final high-level update
+                period_transitions = self.episode_buffer[-steps_since_high_update:] if steps_since_high_update > 0 else self.episode_buffer
+                high_level_reward = self.reward_engine.compute_high_level_reward(period_transitions)
+                
+                final_aggregated_state = self.high_agent.aggregate_state(self.state_history)
+                high_transition = Transition(aggregated_state, goal, goal, high_level_reward, final_aggregated_state, True)
+                high_level_transitions.append(high_transition)
+                
+                high_metrics = self.high_agent.learn(high_level_transitions)
+                self.training_history['high_level_losses'].append(high_metrics['loss'])
+                
+                # Final low-level update
+                if len(self.episode_buffer) >= self.config.batch_size:
+                    low_metrics = self.low_agent.learn(self.episode_buffer[-self.config.batch_size:])
+                    self.training_history['low_level_losses'].append(low_metrics['loss'])
+            
+            # Store episode metrics
+            self.training_history['episode_rewards'].append(episode_reward)
+            self.training_history['episode_lengths'].append(episode_length)
+            self.training_history['cash_balances'].append(info.get('cash_balance', 0))
+            self.training_history['total_invested'].append(info.get('total_invested', 0))
+            
+            # Print progress every 100 episodes
+            if (episode + 1) % 100 == 0:
+                avg_reward = np.mean(self.training_history['episode_rewards'][-100:])
+                avg_cash = np.mean(self.training_history['cash_balances'][-100:])
+                avg_invested = np.mean(self.training_history['total_invested'][-100:])
+                print(f"Episode {episode + 1}/{num_episodes} - "
+                      f"Avg Reward: {avg_reward:.2f}, "
+                      f"Avg Cash: {avg_cash:.2f}, "
+                      f"Avg Invested: {avg_invested:.2f}")
+        
+        return self.training_history
     
     def evaluate(self, num_episodes: int) -> Dict:
         """
@@ -842,8 +935,13 @@ reward_engine = RewardEngine(reward_config, safety_threshold=1000)
 # Create trainer
 trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
 
-# Train (to be implemented)
-# history = trainer.train(num_episodes=5000)
+# Train the HRL system
+history = trainer.train(num_episodes=5000)
+
+# Access training metrics
+print(f"Final average reward: {np.mean(history['episode_rewards'][-100:]):.2f}")
+print(f"Final average cash: {np.mean(history['cash_balances'][-100:]):.2f}")
+print(f"Final average invested: {np.mean(history['total_invested'][-100:]):.2f}")
 
 # Evaluate (to be implemented)
 # metrics = trainer.evaluate(num_episodes=100)
@@ -915,21 +1013,21 @@ training:
 | **Unit Tests - BudgetExecutor** | ✅ Complete | `tests/test_budget_executor.py` | Comprehensive tests for BudgetExecutor including action generation, learning, and policy updates |
 | **Unit Tests - FinancialStrategist** | ✅ Complete | `tests/test_financial_strategist.py` | Comprehensive tests for FinancialStrategist including goal generation, state aggregation, learning, and policy updates |
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
-| **HRLTrainer Class Structure** | ✅ Complete | `src/training/hrl_trainer.py` | Training orchestrator initialization with episode buffer, state history, and metrics tracking |
+| **HRLTrainer** | ✅ Complete | `src/training/hrl_trainer.py` | Training orchestrator with complete training loop, policy coordination, and metrics tracking |
 
 ### 🚧 In Progress
 
 | Component | Status | Next Steps |
 |-----------|--------|------------|
-| **Training Orchestrator** | 🚧 In Progress | `src/training/hrl_trainer.py` - HRLTrainer class structure complete, need to implement train() and evaluate() methods |
+| **Training Orchestrator - Evaluation** | 🚧 In Progress | `src/training/hrl_trainer.py` - Training loop complete, need to implement evaluate() method |
 | **Analytics Module** | Not started | Implement performance metrics tracking |
 
 ### 📋 Next Immediate Tasks
 
 1. **Complete Training Orchestrator** (Task 7)
    - ✅ HRLTrainer class structure created
-   - ⏳ Implement main training loop (train method)
-   - ⏳ Implement policy update coordination
+   - ✅ Implement main training loop (train method)
+   - ✅ Implement policy update coordination
    - ⏳ Implement evaluation method
 
 ## 9. Future Extensions
