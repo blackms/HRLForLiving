@@ -167,6 +167,7 @@ class TestLoadBehavioralProfile:
 class TestConfigurationValidation:
     """Tests for configuration validation"""
     
+    # Environment validation tests
     def test_invalid_income(self):
         """Test validation fails for non-positive income"""
         config_data = {
@@ -181,6 +182,281 @@ class TestConfigurationValidation:
         
         try:
             with pytest.raises(ConfigurationError, match="income must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_income(self):
+        """Test validation fails for zero income"""
+        config_data = {
+            'environment': {'income': 0},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="income must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_fixed_expenses(self):
+        """Test validation fails for negative fixed expenses"""
+        config_data = {
+            'environment': {'fixed_expenses': -500},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="fixed_expenses must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_variable_expense_mean(self):
+        """Test validation fails for negative variable expense mean"""
+        config_data = {
+            'environment': {'variable_expense_mean': -200},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="variable_expense_mean must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_variable_expense_std(self):
+        """Test validation fails for negative variable expense std"""
+        config_data = {
+            'environment': {'variable_expense_std': -50},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="variable_expense_std must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_inflation_below_range(self):
+        """Test validation fails for inflation below -1"""
+        config_data = {
+            'environment': {'inflation': -1.5},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="inflation must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_inflation_above_range(self):
+        """Test validation fails for inflation above 1"""
+        config_data = {
+            'environment': {'inflation': 1.5},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="inflation must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_inflation_boundary_values(self):
+        """Test inflation boundary values are accepted"""
+        config_data = {
+            'environment': {'inflation': -1.0},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            env_config, _, _ = load_config(temp_path)
+            assert env_config.inflation == -1.0
+        finally:
+            Path(temp_path).unlink()
+        
+        config_data['environment']['inflation'] = 1.0
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            env_config, _, _ = load_config(temp_path)
+            assert env_config.inflation == 1.0
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_safety_threshold(self):
+        """Test validation fails for negative safety threshold"""
+        config_data = {
+            'environment': {'safety_threshold': -100},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="safety_threshold must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_max_months(self):
+        """Test validation fails for zero max_months"""
+        config_data = {
+            'environment': {'max_months': 0},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="max_months must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_initial_cash(self):
+        """Test validation fails for negative initial cash"""
+        config_data = {
+            'environment': {'initial_cash': -500},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="initial_cash must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_invalid_risk_tolerance(self):
+        """Test validation fails for risk_tolerance out of range"""
+        config_data = {
+            'environment': {'risk_tolerance': 1.5},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="risk_tolerance must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_risk_tolerance_below_range(self):
+        """Test validation fails for risk_tolerance below 0"""
+        config_data = {
+            'environment': {'risk_tolerance': -0.1},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="risk_tolerance must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_risk_tolerance_boundary_values(self):
+        """Test risk_tolerance boundary values are accepted"""
+        config_data = {
+            'environment': {'risk_tolerance': 0.0},
+            'training': {},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            env_config, _, _ = load_config(temp_path)
+            assert env_config.risk_tolerance == 0.0
+        finally:
+            Path(temp_path).unlink()
+        
+        config_data['environment']['risk_tolerance'] = 1.0
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            env_config, _, _ = load_config(temp_path)
+            assert env_config.risk_tolerance == 1.0
+        finally:
+            Path(temp_path).unlink()
+    
+    # Training validation tests
+    def test_zero_num_episodes(self):
+        """Test validation fails for zero num_episodes"""
+        config_data = {
+            'environment': {},
+            'training': {'num_episodes': 0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="num_episodes must be positive"):
                 load_config(temp_path)
         finally:
             Path(temp_path).unlink()
@@ -203,6 +479,173 @@ class TestConfigurationValidation:
         finally:
             Path(temp_path).unlink()
     
+    def test_gamma_low_below_range(self):
+        """Test validation fails for gamma_low below 0"""
+        config_data = {
+            'environment': {},
+            'training': {'gamma_low': -0.1},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="gamma_low must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_gamma_low_boundary_values(self):
+        """Test gamma_low boundary values are accepted"""
+        config_data = {
+            'environment': {},
+            'training': {'gamma_low': 0.0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            _, training_config, _ = load_config(temp_path)
+            assert training_config.gamma_low == 0.0
+        finally:
+            Path(temp_path).unlink()
+        
+        config_data['training']['gamma_low'] = 1.0
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            _, training_config, _ = load_config(temp_path)
+            assert training_config.gamma_low == 1.0
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_invalid_gamma_high(self):
+        """Test validation fails for gamma_high out of range"""
+        config_data = {
+            'environment': {},
+            'training': {'gamma_high': 1.5},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="gamma_high must be in"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_gamma_high_boundary_values(self):
+        """Test gamma_high boundary values are accepted"""
+        config_data = {
+            'environment': {},
+            'training': {'gamma_high': 0.0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            _, training_config, _ = load_config(temp_path)
+            assert training_config.gamma_high == 0.0
+        finally:
+            Path(temp_path).unlink()
+        
+        config_data['training']['gamma_high'] = 1.0
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            _, training_config, _ = load_config(temp_path)
+            assert training_config.gamma_high == 1.0
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_high_period(self):
+        """Test validation fails for zero high_period"""
+        config_data = {
+            'environment': {},
+            'training': {'high_period': 0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="high_period must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_batch_size(self):
+        """Test validation fails for zero batch_size"""
+        config_data = {
+            'environment': {},
+            'training': {'batch_size': 0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="batch_size must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_learning_rate_low(self):
+        """Test validation fails for zero learning_rate_low"""
+        config_data = {
+            'environment': {},
+            'training': {'learning_rate_low': 0.0},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="learning_rate_low must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_learning_rate_high(self):
+        """Test validation fails for negative learning_rate_high"""
+        config_data = {
+            'environment': {},
+            'training': {'learning_rate_high': -0.001},
+            'reward': {}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="learning_rate_high must be positive"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    # Reward validation tests
     def test_invalid_reward_coefficient(self):
         """Test validation fails for negative reward coefficient"""
         config_data = {
@@ -221,12 +664,12 @@ class TestConfigurationValidation:
         finally:
             Path(temp_path).unlink()
     
-    def test_invalid_risk_tolerance(self):
-        """Test validation fails for risk_tolerance out of range"""
+    def test_negative_beta(self):
+        """Test validation fails for negative beta"""
         config_data = {
-            'environment': {'risk_tolerance': 1.5},
+            'environment': {},
             'training': {},
-            'reward': {}
+            'reward': {'beta': -0.5}
         }
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
@@ -234,8 +677,110 @@ class TestConfigurationValidation:
             temp_path = f.name
         
         try:
-            with pytest.raises(ConfigurationError, match="risk_tolerance must be in"):
+            with pytest.raises(ConfigurationError, match="beta must be non-negative"):
                 load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_gamma_reward(self):
+        """Test validation fails for negative gamma reward coefficient"""
+        config_data = {
+            'environment': {},
+            'training': {},
+            'reward': {'gamma': -2.0}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="gamma must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_delta(self):
+        """Test validation fails for negative delta"""
+        config_data = {
+            'environment': {},
+            'training': {},
+            'reward': {'delta': -10.0}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="delta must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_lambda(self):
+        """Test validation fails for negative lambda_"""
+        config_data = {
+            'environment': {},
+            'training': {},
+            'reward': {'lambda_': -1.0}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="lambda_ must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_negative_mu(self):
+        """Test validation fails for negative mu"""
+        config_data = {
+            'environment': {},
+            'training': {},
+            'reward': {'mu': -0.5}
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            with pytest.raises(ConfigurationError, match="mu must be non-negative"):
+                load_config(temp_path)
+        finally:
+            Path(temp_path).unlink()
+    
+    def test_zero_reward_coefficients_accepted(self):
+        """Test that zero values are accepted for reward coefficients"""
+        config_data = {
+            'environment': {},
+            'training': {},
+            'reward': {
+                'alpha': 0.0,
+                'beta': 0.0,
+                'gamma': 0.0,
+                'delta': 0.0,
+                'lambda_': 0.0,
+                'mu': 0.0
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            temp_path = f.name
+        
+        try:
+            _, _, reward_config = load_config(temp_path)
+            assert reward_config.alpha == 0.0
+            assert reward_config.beta == 0.0
+            assert reward_config.gamma == 0.0
+            assert reward_config.delta == 0.0
+            assert reward_config.lambda_ == 0.0
+            assert reward_config.mu == 0.0
         finally:
             Path(temp_path).unlink()
 

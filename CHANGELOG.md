@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Comprehensive unit tests for ConfigurationManager (`tests/test_config_manager.py`)
+  - 50+ test cases covering all functionality and validation rules
+  - Configuration loading tests (5 tests)
+    - Valid configuration loading with all parameters
+    - Partial configuration with default values
+    - Missing file error handling
+    - Empty file error handling
+    - Malformed YAML error handling
+  - Behavioral profile tests (5 tests)
+    - Conservative profile parameter verification
+    - Balanced profile parameter verification
+    - Aggressive profile parameter verification
+    - Case-insensitive profile name handling
+    - Invalid profile name error handling
+  - Environment validation tests (17 tests)
+    - Income validation (negative, zero)
+    - Expense validation (fixed, variable mean, variable std)
+    - Inflation validation (below range, above range, boundary values)
+    - Safety threshold validation (negative)
+    - Max months validation (zero)
+    - Initial cash validation (negative)
+    - Risk tolerance validation (below range, above range, boundary values)
+  - Training validation tests (13 tests)
+    - Num episodes validation (zero)
+    - Gamma_low validation (below range, above range, boundary values)
+    - Gamma_high validation (above range, boundary values)
+    - High period validation (zero)
+    - Batch size validation (zero)
+    - Learning rate validation (zero, negative)
+  - Reward validation tests (8 tests)
+    - All reward coefficients (alpha, beta, gamma, delta, lambda_, mu)
+    - Negative value validation for all coefficients
+    - Zero value acceptance for all coefficients
+  - Configuration override tests (1 test)
+    - Profile loading with custom parameter overrides
 - Analytics Module implementation (`src/utils/analytics.py`)
   - AnalyticsModule class for tracking and computing performance metrics
   - Step-by-step data recording with `record_step()` method
@@ -181,4 +216,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer training loop, and AnalyticsModule implementations complete with full integration and comprehensive tests (18 test cases for AnalyticsModule). Core HRL training system is functional. Remaining: evaluation method integration with analytics, and full integration tests.
+- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer training loop, AnalyticsModule, and ConfigurationManager implementations complete with full integration and comprehensive tests (18 test cases for AnalyticsModule, 50+ test cases for ConfigurationManager). Core HRL training system is functional with complete configuration management and validation. Remaining: evaluation method integration with analytics, and full integration tests.

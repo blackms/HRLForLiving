@@ -1,0 +1,31 @@
+# Aggressive Behavioral Profile Configuration
+# High risk tolerance with low safety threshold
+# Focus on maximum investment growth
+
+environment:
+  income: 3200
+  fixed_expenses: 1400
+  variable_expense_mean: 700
+  variable_expense_std: 100
+  inflation: 0.02
+  safety_threshold: 500
+  max_months: 60
+  initial_cash: 0
+  risk_tolerance: 0.8
+
+training:
+  num_episodes: 5000
+  gamma_low: 0.95
+  gamma_high: 0.99
+  high_period: 6
+  batch_size: 32
+  learning_rate_low: 0.0003
+  learning_rate_high: 0.0001
+
+reward:
+  alpha: 15.0    # Investment reward coefficient (higher for aggressive)
+  beta: 0.05     # Stability penalty coefficient (lower for aggressive)
+  gamma: 5.0     # Overspend penalty coefficient
+  delta: 20.0    # Debt penalty coefficient
+  lambda_: 1.0   # Wealth growth coefficient
+  mu: 0.5        # Stability bonus coefficient
