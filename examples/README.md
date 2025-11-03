@@ -27,18 +27,42 @@ python examples/basic_budget_env_usage.py
 - How cash balance evolves over time
 - How to implement simple allocation strategies
 
+### 2. RewardEngine Usage (`reward_engine_usage.py`)
+
+**Status:** ✅ Ready to run
+
+Demonstrates the multi-objective reward computation system:
+- Configuring reward coefficients with `RewardConfig`
+- Computing low-level rewards for different scenarios
+- Understanding reward components (investment, stability, overspend, debt)
+- Computing high-level strategic rewards
+- Aggregating rewards over multiple time steps
+
+**Run:**
+```bash
+python examples/reward_engine_usage.py
+```
+
+**What you'll learn:**
+- How to configure and initialize a RewardEngine
+- How different actions affect reward values
+- Impact of cash balance on stability penalties
+- How overspending and debt are penalized
+- How high-level rewards aggregate low-level performance
+- Understanding wealth growth and stability bonuses
+
 ## Coming Soon
 
-### 2. Training with PPO (Low-Level Agent)
+### 3. Training with PPO (Low-Level Agent)
 Example showing how to train a single PPO agent on the BudgetEnv without hierarchical structure.
 
-### 3. Full HRL Training
+### 4. Full HRL Training
 Complete example with both High-Level (Strategist) and Low-Level (Executor) agents.
 
-### 4. Behavioral Profile Comparison
+### 5. Behavioral Profile Comparison
 Compare performance across conservative, balanced, and aggressive profiles.
 
-### 5. Custom Reward Functions
+### 6. Custom Reward Functions
 Demonstrate how to integrate custom reward engines for different optimization objectives.
 
 ## Requirements

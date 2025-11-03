@@ -15,16 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Inflation adjustments applied each step
   - Episode termination on negative cash or max months
   - Comprehensive info dictionary with financial metrics
+- RewardEngine implementation
+  - Multi-objective reward computation for low-level agent
+  - Strategic reward aggregation for high-level agent
+  - Configurable reward coefficients (α, β, γ, δ, λ, μ)
+  - Investment rewards, stability penalties, overspend penalties, debt penalties
+  - Wealth growth tracking and stability bonus computation
 - Environment module public API (`src/environment/__init__.py`)
 - Basic usage example (`examples/basic_budget_env_usage.py`)
 - Examples documentation (`examples/README.md`)
+- RewardEngine usage example (`examples/reward_engine_usage.py`)
 - Unit tests for BudgetEnv (`tests/test_budget_env.py`)
+- Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
-- Updated README.md with BudgetEnv usage examples and API documentation
+- Updated README.md with BudgetEnv and RewardEngine usage examples and API documentation
 - Updated HLD/LLD document with implementation details and status tracking
 - Updated project structure documentation to reflect new examples directory
 - Marked Task 2 (Implement BudgetEnv) as complete in tasks.md
+- Marked Task 3 (Implement Reward Engine) as complete in tasks.md
 
 ### Documentation
 - Added Quick Start section to README.md
@@ -67,4 +76,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv implementation complete, ready for Reward Engine integration
+- **Unreleased**: BudgetEnv and RewardEngine implementations complete, ready for agent integration

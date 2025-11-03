@@ -80,7 +80,11 @@ The system supports three behavioral profiles with different risk tolerances:
 
 ### BudgetEnv - Financial Simulation Environment
 
-The `BudgetEnv` is a custom Gymnasium environment that simulates monthly financial decisions. It's now fully implemented and ready to use.
+The `BudgetEnv` is a custom Gymnasium environment that simulates monthly financial decisions.
+
+### RewardEngine - Multi-Objective Reward Computation
+
+The `RewardEngine` computes rewards for both high-level and low-level agents, balancing multiple financial objectives.
 
 **Usage Example:**
 ```python
@@ -130,6 +134,48 @@ print(f"Month: {info['month']}")
 - `consume_ratio`: Percentage for discretionary spending (automatically normalized)
 
 Actions are automatically normalized to sum to 1 using softmax.
+
+**RewardEngine Usage:**
+```python
+from src.environment import RewardEngine
+from src.utils.config import RewardConfig
+
+# Create reward configuration
+reward_config = RewardConfig(
+    alpha=10.0,    # Investment reward coefficient
+    beta=0.1,      # Stability penalty coefficient
+    gamma=5.0,     # Overspend penalty coefficient
+    delta=20.0,    # Debt penalty coefficient
+    lambda_=1.0,   # Wealth growth coefficient
+    mu=0.5         # Stability bonus coefficient
+)
+
+# Initialize reward engine
+reward_engine = RewardEngine(reward_config, safety_threshold=1000)
+
+# Compute low-level reward for a single step
+action = np.array([0.3, 0.5, 0.2])  # [invest, save, consume]
+state = np.array([3200, 1400, 700, 2000, 0.02, 0.5, 50])
+next_state = np.array([3200, 1400, 700, 1800, 0.02, 0.5, 49])
+reward = reward_engine.compute_low_level_reward(action, state, next_state)
+
+# Compute high-level reward over a strategic period
+episode_history = [...]  # List of Transition objects
+high_level_reward = reward_engine.compute_high_level_reward(episode_history)
+```
+
+**Reward Components:**
+
+Low-Level Reward (monthly):
+- Investment reward: `α * invest_amount` (encourages investment)
+- Stability penalty: `β * max(0, threshold - cash)` (penalizes low cash)
+- Overspend penalty: `γ * overspend` (penalizes excessive spending)
+- Debt penalty: `δ * abs(min(0, cash))` (heavily penalizes negative balance)
+
+High-Level Reward (strategic period):
+- Aggregated low-level rewards over 6-12 months
+- Wealth change: `λ * Δwealth` (rewards cash balance growth)
+- Stability bonus: `μ * stability_ratio * period_length` (rewards consistent positive balance)
 
 ### Environment Configuration
 ```python
@@ -182,9 +228,9 @@ config = RewardConfig(
 - [x] Data models (Transition)
 - [x] Package initialization
 - [x] BudgetEnv (Gymnasium environment) - Full implementation with state management, action normalization, expense simulation, and episode termination
+- [x] Reward Engine - Multi-objective reward computation for both high-level and low-level agents
 
 ### 🚧 In Progress
-- [ ] Reward Engine
 - [ ] Low-Level Agent (Budget Executor)
 - [ ] High-Level Agent (Financial Strategist)
 - [ ] Training Orchestrator

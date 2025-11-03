@@ -47,13 +47,13 @@
     - Test variable expense sampling distribution
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 3. Implement Reward Engine
-  - [ ] 3.1 Create RewardEngine class
+- [x] 3. Implement Reward Engine
+  - [x] 3.1 Create RewardEngine class
     - Implement `RewardEngine` class in `src/environment/reward_engine.py`
     - Initialize with RewardConfig containing coefficients (α, β, γ, δ, λ, μ)
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
   
-  - [ ] 3.2 Implement low-level reward computation
+  - [x] 3.2 Implement low-level reward computation
     - Implement `compute_low_level_reward(action, state, next_state)` method
     - Calculate investment reward: `α * invest_amount`
     - Calculate stability penalty: `β * max(0, threshold - cash)`
@@ -62,14 +62,14 @@
     - Return combined reward
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
   
-  - [ ] 3.3 Implement high-level reward computation
+  - [x] 3.3 Implement high-level reward computation
     - Implement `compute_high_level_reward(episode_history)` method
     - Aggregate low-level rewards over strategic period
     - Add wealth change term: `λ * Δwealth`
     - Add stability bonus for consistent positive balance
     - _Requirements: 3.5_
   
-  - [ ] 3.4 Write unit tests for RewardEngine
+  - [x] 3.4 Write unit tests for RewardEngine
     - Test low-level reward with various scenarios (high investment, low cash, overspend, debt)
     - Test high-level reward aggregation
     - Test reward coefficient effects

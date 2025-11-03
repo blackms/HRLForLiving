@@ -60,7 +60,7 @@ A -->|reward_high (aggregated)| B
 ### 3.1 Environment: `BudgetEnv`
 **Type:** Custom Gymnasium environment
 
-**Status:** ✅ **IMPLEMENTED** - Fully functional and ready for integration
+**Status:** ✅ **IMPLEMENTED** - Fully functional and ready for RewardEngine integration
 
 **Observation space (7-dimensional):**
 ```python
@@ -77,24 +77,45 @@ A -->|reward_high (aggregated)| B
 - Episode termination on negative cash or max months
 - Comprehensive info dictionary with cash balance, investments, and expenses
 
-**Reward function (placeholder - will be replaced by RewardEngine):**
+**Reward function:** Currently uses placeholder implementation. Will be replaced by RewardEngine in Task 4.
+
+### 3.2 Reward Engine: `RewardEngine`
+**Type:** Multi-objective reward computation
+
+**Status:** ✅ **IMPLEMENTED** - Fully functional and tested
+
+**Low-Level Reward Function:**
 \[
-r_t = \alpha \cdot a_{invest} - \beta \cdot risk(cash) - \gamma \cdot overspend
+r_t = \alpha \cdot invest_{amount} - \beta \cdot max(0, threshold - cash) - \gamma \cdot overspend - \delta \cdot |min(0, cash)|
 \]
 
-### 3.2 High-Level Agent
+**High-Level Reward Function:**
+\[
+r_{high} = \sum r_{low} + \lambda \cdot \Delta wealth + \mu \cdot stability_{ratio} \cdot period_{length}
+\]
+
+**Key Features:**
+- Configurable reward coefficients (α, β, γ, δ, λ, μ)
+- Investment rewards to encourage long-term growth
+- Stability penalties to maintain positive cash balance
+- Overspend penalties to prevent excessive consumption
+- Debt penalties to heavily discourage negative balance
+- Wealth growth tracking for strategic rewards
+- Stability bonus for consistent positive balance
+
+### 3.3 High-Level Agent
 - Decision every 6–12 steps
 - Input: average cash, investment return, spending trend
 - Output: goal vector = [target_invest_ratio, target_safety_buffer, aggressiveness]
 - Reward: long-term wealth + stability
 
-### 3.3 Low-Level Agent
+### 3.4 Low-Level Agent
 - Decision every month
 - Input: monthly financial state + goal vector
 - Output: continuous action [invest, save, consume]
 - Reward: monthly investment gain - penalties for low balance
 
-### 3.4 Training
+### 3.5 Training
 Framework: **RLlib** or **Stable-Baselines3 + custom HRL wrapper**
 
 Algorithms:
@@ -105,7 +126,7 @@ Discount factors:
 - gamma_low = 0.95
 - gamma_high = 0.99
 
-### 3.5 Data Flow
+### 3.6 Data Flow
 1. Reset environment → generate initial scenario
 2. High-level policy sets goal
 3. Low-level acts monthly
@@ -119,6 +140,8 @@ Discount factors:
 ### 4.1 Class: `BudgetEnv` ✅ IMPLEMENTED
 
 **Location:** `src/environment/budget_env.py`
+
+**Status:** Fully implemented and tested. Ready for RewardEngine integration.
 
 **Implementation Details:**
 
@@ -273,7 +296,114 @@ observation, info = env.reset()
 observation, reward, terminated, truncated, info = env.step([0.3, 0.5, 0.2])
 ```
 
-### 4.2 High-Level Policy (Strategist)
+### 4.2 Class: `RewardEngine` ✅ IMPLEMENTED
+
+**Location:** `src/environment/reward_engine.py`
+
+**Status:** Fully implemented and tested. Ready for BudgetEnv integration.
+
+**Implementation Details:**
+
+```python
+class RewardEngine:
+    """
+    Computes multi-objective rewards for both high-level and low-level agents.
+    """
+    
+    def __init__(self, config: RewardConfig, safety_threshold: float = 1000):
+        """Initialize with reward coefficients"""
+        self.config = config
+        self.safety_threshold = safety_threshold
+        self.alpha = config.alpha      # Investment reward coefficient
+        self.beta = config.beta        # Stability penalty coefficient
+        self.gamma = config.gamma      # Overspend penalty coefficient
+        self.delta = config.delta      # Debt penalty coefficient
+        self.lambda_ = config.lambda_  # Wealth growth coefficient
+        self.mu = config.mu            # Stability bonus coefficient
+
+    def compute_low_level_reward(
+        self, 
+        action: np.ndarray, 
+        state: np.ndarray, 
+        next_state: np.ndarray
+    ) -> float:
+        """
+        Compute immediate monthly reward combining:
+        - Investment reward: α * invest_amount
+        - Stability penalty: β * max(0, threshold - cash)
+        - Overspend penalty: γ * overspend
+        - Debt penalty: δ * abs(min(0, cash))
+        """
+        # Extract values
+        income = state[0]
+        current_cash = state[3]
+        next_cash = next_state[3]
+        invest_ratio = action[0]
+        invest_amount = invest_ratio * income
+        
+        # Calculate reward components
+        investment_reward = self.alpha * invest_amount
+        
+        stability_penalty = 0
+        if next_cash < self.safety_threshold:
+            stability_penalty = self.beta * (self.safety_threshold - next_cash)
+        
+        overspend = 0
+        cash_change = next_cash - current_cash
+        expected_decrease = invest_amount
+        if cash_change < -expected_decrease:
+            overspend = abs(cash_change + expected_decrease)
+        overspend_penalty = self.gamma * overspend
+        
+        debt_penalty = 0
+        if next_cash < 0:
+            debt_penalty = self.delta * abs(next_cash)
+        
+        return investment_reward - stability_penalty - overspend_penalty - debt_penalty
+
+    def compute_high_level_reward(self, episode_history: List[Transition]) -> float:
+        """
+        Compute strategic reward aggregating:
+        - Sum of low-level rewards
+        - Wealth change: λ * Δwealth
+        - Stability bonus: μ * stability_ratio * period_length
+        """
+        if not episode_history:
+            return 0.0
+        
+        # Aggregate low-level rewards
+        total_low_level_reward = sum(t.reward for t in episode_history)
+        
+        # Calculate wealth change
+        initial_cash = episode_history[0].state[3]
+        final_cash = episode_history[-1].next_state[3]
+        wealth_change = final_cash - initial_cash
+        wealth_reward = self.lambda_ * wealth_change
+        
+        # Calculate stability bonus
+        positive_balance_count = sum(1 for t in episode_history if t.next_state[3] > 0)
+        stability_ratio = positive_balance_count / len(episode_history)
+        stability_bonus = self.mu * stability_ratio * len(episode_history)
+        
+        return total_low_level_reward + wealth_reward + stability_bonus
+```
+
+**Usage:**
+```python
+from src.environment import RewardEngine
+from src.utils.config import RewardConfig
+
+config = RewardConfig(alpha=10.0, beta=0.1, gamma=5.0, delta=20.0, lambda_=1.0, mu=0.5)
+reward_engine = RewardEngine(config, safety_threshold=1000)
+
+# Compute low-level reward
+reward = reward_engine.compute_low_level_reward(action, state, next_state)
+
+# Compute high-level reward
+high_reward = reward_engine.compute_high_level_reward(episode_history)
+```
+
+### 4.3 High-Level Policy (Strategist)
 
 ```python
 class FinancialStrategist:
@@ -288,7 +418,7 @@ class FinancialStrategist:
         self.model.update(transition_batch)
 ```
 
-### 4.3 Low-Level Policy (Executor)
+### 4.4 Low-Level Policy (Executor)
 
 ```python
 class BudgetExecutor:
@@ -303,7 +433,7 @@ class BudgetExecutor:
         self.model.update(transition_batch)
 ```
 
-### 4.4 Trainer
+### 4.5 Trainer
 
 ```python
 class HRLTrainer:
@@ -387,16 +517,17 @@ training:
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
 | **BudgetEnv** | ✅ Complete | `src/environment/budget_env.py` | Fully functional Gymnasium environment with state management, action normalization, expense simulation, and episode termination |
+| **RewardEngine** | ✅ Complete | `src/environment/reward_engine.py` | Multi-objective reward computation for both agents with configurable coefficients |
 | **Configuration System** | ✅ Complete | `src/utils/config.py` | EnvironmentConfig, TrainingConfig, RewardConfig, BehavioralProfile |
 | **Data Models** | ✅ Complete | `src/utils/data_models.py` | Transition dataclass |
-| **Unit Tests** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
+| **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
+| **Unit Tests - RewardEngine** | ✅ Complete | `tests/test_reward_engine.py` | Comprehensive tests for RewardEngine with all reward components |
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
 
 ### 🚧 In Progress
 
 | Component | Status | Next Steps |
 |-----------|--------|------------|
-| **Reward Engine** | Not started | Implement RewardEngine class with configurable coefficients |
 | **Low-Level Agent** | Not started | Implement BudgetExecutor with PPO |
 | **High-Level Agent** | Not started | Implement FinancialStrategist with HIRO/Option-Critic |
 | **Training Orchestrator** | Not started | Implement HRLTrainer for coordinated training |
@@ -404,11 +535,10 @@ training:
 
 ### 📋 Next Immediate Tasks
 
-1. **Implement Reward Engine** (Task 3)
-   - Create RewardEngine class
-   - Implement low-level reward computation
-   - Implement high-level reward aggregation
-   - Integrate with BudgetEnv
+1. **Integrate Reward Engine with BudgetEnv** (Task 4)
+   - Modify BudgetEnv to accept RewardConfig
+   - Replace placeholder reward calculation with RewardEngine
+   - Update BudgetEnv tests to verify integration
 
 2. **Implement Low-Level Agent** (Task 5)
    - Create BudgetExecutor class
