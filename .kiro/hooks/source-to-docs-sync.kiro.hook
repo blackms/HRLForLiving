@@ -1,0 +1,35 @@
+{
+  "enabled": true,
+  "name": "Source to Docs Sync",
+  "description": "Watches all source files (*.ts, *.js, *.py, *.java, *.go, *.rs, *.cpp, *.c, *.h) and configuration files (package.json, requirements.txt, Cargo.toml, go.mod) for changes and triggers documentation updates in README.md or /docs folder",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.js",
+      "*.jsx",
+      "*.py",
+      "*.java",
+      "*.go",
+      "*.rs",
+      "*.cpp",
+      "*.c",
+      "*.h",
+      "*.hpp",
+      "package.json",
+      "requirements.txt",
+      "Cargo.toml",
+      "go.mod",
+      "*.rb",
+      "*.php",
+      "*.swift",
+      "*.kt"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files have been modified. Please review the changes and update the relevant documentation. If a README.md exists, update it with any new functionality, API changes, or usage examples. If a /docs or /Requirements folder exists, update the appropriate documentation files there to reflect the code changes. Ensure documentation stays in sync with the implementation."
+  }
+}
