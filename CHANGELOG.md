@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Comprehensive README documentation (Task 17)
+  - Detailed behavioral profile descriptions with use cases and characteristics
+  - Complete configuration parameters reference with tables and ranges
+  - Environment, training, and reward parameter documentation
+  - Configuration tips and best practices for each parameter type
+  - Reward formula documentation with mathematical notation
+  - Advanced training examples (checkpointing, resuming, custom directories)
+  - Comprehensive troubleshooting section with common issues and solutions
+  - Frequently Asked Questions (FAQ) section
+  - System extension guide (custom rewards, metrics, profiles, architectures)
+  - Contributing guidelines with code style and testing requirements
+  - Future enhancements roadmap
+  - Citation information for research use
+  - Acknowledgments and references to foundational papers
+- Quick Start Guide (QUICK_START.md)
+  - 5-minute getting started guide for new users
+  - Step-by-step installation and first training
+  - Evaluation and TensorBoard visualization instructions
+  - Next steps and customization guidance
+  - Common first-time issues and solutions
+  - Key metrics interpretation table
+  - Typical training progress timeline
 - Checkpointing and resume functionality (`src/training/hrl_trainer.py`)
   - Added imports: `os`, `json` for file operations
   - Added `Tuple` type hint for return types

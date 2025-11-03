@@ -2,6 +2,8 @@
 
 A hierarchical reinforcement learning (HRL) system that simulates and learns to optimally allocate monthly salary among investments, savings, and discretionary spending. The system aims to maximize long-term investments while maintaining financial stability through realistic monthly economic simulation.
 
+> **🚀 New to the system?** Check out the [Quick Start Guide](QUICK_START.md) to get running in 5 minutes!
+
 ## Overview
 
 The system implements a two-level hierarchical architecture:
@@ -103,28 +105,154 @@ env_config, training_config, reward_config = load_behavioral_profile('balanced')
 
 ### Behavioral Profiles
 
-The system includes three predefined behavioral profiles with different risk tolerances:
+The system includes three predefined behavioral profiles with different risk tolerances and reward structures. Each profile is optimized for different financial goals and risk appetites.
 
 #### Conservative Profile
-- Risk tolerance: 0.3
-- Safety threshold: $1,500
-- Investment reward coefficient (α): 5.0
-- Stability penalty coefficient (β): 0.5
-- Focus: Capital preservation and stability
+**Best for:** Risk-averse individuals prioritizing financial stability and capital preservation
+
+**Configuration:**
+- Risk tolerance: 0.3 (low risk appetite)
+- Safety threshold: $1,500 (higher cash buffer requirement)
+- Investment reward coefficient (α): 5.0 (moderate investment incentive)
+- Stability penalty coefficient (β): 0.5 (strong penalty for low cash)
+- Overspend penalty coefficient (γ): 5.0
+- Debt penalty coefficient (δ): 20.0
+
+**Characteristics:**
+- Maintains higher cash reserves for emergencies
+- Invests conservatively, prioritizing safety over returns
+- Strongly penalizes risky behavior and low cash balances
+- Suitable for individuals with irregular income or high financial obligations
+- Expected outcome: Lower investment returns but higher financial stability
+
+**When to use:**
+- You have unpredictable expenses or income
+- You're building an emergency fund
+- You have low risk tolerance
+- Financial stability is more important than growth
 
 #### Balanced Profile (Default)
-- Risk tolerance: 0.5
-- Safety threshold: $1,000
-- Investment reward coefficient (α): 10.0
-- Stability penalty coefficient (β): 0.1
-- Focus: Balanced growth and stability
+**Best for:** Most users seeking a reasonable balance between growth and stability
+
+**Configuration:**
+- Risk tolerance: 0.5 (moderate risk appetite)
+- Safety threshold: $1,000 (standard cash buffer)
+- Investment reward coefficient (α): 10.0 (standard investment incentive)
+- Stability penalty coefficient (β): 0.1 (moderate penalty for low cash)
+- Overspend penalty coefficient (γ): 5.0
+- Debt penalty coefficient (δ): 20.0
+
+**Characteristics:**
+- Balances investment growth with financial stability
+- Maintains reasonable cash reserves
+- Adapts to changing financial conditions
+- Suitable for individuals with stable income and moderate expenses
+- Expected outcome: Moderate investment returns with good stability
+
+**When to use:**
+- You have stable income and predictable expenses
+- You want to grow wealth while maintaining safety
+- You're comfortable with moderate risk
+- You're starting out and unsure which profile to choose
 
 #### Aggressive Profile
-- Risk tolerance: 0.8
-- Safety threshold: $500
-- Investment reward coefficient (α): 15.0
-- Stability penalty coefficient (β): 0.05
-- Focus: Maximum investment growth
+**Best for:** Risk-tolerant individuals maximizing investment growth
+
+**Configuration:**
+- Risk tolerance: 0.8 (high risk appetite)
+- Safety threshold: $500 (minimal cash buffer)
+- Investment reward coefficient (α): 15.0 (strong investment incentive)
+- Stability penalty coefficient (β): 0.05 (weak penalty for low cash)
+- Overspend penalty coefficient (γ): 5.0
+- Debt penalty coefficient (δ): 20.0
+
+**Characteristics:**
+- Maximizes investment allocation
+- Maintains minimal cash reserves
+- Prioritizes long-term wealth accumulation over short-term stability
+- Suitable for individuals with stable income, low expenses, and high risk tolerance
+- Expected outcome: Higher investment returns but lower cash stability
+
+**When to use:**
+- You have very stable income and low expenses
+- You have other emergency funds or safety nets
+- You have high risk tolerance
+- Long-term wealth growth is your primary goal
+- You can handle temporary cash flow challenges
+
+### Configuration Parameters Reference
+
+#### Environment Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `income` | float | > 0 | 3200 | Monthly salary/income in dollars |
+| `fixed_expenses` | float | ≥ 0 | 1400 | Fixed monthly costs (rent, utilities, etc.) |
+| `variable_expense_mean` | float | ≥ 0 | 700 | Average variable expenses (groceries, entertainment) |
+| `variable_expense_std` | float | ≥ 0 | 100 | Standard deviation of variable expenses |
+| `inflation` | float | [-1, 1] | 0.02 | Monthly inflation rate (0.02 = 2% per month) |
+| `safety_threshold` | float | ≥ 0 | 1000 | Minimum cash balance before penalties apply |
+| `max_months` | int | > 0 | 60 | Maximum episode length in months |
+| `initial_cash` | float | any | 0 | Starting cash balance |
+| `risk_tolerance` | float | [0, 1] | 0.5 | Agent's risk appetite (0=conservative, 1=aggressive) |
+
+**Tips for Environment Configuration:**
+- Set `income` and `fixed_expenses` based on your target scenario
+- Use `variable_expense_std` to model expense uncertainty (higher = more unpredictable)
+- Adjust `safety_threshold` based on desired cash buffer (typically 1-2 months of expenses)
+- Use `inflation` to model economic conditions (0.02 = 2% monthly ≈ 27% annually)
+- Set `max_months` to your planning horizon (60 = 5 years)
+
+#### Training Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `num_episodes` | int | > 0 | 5000 | Number of training episodes |
+| `gamma_low` | float | [0, 1] | 0.95 | Discount factor for low-level agent (monthly decisions) |
+| `gamma_high` | float | [0, 1] | 0.99 | Discount factor for high-level agent (strategic decisions) |
+| `high_period` | int | > 0 | 6 | Strategic planning interval in months (6-12 recommended) |
+| `batch_size` | int | > 0 | 32 | Number of transitions per policy update |
+| `learning_rate_low` | float | > 0 | 3e-4 | Learning rate for low-level agent |
+| `learning_rate_high` | float | > 0 | 1e-4 | Learning rate for high-level agent |
+
+**Tips for Training Configuration:**
+- Start with 5000 episodes for initial experiments, increase to 10000+ for production
+- `gamma_low` (0.95) values immediate rewards more than `gamma_high` (0.99)
+- `high_period` of 6 means strategic goals are updated every 6 months
+- Reduce learning rates if training is unstable, increase if learning is too slow
+- Larger `batch_size` provides more stable updates but requires more memory
+
+#### Reward Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `alpha` | float | ≥ 0 | 10.0 | Investment reward coefficient (higher = more investment) |
+| `beta` | float | ≥ 0 | 0.1 | Stability penalty coefficient (higher = more conservative) |
+| `gamma` | float | ≥ 0 | 5.0 | Overspend penalty coefficient |
+| `delta` | float | ≥ 0 | 20.0 | Debt penalty coefficient (negative balance) |
+| `lambda_` | float | ≥ 0 | 1.0 | Wealth growth coefficient (high-level reward) |
+| `mu` | float | ≥ 0 | 0.5 | Stability bonus coefficient (high-level reward) |
+
+**Tips for Reward Configuration:**
+- Increase `alpha` to encourage more aggressive investment behavior
+- Increase `beta` to maintain higher cash reserves (more conservative)
+- `delta` should be high (20.0) to strongly discourage negative balance
+- Balance `lambda_` and `mu` to trade off wealth growth vs stability
+- Start with default values and adjust based on observed behavior
+
+**Reward Formula:**
+```
+Low-Level Reward (monthly):
+r_low = α * invest_amount                    # Encourage investment
+        - β * max(0, threshold - cash)       # Penalize low cash
+        - γ * overspend                      # Penalize excess spending
+        - δ * abs(min(0, cash))              # Penalize debt
+
+High-Level Reward (strategic period):
+r_high = Σ(r_low over period)                # Aggregate monthly rewards
+         + λ * Δwealth                       # Reward wealth growth
+         + μ * stability_bonus               # Reward consistent positive balance
+```
 
 ### YAML Configuration Format
 
@@ -132,32 +260,32 @@ Create a YAML file with the following structure (see `configs/` directory for ex
 
 ```yaml
 environment:
-  income: 3200
-  fixed_expenses: 1400
-  variable_expense_mean: 700
-  variable_expense_std: 100
-  inflation: 0.02
-  safety_threshold: 1000
-  max_months: 60
-  initial_cash: 0
-  risk_tolerance: 0.5
+  income: 3200                    # Monthly salary
+  fixed_expenses: 1400            # Fixed monthly costs
+  variable_expense_mean: 700      # Average variable expenses
+  variable_expense_std: 100       # Std dev of variable expenses
+  inflation: 0.02                 # Monthly inflation rate
+  safety_threshold: 1000          # Minimum cash buffer
+  max_months: 60                  # Simulation duration (months)
+  initial_cash: 0                 # Starting cash balance
+  risk_tolerance: 0.5             # Risk appetite (0-1)
 
 training:
-  num_episodes: 5000
-  gamma_low: 0.95
-  gamma_high: 0.99
-  high_period: 6
-  batch_size: 32
-  learning_rate_low: 0.0003
-  learning_rate_high: 0.0001
+  num_episodes: 5000              # Training episodes
+  gamma_low: 0.95                 # Low-level discount factor
+  gamma_high: 0.99                # High-level discount factor
+  high_period: 6                  # Strategic planning interval (months)
+  batch_size: 32                  # Transitions per update
+  learning_rate_low: 0.0003       # Low-level learning rate
+  learning_rate_high: 0.0001      # High-level learning rate
 
 reward:
-  alpha: 10.0    # Investment reward coefficient
-  beta: 0.1      # Stability penalty coefficient
-  gamma: 5.0     # Overspend penalty coefficient
-  delta: 20.0    # Debt penalty coefficient
-  lambda_: 1.0   # Wealth growth coefficient
-  mu: 0.5        # Stability bonus coefficient
+  alpha: 10.0                     # Investment reward coefficient
+  beta: 0.1                       # Stability penalty coefficient
+  gamma: 5.0                      # Overspend penalty coefficient
+  delta: 20.0                     # Debt penalty coefficient
+  lambda_: 1.0                    # Wealth growth coefficient
+  mu: 0.5                         # Stability bonus coefficient
 ```
 
 **Example Configuration Files:**
@@ -957,9 +1085,25 @@ analytics.reset()
 
 ## Quick Start
 
-### Training the HRL System
+### 1. Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd hrl-finance-system
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify installation
+pytest tests/ -v
+```
+
+### 2. Training the HRL System
 
 Train the system using the main training script with either YAML configuration files or predefined behavioral profiles:
+
+**Basic Training Examples:**
 
 ```bash
 # Train with a behavioral profile (recommended for quick start)
@@ -973,6 +1117,25 @@ python3 train.py --profile aggressive --episodes 10000 --output models/aggressiv
 
 # Train with evaluation
 python3 train.py --profile balanced --episodes 5000 --eval-episodes 20
+```
+
+**Advanced Training Examples:**
+
+```bash
+# Train with checkpointing (saves every 1000 episodes)
+python3 train.py --profile balanced --episodes 10000 --save-interval 1000
+
+# Train with custom output directory and seed for reproducibility
+python3 train.py --profile aggressive --episodes 5000 --output models/run_001 --seed 42
+
+# Train without TensorBoard logging
+python3 train.py --profile balanced --no-log
+
+# Train with custom TensorBoard log directory
+python3 train.py --profile balanced --log-dir experiments/balanced_v2
+
+# Resume training from checkpoint
+python3 train.py --profile balanced --resume models/checkpoints/balanced/checkpoint_episode_5000
 ```
 
 **Command-line Options:**
@@ -1126,15 +1289,372 @@ pytest tests/test_sanity_checks.py -v
 - Profile configuration validation
 - Learning effectiveness verification
 
+## Troubleshooting
+
+### Common Issues
+
+#### Training doesn't converge
+**Symptoms:** Rewards remain low or unstable, agent doesn't learn effective policies
+
+**Solutions:**
+1. Reduce learning rates: Try `learning_rate_low: 1e-4` and `learning_rate_high: 5e-5`
+2. Increase training episodes: Use 10000+ episodes for complex scenarios
+3. Adjust reward coefficients: Increase `alpha` to encourage investment, increase `beta` for stability
+4. Check configuration: Ensure income > fixed_expenses + variable_expense_mean
+5. Verify environment: Run sanity checks with `pytest tests/test_sanity_checks.py -v`
+
+#### Agent goes bankrupt frequently
+**Symptoms:** Episodes terminate early due to negative cash balance
+
+**Solutions:**
+1. Increase `safety_threshold` to maintain higher cash reserves
+2. Increase `beta` (stability penalty) to discourage risky behavior
+3. Increase `delta` (debt penalty) to strongly discourage negative balance
+4. Use conservative profile: `python3 train.py --profile conservative`
+5. Reduce `variable_expense_std` to decrease expense uncertainty
+
+#### Agent doesn't invest enough
+**Symptoms:** Low investment amounts, high cash balances
+
+**Solutions:**
+1. Increase `alpha` (investment reward) to encourage more investment
+2. Decrease `beta` (stability penalty) to reduce cash hoarding
+3. Use aggressive profile: `python3 train.py --profile aggressive`
+4. Reduce `safety_threshold` to allow lower cash reserves
+5. Increase `risk_tolerance` in environment configuration
+
+#### Training is too slow
+**Symptoms:** Training takes too long to complete
+
+**Solutions:**
+1. Reduce `num_episodes` for initial experiments (try 1000-2000)
+2. Reduce `max_months` to shorten episodes (try 24-36 months)
+3. Increase `batch_size` for faster updates (try 64 or 128)
+4. Use GPU acceleration if available (PyTorch will use CUDA automatically)
+5. Disable TensorBoard logging: `python3 train.py --no-log`
+
+#### Memory issues during training
+**Symptoms:** Out of memory errors, system slowdown
+
+**Solutions:**
+1. Reduce `batch_size` (try 16 or 8)
+2. Reduce `max_months` to limit episode length
+3. Clear episode buffer more frequently (modify HRLTrainer)
+4. Use smaller neural networks (modify agent architectures)
+5. Run on a machine with more RAM
+
+### Frequently Asked Questions
+
+**Q: How long does training take?**
+A: Training 5000 episodes typically takes 10-30 minutes on a modern CPU, depending on configuration. Using GPU acceleration can reduce this to 5-10 minutes.
+
+**Q: How do I know if my agent is learning?**
+A: Monitor these indicators:
+- Episode rewards should increase over time
+- Cash stability index should improve (approach 1.0)
+- Total invested should increase
+- Episode length should increase (agent survives longer)
+- Run sanity checks: `pytest tests/test_sanity_checks.py -v`
+
+**Q: Which behavioral profile should I use?**
+A: 
+- **Conservative**: If you prioritize stability and have unpredictable expenses
+- **Balanced**: If you want moderate growth with reasonable stability (recommended default)
+- **Aggressive**: If you prioritize investment growth and have stable income
+
+**Q: Can I customize a behavioral profile?**
+A: Yes! Create a custom YAML configuration file based on one of the examples in `configs/`, then modify the parameters to suit your needs.
+
+**Q: How do I interpret the performance metrics?**
+A:
+- **Cumulative Wealth Growth**: Total invested capital (higher is better)
+- **Cash Stability Index**: % months with positive balance (higher is better, aim for >0.9)
+- **Sharpe Ratio**: Risk-adjusted performance (higher is better, >1.0 is good)
+- **Goal Adherence**: Alignment with strategic goals (lower is better, <0.1 is good)
+- **Policy Stability**: Consistency of decisions (lower is better, <0.05 is good)
+
+**Q: Can I use this for real financial planning?**
+A: This system is designed for research and educational purposes. While it models realistic financial scenarios, it should not be used as the sole basis for real financial decisions. Consult with a qualified financial advisor for personal financial planning.
+
+**Q: How do I save and load trained models?**
+A: The training script automatically saves models to the output directory. Use the evaluation script to load and test them:
+```bash
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt
+```
+
+**Q: Can I modify the neural network architecture?**
+A: Yes! Edit the network definitions in `src/agents/budget_executor.py` and `src/agents/financial_strategist.py`. The default architectures are:
+- Low-level: [128, 128] hidden layers
+- High-level: [64, 64] hidden layers
+
+**Q: How do I visualize training progress?**
+A: Use TensorBoard to monitor training in real-time:
+```bash
+# Start training with logging (enabled by default)
+python3 train.py --profile balanced
+
+# In another terminal, start TensorBoard
+tensorboard --logdir=runs
+
+# Open browser to http://localhost:6006
+```
+
+**Q: What if I want to change the action space?**
+A: The action space is defined in `BudgetEnv` as a 3-dimensional continuous vector [invest, save, consume]. Modifying this requires changes to:
+- `BudgetEnv.action_space` definition
+- `BudgetEnv.step()` action processing
+- `BudgetExecutor` output layer
+- Reward computation logic
+
 ## Documentation
 
-- [Requirements Document](.kiro/specs/hrl-finance-system/requirements.md) - Detailed system requirements
+> **📚 Looking for something specific?** Check the [Documentation Index](DOCUMENTATION_INDEX.md) for a complete guide to all documentation.
+
+### Core Documentation
+- [Requirements Document](.kiro/specs/hrl-finance-system/requirements.md) - Detailed system requirements with EARS patterns
 - [Design Document](.kiro/specs/hrl-finance-system/design.md) - Architecture and component design
-- [Implementation Tasks](.kiro/specs/hrl-finance-system/tasks.md) - Development roadmap
-- [HLD/LLD Document](Requirements/HRL_Finance_System_Design.md) - High and low-level design
+- [Implementation Tasks](.kiro/specs/hrl-finance-system/tasks.md) - Development roadmap and task tracking
+- [HLD/LLD Document](Requirements/HRL_Finance_System_Design.md) - High and low-level design specifications
+
+### Testing Documentation
 - [Test Coverage Summary](tests/TEST_COVERAGE.md) - Comprehensive test coverage overview
-- [Basic Usage Example](examples/basic_budget_env_usage.py) - Simple BudgetEnv demonstration
+- [Sanity Check Tests](tests/test_sanity_checks.py) - System-level validation tests
+- [Integration Tests](tests/test_hrl_trainer.py) - Complete training pipeline tests
+
+### Examples and Tutorials
+- [Examples README](examples/README.md) - Overview of all example scripts
+- [Basic BudgetEnv Usage](examples/basic_budget_env_usage.py) - Simple environment demonstration
+- [RewardEngine Usage](examples/reward_engine_usage.py) - Reward computation examples
+- [Analytics Usage](examples/analytics_usage.py) - Performance metrics tracking
+- [Training with Analytics](examples/training_with_analytics.py) - Complete training example
+- [Logging Usage](examples/logging_usage.py) - TensorBoard logging demonstration
+- [Checkpointing Usage](examples/checkpointing_usage.py) - Save/load/resume functionality
+
+### Configuration Examples
+- [Conservative Profile](configs/conservative.yaml) - Low risk, high stability configuration
+- [Balanced Profile](configs/balanced.yaml) - Moderate risk, balanced configuration
+- [Aggressive Profile](configs/aggressive.yaml) - High risk, growth-focused configuration
+
+### Change History
 - [Changelog](CHANGELOG.md) - Version history and implementation progress
+
+## Extending the System
+
+### Adding Custom Reward Components
+
+You can extend the reward system by modifying `RewardEngine`:
+
+```python
+# In src/environment/reward_engine.py
+class RewardEngine:
+    def compute_low_level_reward(self, action, state, next_state):
+        # Add custom reward component
+        custom_reward = self._compute_custom_reward(action, state)
+        
+        # Combine with existing rewards
+        base_reward = self._compute_base_reward(action, state, next_state)
+        return base_reward + custom_reward
+    
+    def _compute_custom_reward(self, action, state):
+        # Example: Reward diversification
+        invest, save, consume = action
+        diversification_bonus = -abs(invest - save)  # Penalize imbalance
+        return 0.5 * diversification_bonus
+```
+
+### Adding Custom Metrics
+
+Extend `AnalyticsModule` to track additional metrics:
+
+```python
+# In src/utils/analytics.py
+class AnalyticsModule:
+    def __init__(self):
+        super().__init__()
+        self.custom_metrics = []
+    
+    def record_step(self, state, action, reward, goal=None, invested_amount=None):
+        super().record_step(state, action, reward, goal, invested_amount)
+        
+        # Track custom metric
+        custom_value = self._compute_custom_metric(state, action)
+        self.custom_metrics.append(custom_value)
+    
+    def compute_episode_metrics(self):
+        metrics = super().compute_episode_metrics()
+        
+        # Add custom metric
+        metrics['custom_metric'] = np.mean(self.custom_metrics)
+        return metrics
+```
+
+### Creating Custom Behavioral Profiles
+
+Add new profiles to `config_manager.py`:
+
+```python
+# In src/utils/config_manager.py
+def load_behavioral_profile(profile_name: str):
+    profiles = {
+        'conservative': _create_conservative_config(),
+        'balanced': _create_balanced_config(),
+        'aggressive': _create_aggressive_config(),
+        'custom': _create_custom_config(),  # Add your profile
+    }
+    # ... rest of implementation
+
+def _create_custom_config():
+    """Create custom behavioral profile configuration"""
+    env_config = EnvironmentConfig(
+        income=3200,
+        fixed_expenses=1400,
+        variable_expense_mean=700,
+        variable_expense_std=100,
+        inflation=0.02,
+        safety_threshold=750,  # Custom value
+        max_months=60,
+        initial_cash=0,
+        risk_tolerance=0.65  # Custom value
+    )
+    
+    training_config = TrainingConfig(
+        num_episodes=5000,
+        gamma_low=0.95,
+        gamma_high=0.99,
+        high_period=8,  # Custom value
+        batch_size=32,
+        learning_rate_low=3e-4,
+        learning_rate_high=1e-4
+    )
+    
+    reward_config = RewardConfig(
+        alpha=12.0,  # Custom value
+        beta=0.15,   # Custom value
+        gamma=5.0,
+        delta=20.0,
+        lambda_=1.0,
+        mu=0.5
+    )
+    
+    return env_config, training_config, reward_config
+```
+
+### Modifying Neural Network Architectures
+
+Customize agent architectures for different problem complexities:
+
+```python
+# In src/agents/budget_executor.py
+class PolicyNetwork(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super().__init__()
+        # Original: [128, 128]
+        # Custom: Deeper network for complex scenarios
+        self.network = nn.Sequential(
+            nn.Linear(input_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, output_dim),
+            nn.Softmax(dim=-1)
+        )
+```
+
+### Adding New Environment Features
+
+Extend `BudgetEnv` with additional financial scenarios:
+
+```python
+# In src/environment/budget_env.py
+class BudgetEnv(gym.Env):
+    def __init__(self, config, reward_config=None):
+        super().__init__(config, reward_config)
+        
+        # Add new features
+        self.emergency_fund = 0
+        self.investment_returns = []
+    
+    def step(self, action):
+        # Add investment returns
+        if self.total_invested > 0:
+            return_rate = np.random.normal(0.007, 0.02)  # ~8% annual
+            investment_return = self.total_invested * return_rate
+            self.cash_balance += investment_return
+            self.investment_returns.append(investment_return)
+        
+        # Continue with normal step logic
+        return super().step(action)
+```
+
+## Contributing
+
+Contributions are welcome! Here's how you can help:
+
+### Reporting Issues
+- Use GitHub Issues to report bugs or request features
+- Include system information, configuration, and error messages
+- Provide minimal reproducible examples when possible
+
+### Code Contributions
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes with clear commit messages
+4. Add tests for new functionality
+5. Ensure all tests pass: `pytest tests/ -v`
+6. Update documentation as needed
+7. Submit a pull request
+
+### Code Style
+- Follow PEP 8 style guidelines
+- Use type hints for function signatures
+- Add docstrings for classes and methods
+- Keep functions focused and modular
+- Write comprehensive tests for new features
+
+### Testing Guidelines
+- Write unit tests for individual components
+- Add integration tests for component interactions
+- Include edge case tests for robustness
+- Maintain test coverage above 80%
+- Run full test suite before submitting: `pytest tests/ --cov=src`
+
+### Documentation Guidelines
+- Update README.md for user-facing changes
+- Update docstrings for API changes
+- Add examples for new features
+- Update configuration documentation for new parameters
+- Keep CHANGELOG.md up to date
+
+## Future Enhancements
+
+Potential areas for future development:
+
+- **Multi-asset Investment**: Support for different investment types (stocks, bonds, real estate)
+- **Tax Modeling**: Incorporate tax implications of investment decisions
+- **Income Variability**: Model irregular income patterns (freelance, commission-based)
+- **Life Events**: Simulate major life events (marriage, children, home purchase)
+- **Debt Management**: Add support for loans, credit cards, and debt repayment strategies
+- **Retirement Planning**: Long-term planning with retirement goals and pension modeling
+- **Risk-Adjusted Returns**: More sophisticated investment return modeling
+- **Multi-Agent Scenarios**: Household financial planning with multiple decision-makers
+- **Transfer Learning**: Pre-trained models for different financial scenarios
+- **Explainable AI**: Interpretability tools to understand agent decisions
+
+## Citation
+
+If you use this system in your research, please cite:
+
+```bibtex
+@software{hrl_finance_system,
+  author = {Rocchi, Alessio},
+  title = {Personal Finance Optimization HRL System},
+  year = {2024},
+  description = {A hierarchical reinforcement learning system for optimal financial decision-making},
+  url = {https://github.com/yourusername/hrl-finance-system}
+}
+```
 
 ## License
 
@@ -1143,3 +1663,16 @@ This project is for research and educational purposes.
 ## Author
 
 Alessio Rocchi
+
+## Acknowledgments
+
+This project implements hierarchical reinforcement learning concepts from:
+- HIRO: Data Efficient Hierarchical Reinforcement Learning (Nachum et al., 2018)
+- Proximal Policy Optimization (Schulman et al., 2017)
+- Option-Critic Architecture (Bacon et al., 2017)
+
+Built with:
+- [Gymnasium](https://gymnasium.farama.org/) - RL environment framework
+- [Stable-Baselines3](https://stable-baselines3.readthedocs.io/) - RL algorithms
+- [PyTorch](https://pytorch.org/) - Deep learning framework
+- [TensorBoard](https://www.tensorflow.org/tensorboard) - Experiment tracking
