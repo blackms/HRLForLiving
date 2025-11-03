@@ -745,12 +745,13 @@ config = RewardConfig(
 - [x] HRLTrainer evaluation method - Deterministic evaluation with comprehensive summary statistics
 - [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation (50+ test cases)
 - [x] Main training script (train.py) - Complete CLI tool with comprehensive features
+- [x] Integration tests for HRLTrainer - 13 comprehensive tests covering complete training pipeline
 
 ### 🚧 In Progress
-- [ ] Integration tests for training loop with analytics
 - [ ] Evaluation script for loading and testing trained models
 
 ### ✅ Recently Completed
+- [x] Integration tests for HRLTrainer (13 comprehensive tests) - Complete coverage of training pipeline, component coordination, and analytics integration
 - [x] Main training script (train.py) - Complete CLI tool with config/profile support, model saving, evaluation, and comprehensive progress monitoring
 - [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation (50+ test cases)
 - [x] Analytics Module integration with HRLTrainer - Zero-overhead automatic tracking during training
@@ -876,6 +877,73 @@ The training script will:
 - `{config_name}_high_agent.pt` - Trained high-level agent (Strategist)
 - `{config_name}_low_agent.pt` - Trained low-level agent (Executor)
 - `{config_name}_history.json` - Complete training history with all metrics
+
+### Evaluating Trained Models
+
+After training, evaluate your models using the evaluation script to assess performance and generate visualizations:
+
+```bash
+# Basic evaluation with trained models
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt
+
+# Evaluate with specific configuration
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --config configs/balanced.yaml
+
+# Evaluate with custom episodes and output directory
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --episodes 50 --output results/
+
+# Evaluate without generating visualizations
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --no-viz
+
+# Evaluate with reproducible results
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --seed 42
+```
+
+**Command-line Options:**
+- `--high-agent PATH`: Path to trained high-level agent model (.pt file) [required]
+- `--low-agent PATH`: Path to trained low-level agent model (.pt file) [required]
+- `--config PATH`: Path to YAML configuration file (optional)
+- `--profile {conservative,balanced,aggressive}`: Use predefined behavioral profile (optional)
+- `--episodes N`: Number of evaluation episodes (default: 20)
+- `--output DIR`: Output directory for results and visualizations (default: results/)
+- `--seed N`: Random seed for reproducibility
+- `--no-viz`: Skip generating visualizations
+
+**Evaluation Output:**
+The evaluation script will:
+1. Load trained models from checkpoint files
+2. Initialize environment with specified configuration
+3. Run evaluation episodes using deterministic policies
+4. Compute comprehensive performance metrics
+5. Display detailed evaluation results
+6. Save results to JSON file
+7. Generate trajectory visualizations (unless --no-viz is specified)
+
+**Generated Files:**
+- `{config_name}_evaluation_results.json` - Comprehensive evaluation metrics and statistics
+- `{config_name}_trajectory_visualization.png` - Episode trajectory plots showing:
+  - Cash balance over time
+  - Allocation actions over time (invest, save, consume)
+  - Cumulative investment growth
+  - Rewards over time
+  - Goal adherence (target vs actual investment)
+  - Total expenses over time
+- `{config_name}_summary_statistics.png` - Statistical analysis showing:
+  - Distribution of episode rewards
+  - Distribution of final cash balances
+  - Distribution of total investments
+  - Performance metrics comparison
+
+**Performance Metrics Reported:**
+- Mean reward ± standard deviation
+- Mean episode length (months survived)
+- Mean final cash balance ± std
+- Mean total invested ± std
+- Mean cumulative wealth growth ± std
+- Mean cash stability index (% positive balance months) ± std
+- Mean Sharpe ratio (risk-adjusted performance) ± std
+- Mean goal adherence (alignment with strategic goals) ± std
+- Mean policy stability (consistency of decisions) ± std
 
 ### Running Examples
 

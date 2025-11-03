@@ -304,6 +304,6 @@ class FinancialStrategist:
         Args:
             path: File path to load the model from
         """
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(path, weights_only=False)
         self.policy_network.load_state_dict(checkpoint['policy_network_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

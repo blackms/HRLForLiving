@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Comprehensive integration tests for HRLTrainer (`tests/test_hrl_trainer.py`)
+  - 13 new integration tests covering complete HRL training pipeline
+  - Test complete episode execution with all components working together
+  - Test high-level/low-level coordination and goal updates at correct intervals
+  - Test policy updates occur correctly (both low-level and high-level agents)
+  - Test analytics integration throughout episode execution
+  - Test episode buffer accumulation and state history tracking
+  - Test reward engine integration during training
+  - Test full training pipeline from start to finish (5 episodes)
+  - Test evaluation after training integration
+  - Test hierarchical coordination complete flow
+  - Test batch size coordination for low-level updates
+  - Test high_period coordination for high-level updates
+  - Test policy improvement verification over time
+  - Test all components (env, agents, reward engine, analytics) working together
+- Test coverage documentation (`tests/TEST_COVERAGE.md`)
+  - Comprehensive overview of all test suites (150+ test cases)
+  - Detailed coverage breakdown by component
+  - Test execution instructions
+  - Edge case documentation
+  - Test quality metrics and CI/CD guidelines
 - Main training script (`train.py`) - Complete CLI tool for training the HRL system
   - Comprehensive command-line interface with argparse
   - Support for both YAML configuration files and behavioral profiles
@@ -241,4 +262,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer (training loop + evaluation), AnalyticsModule, ConfigurationManager, and main training script (train.py) implementations complete with full integration and comprehensive tests (18 test cases for AnalyticsModule, 50+ test cases for ConfigurationManager). Core HRL training system is fully functional with complete configuration management, validation, and CLI training tool. The system can now be trained end-to-end using `python train.py --profile balanced`. Remaining: integration tests and evaluation script (evaluate.py).
+- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer (training loop + evaluation), AnalyticsModule, ConfigurationManager, and main training script (train.py) implementations complete with full integration and comprehensive tests. Test suite includes 150+ test cases: 18 for AnalyticsModule, 50+ for ConfigurationManager, 30+ for HRLTrainer (including 13 integration tests). Core HRL training system is fully functional with complete configuration management, validation, CLI training tool, and comprehensive test coverage. The system can now be trained end-to-end using `python train.py --profile balanced`. Remaining: evaluation script (evaluate.py) for loading and testing trained models.

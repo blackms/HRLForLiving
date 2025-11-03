@@ -1,0 +1,36 @@
+{
+  "num_episodes": 2,
+  "mean_reward": 6220.654075622559,
+  "std_reward": 1702.9925582885735,
+  "mean_episode_length": 1.0,
+  "mean_final_cash": -351.7935946171277,
+  "std_final_cash": 84.72600203653963,
+  "mean_total_invested": 1339.1705513000488,
+  "std_total_invested": 0.0,
+  "mean_wealth_growth": 1339.1705513000488,
+  "std_wealth_growth": 0.0,
+  "mean_cash_stability": 0.0,
+  "std_cash_stability": 0.0,
+  "mean_sharpe_ratio": 0.0,
+  "std_sharpe_ratio": 0.0,
+  "mean_goal_adherence": 0.046743929386138916,
+  "std_goal_adherence": 0.0,
+  "mean_policy_stability": 0.0,
+  "std_policy_stability": 0.0,
+  "episode_rewards": [
+    7923.646633911132,
+    4517.661517333985
+  ],
+  "episode_lengths": [
+    1,
+    1
+  ],
+  "final_cash_balances": [
+    -267.0675925805881,
+    -436.51959665366735
+  ],
+  "total_invested": [
+    1339.1705513000488,
+    1339.1705513000488
+  ]
+}

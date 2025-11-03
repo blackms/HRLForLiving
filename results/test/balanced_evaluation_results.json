@@ -1,0 +1,40 @@
+{
+  "num_episodes": 3,
+  "mean_reward": NaN,
+  "std_reward": NaN,
+  "mean_episode_length": 60.0,
+  "mean_final_cash": NaN,
+  "std_final_cash": NaN,
+  "mean_total_invested": NaN,
+  "std_total_invested": NaN,
+  "mean_wealth_growth": NaN,
+  "std_wealth_growth": NaN,
+  "mean_cash_stability": 0.0,
+  "std_cash_stability": 0.0,
+  "mean_sharpe_ratio": 0.0,
+  "std_sharpe_ratio": 0.0,
+  "mean_goal_adherence": NaN,
+  "std_goal_adherence": NaN,
+  "mean_policy_stability": NaN,
+  "std_policy_stability": NaN,
+  "episode_rewards": [
+    NaN,
+    NaN,
+    NaN
+  ],
+  "episode_lengths": [
+    60,
+    60,
+    60
+  ],
+  "final_cash_balances": [
+    NaN,
+    NaN,
+    NaN
+  ],
+  "total_invested": [
+    NaN,
+    NaN,
+    NaN
+  ]
+}
