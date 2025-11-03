@@ -2,7 +2,8 @@
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
-from src.utils.config import EnvironmentConfig
+from src.utils.config import EnvironmentConfig, RewardConfig
+from src.environment.reward_engine import RewardEngine
 
 
 class BudgetEnv(gym.Env):
@@ -29,17 +30,23 @@ class BudgetEnv(gym.Env):
     
     metadata = {'render_modes': []}
     
-    def __init__(self, config: EnvironmentConfig):
+    def __init__(self, config: EnvironmentConfig, reward_config: RewardConfig = None):
         """
         Initialize the BudgetEnv with configuration parameters.
         
         Args:
             config: EnvironmentConfig containing simulation parameters
+            reward_config: RewardConfig for reward computation (optional, uses default if None)
         """
         super().__init__()
         
         # Store configuration
         self.config = config
+        
+        # Initialize RewardEngine
+        if reward_config is None:
+            reward_config = RewardConfig()
+        self.reward_engine = RewardEngine(reward_config, safety_threshold=config.safety_threshold)
         
         # Define observation space (7-dimensional continuous)
         # [income, fixed_expenses, variable_expenses, cash_balance, inflation, risk_tolerance, t_remaining]
@@ -189,6 +196,9 @@ class BudgetEnv(gym.Env):
             truncated: Whether episode was truncated (max steps)
             info: Additional information dictionary
         """
+        # Store current state before action
+        current_state = self._get_state()
+        
         # Normalize action to ensure it sums to 1
         action = self._normalize_action(action)
         invest_ratio, save_ratio, consume_ratio = action
@@ -224,15 +234,15 @@ class BudgetEnv(gym.Env):
         # Increment month counter
         self.current_month += 1
         
-        # Calculate reward (placeholder - will be replaced by RewardEngine)
-        reward = self._calculate_reward(invest_amount, self.cash_balance)
+        # Get next state after action
+        next_state = self._get_state()
+        
+        # Calculate reward using RewardEngine
+        reward = self.reward_engine.compute_low_level_reward(action, current_state, next_state)
         
         # Check termination conditions
         terminated = self.cash_balance < 0  # Negative cash balance
         truncated = self.current_month >= self.max_months  # Max months reached
-        
-        # Get next state
-        observation = self._get_state()
         
         # Additional info
         info = {
@@ -244,28 +254,5 @@ class BudgetEnv(gym.Env):
             'total_expenses': total_expenses
         }
         
-        return observation, reward, terminated, truncated, info
-    
-    def _calculate_reward(self, invest_amount, cash_balance):
-        """
-        Calculate immediate reward (placeholder implementation).
-        This will be replaced by the RewardEngine in task 4.
-        
-        Args:
-            invest_amount: Amount invested this step
-            cash_balance: Current cash balance
-            
-        Returns:
-            float: Reward value
-        """
-        # Simple reward: encourage investment, penalize low cash
-        reward = invest_amount * 0.1
-        
-        if cash_balance < self.config.safety_threshold:
-            penalty = (self.config.safety_threshold - cash_balance) * 0.01
-            reward -= penalty
-        
-        if cash_balance < 0:
-            reward -= abs(cash_balance) * 0.1
-        
-        return reward
+        return next_state, reward, terminated, truncated, info
+

@@ -60,7 +60,7 @@ A -->|reward_high (aggregated)| B
 ### 3.1 Environment: `BudgetEnv`
 **Type:** Custom Gymnasium environment
 
-**Status:** ✅ **IMPLEMENTED** - Fully functional and ready for RewardEngine integration
+**Status:** ✅ **IMPLEMENTED** - Fully functional with integrated RewardEngine
 
 **Observation space (7-dimensional):**
 ```python
@@ -76,8 +76,9 @@ A -->|reward_high (aggregated)| B
 - Inflation adjustments applied each step
 - Episode termination on negative cash or max months
 - Comprehensive info dictionary with cash balance, investments, and expenses
+- Integrated RewardEngine for multi-objective reward computation
 
-**Reward function:** Currently uses placeholder implementation. Will be replaced by RewardEngine in Task 4.
+**Reward function:** Uses RewardEngine.compute_low_level_reward() for production-ready multi-objective rewards.
 
 ### 3.2 Reward Engine: `RewardEngine`
 **Type:** Multi-objective reward computation
@@ -516,8 +517,9 @@ training:
 
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
-| **BudgetEnv** | ✅ Complete | `src/environment/budget_env.py` | Fully functional Gymnasium environment with state management, action normalization, expense simulation, and episode termination |
+| **BudgetEnv** | ✅ Complete | `src/environment/budget_env.py` | Fully functional Gymnasium environment with integrated RewardEngine, state management, action normalization, expense simulation, and episode termination |
 | **RewardEngine** | ✅ Complete | `src/environment/reward_engine.py` | Multi-objective reward computation for both agents with configurable coefficients |
+| **RewardEngine Integration** | ✅ Complete | `src/environment/budget_env.py` | BudgetEnv now uses RewardEngine for all reward calculations |
 | **Configuration System** | ✅ Complete | `src/utils/config.py` | EnvironmentConfig, TrainingConfig, RewardConfig, BehavioralProfile |
 | **Data Models** | ✅ Complete | `src/utils/data_models.py` | Transition dataclass |
 | **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
@@ -535,12 +537,7 @@ training:
 
 ### 📋 Next Immediate Tasks
 
-1. **Integrate Reward Engine with BudgetEnv** (Task 4)
-   - Modify BudgetEnv to accept RewardConfig
-   - Replace placeholder reward calculation with RewardEngine
-   - Update BudgetEnv tests to verify integration
-
-2. **Implement Low-Level Agent** (Task 5)
+1. **Implement Low-Level Agent** (Task 5)
    - Create BudgetExecutor class
    - Integrate with Stable-Baselines3 PPO
    - Implement action generation and learning

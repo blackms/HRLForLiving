@@ -75,32 +75,32 @@
     - Test reward coefficient effects
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 4. Integrate RewardEngine with BudgetEnv
+- [x] 4. Integrate RewardEngine with BudgetEnv
   - Modify `BudgetEnv.__init__` to accept RewardConfig and create RewardEngine instance
   - Update `BudgetEnv.step()` to use `reward_engine.compute_low_level_reward()` instead of internal calculation
   - Pass action, current state, and next state to reward engine
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 5. Implement Low-Level Agent (Budget Executor)
-  - [ ] 5.1 Create BudgetExecutor class structure
+- [x] 5. Implement Low-Level Agent (Budget Executor)
+  - [x] 5.1 Create BudgetExecutor class structure
     - Implement `BudgetExecutor` class in `src/agents/budget_executor.py`
     - Initialize with neural network policy (use Stable-Baselines3 PPO)
     - Accept TrainingConfig for hyperparameters
     - _Requirements: 2.4, 2.5, 4.1_
   
-  - [ ] 5.2 Implement action generation
+  - [x] 5.2 Implement action generation
     - Implement `act(state, goal)` method that concatenates state and goal vectors
     - Pass concatenated input (10-dimensional) to PPO policy
     - Return action vector [invest, save, consume]
     - _Requirements: 2.4, 2.5_
   
-  - [ ] 5.3 Implement learning method
+  - [x] 5.3 Implement learning method
     - Implement `learn(transitions)` method to update PPO policy
     - Apply discount factor γ_low = 0.95
     - Return training metrics (loss, policy entropy)
     - _Requirements: 4.1, 4.3_
   
-  - [ ] 5.4 Write unit tests for BudgetExecutor
+  - [x] 5.4 Write unit tests for BudgetExecutor
     - Test action generation within valid ranges
     - Test input concatenation (state + goal)
     - Test policy update mechanics

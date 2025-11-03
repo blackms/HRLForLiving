@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Inflation adjustments applied each step
   - Episode termination on negative cash or max months
   - Comprehensive info dictionary with financial metrics
+  - Integrated RewardEngine for multi-objective reward computation
 - RewardEngine implementation
   - Multi-objective reward computation for low-level agent
   - Strategic reward aggregation for high-level agent
@@ -29,11 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Integrated RewardEngine with BudgetEnv for production-ready reward computation
+- BudgetEnv now accepts optional RewardConfig parameter in constructor
+- BudgetEnv.step() now uses RewardEngine.compute_low_level_reward() for all reward calculations
 - Updated README.md with BudgetEnv and RewardEngine usage examples and API documentation
 - Updated HLD/LLD document with implementation details and status tracking
 - Updated project structure documentation to reflect new examples directory
 - Marked Task 2 (Implement BudgetEnv) as complete in tasks.md
 - Marked Task 3 (Implement Reward Engine) as complete in tasks.md
+- Marked Task 4 (Integrate RewardEngine with BudgetEnv) as complete in tasks.md
 
 ### Documentation
 - Added Quick Start section to README.md
@@ -76,4 +81,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv and RewardEngine implementations complete, ready for agent integration
+- **Unreleased**: BudgetEnv and RewardEngine implementations complete with full integration, ready for agent implementation

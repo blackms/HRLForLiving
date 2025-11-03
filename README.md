@@ -80,19 +80,21 @@ The system supports three behavioral profiles with different risk tolerances:
 
 ### BudgetEnv - Financial Simulation Environment
 
-The `BudgetEnv` is a custom Gymnasium environment that simulates monthly financial decisions.
+The `BudgetEnv` is a custom Gymnasium environment that simulates monthly financial decisions with integrated multi-objective reward computation via `RewardEngine`.
 
-### RewardEngine - Multi-Objective Reward Computation
-
-The `RewardEngine` computes rewards for both high-level and low-level agents, balancing multiple financial objectives.
+**Key Integration Features:**
+- Accepts optional `RewardConfig` parameter for customizing reward behavior
+- Uses default reward configuration if none provided
+- Automatically computes rewards using `RewardEngine.compute_low_level_reward()`
+- Passes action, current state, and next state to reward engine for accurate reward calculation
 
 **Usage Example:**
 ```python
 from src.environment import BudgetEnv
-from src.utils.config import EnvironmentConfig
+from src.utils.config import EnvironmentConfig, RewardConfig
 
-# Create configuration
-config = EnvironmentConfig(
+# Create environment configuration
+env_config = EnvironmentConfig(
     income=3200,              # Monthly salary
     fixed_expenses=1400,      # Fixed monthly costs
     variable_expense_mean=700, # Average variable expenses
@@ -104,8 +106,21 @@ config = EnvironmentConfig(
     risk_tolerance=0.5       # Risk profile (0-1)
 )
 
-# Initialize environment
-env = BudgetEnv(config)
+# Create reward configuration (optional - uses defaults if not provided)
+reward_config = RewardConfig(
+    alpha=10.0,    # Investment reward coefficient
+    beta=0.1,      # Stability penalty coefficient
+    gamma=5.0,     # Overspend penalty coefficient
+    delta=20.0,    # Debt penalty coefficient
+    lambda_=1.0,   # Wealth growth coefficient
+    mu=0.5         # Stability bonus coefficient
+)
+
+# Initialize environment with custom reward configuration
+env = BudgetEnv(env_config, reward_config)
+
+# Or use default reward configuration
+env = BudgetEnv(env_config)
 
 # Reset environment
 observation, info = env.reset()
@@ -116,6 +131,7 @@ observation, reward, terminated, truncated, info = env.step(action)
 
 print(f"Cash balance: ${info['cash_balance']:.2f}")
 print(f"Total invested: ${info['total_invested']:.2f}")
+print(f"Reward: {reward:.2f}")
 print(f"Month: {info['month']}")
 ```
 
@@ -135,10 +151,15 @@ print(f"Month: {info['month']}")
 
 Actions are automatically normalized to sum to 1 using softmax.
 
-**RewardEngine Usage:**
+### RewardEngine - Multi-Objective Reward Computation
+
+The `RewardEngine` is automatically integrated with `BudgetEnv` and computes rewards balancing multiple financial objectives. You can also use it standalone for custom reward calculations.
+
+**Standalone Usage:**
 ```python
 from src.environment import RewardEngine
 from src.utils.config import RewardConfig
+import numpy as np
 
 # Create reward configuration
 reward_config = RewardConfig(
@@ -229,12 +250,16 @@ config = RewardConfig(
 - [x] Package initialization
 - [x] BudgetEnv (Gymnasium environment) - Full implementation with state management, action normalization, expense simulation, and episode termination
 - [x] Reward Engine - Multi-objective reward computation for both high-level and low-level agents
+- [x] RewardEngine integration with BudgetEnv - Production-ready reward computation
+- [x] Low-Level Agent (Budget Executor) - PPO-based agent with policy network, action generation, and learning capabilities
 
 ### 🚧 In Progress
-- [ ] Low-Level Agent (Budget Executor)
 - [ ] High-Level Agent (Financial Strategist)
 - [ ] Training Orchestrator
 - [ ] Analytics Module
+
+### ✅ Recently Completed
+- [x] Low-Level Agent (Budget Executor) - PPO-based agent for monthly allocation decisions
 
 ## Architecture
 
