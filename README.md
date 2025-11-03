@@ -276,6 +276,58 @@ The executor uses a simplified policy gradient approach with:
 - Entropy bonus (0.01 coefficient) for exploration
 - Adam optimizer with configurable learning rate
 
+### AnalyticsModule - Performance Metrics Tracking
+
+The `AnalyticsModule` tracks and computes comprehensive performance metrics for evaluating the HRL system's financial decision-making quality.
+
+**Key Features:**
+- Records step-by-step data (states, actions, rewards, goals, investments)
+- Computes cumulative wealth growth (total invested capital)
+- Calculates cash stability index (% months with positive balance)
+- Computes Sharpe-like ratio (mean return / std balance)
+- Measures goal adherence (alignment between strategic goals and actual actions)
+- Tracks policy stability (variance of actions over time)
+- Episode-level metric computation
+- Easy reset for new episodes
+
+**Usage Example:**
+```python
+from src.utils.analytics import AnalyticsModule
+import numpy as np
+
+# Initialize analytics module
+analytics = AnalyticsModule()
+
+# Record steps during episode
+for step in episode:
+    state = np.array([3200, 1400, 700, 1000, 0.02, 0.5, 50])
+    action = np.array([0.3, 0.5, 0.2])
+    reward = 15.0
+    goal = np.array([0.3, 1000, 0.5])
+    invested_amount = 960.0  # 0.3 * 3200
+    
+    analytics.record_step(state, action, reward, goal, invested_amount)
+
+# Compute metrics at episode end
+metrics = analytics.compute_episode_metrics()
+
+print(f"Cumulative wealth growth: ${metrics['cumulative_wealth_growth']:.2f}")
+print(f"Cash stability index: {metrics['cash_stability_index']:.2%}")
+print(f"Sharpe ratio: {metrics['sharpe_ratio']:.2f}")
+print(f"Goal adherence: {metrics['goal_adherence']:.4f}")
+print(f"Policy stability: {metrics['policy_stability']:.4f}")
+
+# Reset for next episode
+analytics.reset()
+```
+
+**Metrics Explained:**
+- **Cumulative Wealth Growth**: Total amount invested over the episode, indicating long-term wealth accumulation
+- **Cash Stability Index**: Percentage of months maintaining positive cash balance (0-1), higher is better
+- **Sharpe-like Ratio**: Risk-adjusted return metric (mean balance / std balance), higher indicates better risk-adjusted performance
+- **Goal Adherence**: Mean absolute difference between target investment ratio and actual investment action, lower indicates better goal following
+- **Policy Stability**: Variance of actions over time, lower indicates more consistent decision-making
+
 ### HRLTrainer - Training Orchestrator
 
 The `HRLTrainer` coordinates the hierarchical training loop, managing interactions between the high-level and low-level agents. It implements the complete HRL training process where strategic goals are set periodically and monthly actions are executed continuously.
@@ -512,13 +564,15 @@ config = RewardConfig(
 - [x] Low-Level Agent (Budget Executor) - PPO-based agent with policy network, action generation, and learning capabilities
 - [x] High-Level Agent (Financial Strategist) - HIRO-style agent with state aggregation, goal generation, and strategic learning
 - [x] Training Orchestrator (HRLTrainer) - Complete training loop with policy coordination and metrics tracking
+- [x] Analytics Module - Performance metrics tracking and computation
 
 ### 🚧 In Progress
-- [ ] Training Orchestrator - Evaluation method
-- [ ] Analytics Module
-- [ ] Integration tests for training loop
+- [ ] Training Orchestrator - Evaluation method integration with Analytics Module
+- [ ] Integration tests for training loop with analytics
+- [ ] Analytics Module integration with HRLTrainer
 
 ### ✅ Recently Completed
+- [x] Analytics Module implementation - Complete with all 5 key metrics (wealth growth, stability, Sharpe ratio, goal adherence, policy stability)
 - [x] HRLTrainer training loop - Complete implementation with high-level/low-level coordination, policy updates, and progress monitoring
 - [x] Policy update coordination - Automatic updates for both agents with proper timing and transition management
 
@@ -556,12 +610,50 @@ config = RewardConfig(
 
 ## Performance Metrics
 
-The system tracks the following metrics:
-- **Cumulative Wealth Growth**: Total invested capital over simulation
-- **Cash Stability Index**: Percentage of months with positive balance
-- **Sharpe-like Ratio**: Return divided by standard deviation of balance
-- **Goal Adherence**: Alignment between strategic goals and actual allocations
-- **Policy Stability**: Consistency of actions over time
+The system tracks comprehensive performance metrics through the `AnalyticsModule`:
+
+### Core Metrics
+
+| Metric | Description | Interpretation |
+|--------|-------------|----------------|
+| **Cumulative Wealth Growth** | Total invested capital over simulation | Higher is better - indicates long-term wealth accumulation |
+| **Cash Stability Index** | Percentage of months with positive balance (0-1) | Higher is better - indicates financial stability |
+| **Sharpe-like Ratio** | Mean balance / std balance | Higher is better - indicates better risk-adjusted performance |
+| **Goal Adherence** | Mean absolute difference between target and actual investment | Lower is better - indicates better goal following |
+| **Policy Stability** | Variance of actions over time | Lower is better - indicates more consistent decision-making |
+
+### Using Analytics in Your Code
+
+```python
+from src.utils.analytics import AnalyticsModule
+
+# Initialize analytics
+analytics = AnalyticsModule()
+
+# During episode execution
+for step in range(episode_length):
+    state, reward, done, info = env.step(action)
+    analytics.record_step(
+        state=state,
+        action=action,
+        reward=reward,
+        goal=goal,  # Optional: from high-level agent
+        invested_amount=info['invest_amount']  # Optional: from env info
+    )
+
+# Compute metrics at episode end
+metrics = analytics.compute_episode_metrics()
+
+# Access individual metrics
+print(f"Wealth Growth: ${metrics['cumulative_wealth_growth']:.2f}")
+print(f"Stability: {metrics['cash_stability_index']:.2%}")
+print(f"Sharpe Ratio: {metrics['sharpe_ratio']:.2f}")
+print(f"Goal Adherence: {metrics['goal_adherence']:.4f}")
+print(f"Policy Stability: {metrics['policy_stability']:.4f}")
+
+# Reset for next episode
+analytics.reset()
+```
 
 ## Quick Start
 

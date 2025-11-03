@@ -51,18 +51,46 @@ PYTHONPATH=. python3 examples/reward_engine_usage.py
 - How high-level rewards aggregate low-level performance
 - Understanding wealth growth and stability bonuses
 
+### 3. Analytics Module Usage (`analytics_usage.py`)
+
+**Status:** ✅ Ready to run
+
+Demonstrates the AnalyticsModule for tracking and computing performance metrics:
+- Recording step-by-step data during episodes
+- Computing comprehensive performance metrics
+- Understanding metric interpretation
+- Integration patterns for training loops
+- Reset functionality for new episodes
+
+**Run:**
+```bash
+PYTHONPATH=. python3 examples/analytics_usage.py
+```
+
+**What you'll learn:**
+- How to initialize and use the AnalyticsModule
+- Recording states, actions, rewards, goals, and investments
+- Computing 5 key performance metrics:
+  - Cumulative Wealth Growth (total invested capital)
+  - Cash Stability Index (% months with positive balance)
+  - Sharpe-like Ratio (risk-adjusted performance)
+  - Goal Adherence (alignment with strategic goals)
+  - Policy Stability (consistency of decisions)
+- How to interpret each metric
+- Best practices for integration with training loops
+
 ## Coming Soon
 
-### 3. Training with PPO (Low-Level Agent)
+### 4. Training with PPO (Low-Level Agent)
 Example showing how to train a single PPO agent on the BudgetEnv without hierarchical structure.
 
-### 4. Full HRL Training
+### 5. Full HRL Training
 Complete example with both High-Level (Strategist) and Low-Level (Executor) agents.
 
-### 5. Behavioral Profile Comparison
+### 6. Behavioral Profile Comparison
 Compare performance across conservative, balanced, and aggressive profiles.
 
-### 6. Custom Reward Functions
+### 7. Custom Reward Functions
 Demonstrate how to integrate custom reward engines for different optimization objectives.
 
 ## Requirements

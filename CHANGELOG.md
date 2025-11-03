@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Analytics Module implementation (`src/utils/analytics.py`)
+  - AnalyticsModule class for tracking and computing performance metrics
+  - Step-by-step data recording with `record_step()` method
+    - Tracks states, actions, rewards, goals, and invested amounts
+    - Automatic cash balance extraction from state[3]
+    - Safe copying of numpy arrays to prevent reference issues
+    - Optional goal and invested_amount parameters
+  - Comprehensive metric computation with `compute_episode_metrics()`
+    - Cumulative wealth growth: Sum of all invested amounts
+    - Cash stability index: Percentage of months with positive balance (0-1)
+    - Sharpe-like ratio: Mean balance / std balance for risk-adjusted performance
+    - Goal adherence: Mean absolute difference between target_invest_ratio (goal[0]) and actual invest action (action[0])
+    - Policy stability: Mean variance of actions over time
+    - Robust edge case handling (empty data, single data point)
+  - Reset functionality with `reset()` method for new episodes
+  - Comprehensive docstrings and type hints throughout
+  - Ready for integration with HRLTrainer evaluation method
 - HRLTrainer complete training loop implementation
   - Full `train(num_episodes)` method in `src/training/hrl_trainer.py`
   - Episode execution with environment reset and state initialization
@@ -87,6 +104,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Marked Task 8 (Implement Analytics Module) as complete in tasks.md (except unit tests)
+- Updated README.md with AnalyticsModule usage examples and comprehensive metrics documentation
+- Updated design document with complete AnalyticsModule implementation details
+- Updated HLD/LLD document with AnalyticsModule status and integration roadmap
 - Marked Task 7.2 (Implement main training loop) as complete in tasks.md
 - Marked Task 7.3 (Implement policy update coordination) as complete in tasks.md
 - Updated implementation status in HLD/LLD document to reflect HRLTrainer training loop completion

@@ -260,27 +260,111 @@ class HRLTrainer:
 
 **Purpose**: Tracks and computes performance metrics
 
-**Metrics Computed**:
-- **Cumulative Wealth Growth**: Total invested capital at episode end
-- **Cash Stability Index**: Percentage of months with positive balance
-- **Sharpe-like Ratio**: (mean_return) / (std_balance)
-- **Goal Adherence**: Mean absolute difference between target and actual allocation
-- **Policy Stability**: Variance of actions over time
+**Status**: ✅ **IMPLEMENTED** - Fully functional with comprehensive metric computation
 
-**Interface**:
+**Metrics Computed**:
+- **Cumulative Wealth Growth**: Total invested capital (sum of invested_amounts)
+- **Cash Stability Index**: Percentage of months with positive balance (0-1)
+- **Sharpe-like Ratio**: Mean balance / std balance (risk-adjusted performance)
+- **Goal Adherence**: Mean absolute difference between target_invest_ratio and actual invest action
+- **Policy Stability**: Mean variance of actions over time (lower = more consistent)
+
+**Implementation Details**:
 ```python
 class AnalyticsModule:
-    def __init__(self)
-        # Initialize metric trackers
+    """
+    Tracks and computes performance metrics for HRL financial system.
+    
+    Attributes:
+        states: List of state observations
+        actions: List of actions taken
+        rewards: List of rewards received
+        cash_balances: List of cash balances (extracted from state[3])
+        goals: List of goal vectors from high-level agent
+        invested_amounts: List of investment amounts per step
+    """
+    
+    def __init__(self):
+        """Initialize metric trackers"""
+        self.states: List[np.ndarray] = []
+        self.actions: List[np.ndarray] = []
+        self.rewards: List[float] = []
+        self.cash_balances: List[float] = []
+        self.goals: List[np.ndarray] = []
+        self.invested_amounts: List[float] = []
         
-    def record_step(self, state: np.ndarray, action: np.ndarray, reward: float)
-        # Record data from single step
+    def record_step(
+        self, 
+        state: np.ndarray, 
+        action: np.ndarray, 
+        reward: float,
+        goal: Optional[np.ndarray] = None,
+        invested_amount: Optional[float] = None
+    ):
+        """
+        Record data from single step.
         
-    def compute_episode_metrics(self) -> dict
-        # Compute all metrics for completed episode
+        Automatically extracts cash balance from state[3].
+        Uses .copy() to prevent reference issues.
+        """
+        self.states.append(state.copy())
+        self.actions.append(action.copy())
+        self.rewards.append(float(reward))
         
-    def reset(self)
-        # Clear episode data for new episode
+        if len(state) >= 4:
+            self.cash_balances.append(float(state[3]))
+        
+        if goal is not None:
+            self.goals.append(goal.copy())
+        
+        if invested_amount is not None:
+            self.invested_amounts.append(float(invested_amount))
+        
+    def compute_episode_metrics(self) -> Dict[str, float]:
+        """
+        Compute all metrics for completed episode.
+        
+        Returns dictionary with:
+        - cumulative_wealth_growth: Sum of invested_amounts
+        - cash_stability_index: positive_months / total_months
+        - sharpe_ratio: mean_balance / std_balance
+        - goal_adherence: mean(|goal[0] - action[0]|)
+        - policy_stability: mean(var(actions))
+        
+        Handles edge cases (empty data, single data point).
+        """
+        # Implementation details in src/utils/analytics.py
+        
+    def reset(self):
+        """Clear all episode data for new episode"""
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+        self.cash_balances.clear()
+        self.goals.clear()
+        self.invested_amounts.clear()
+```
+
+**Usage Example**:
+```python
+from src.utils.analytics import AnalyticsModule
+
+analytics = AnalyticsModule()
+
+# During episode
+for step in episode:
+    analytics.record_step(state, action, reward, goal, invested_amount)
+
+# At episode end
+metrics = analytics.compute_episode_metrics()
+print(f"Wealth growth: ${metrics['cumulative_wealth_growth']:.2f}")
+print(f"Stability: {metrics['cash_stability_index']:.2%}")
+print(f"Sharpe ratio: {metrics['sharpe_ratio']:.2f}")
+print(f"Goal adherence: {metrics['goal_adherence']:.4f}")
+print(f"Policy stability: {metrics['policy_stability']:.4f}")
+
+# Reset for next episode
+analytics.reset()
 ```
 
 ## Data Models
