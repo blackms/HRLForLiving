@@ -486,7 +486,7 @@ The module gracefully handles various edge cases:
 
 The `HRLTrainer` coordinates the hierarchical training loop, managing interactions between the high-level and low-level agents. It implements the complete HRL training process where strategic goals are set periodically and monthly actions are executed continuously.
 
-**Status:** ✅ **FULLY IMPLEMENTED** - Complete with AnalyticsModule integration
+**Status:** ✅ **FULLY IMPLEMENTED** - Complete with AnalyticsModule integration, TensorBoard logging, and checkpointing
 
 **Key Features:**
 - Coordinates high-level (Strategist) and low-level (Executor) agent training
@@ -498,6 +498,9 @@ The `HRLTrainer` coordinates the hierarchical training loop, managing interactio
 - Automatic policy updates for both agents
 - Enhanced progress monitoring with stability and goal adherence metrics
 - Deterministic evaluation mode with comprehensive summary statistics
+- Optional TensorBoard logging for experiment tracking
+- Checkpointing and resume functionality for long training runs
+- Best model tracking based on evaluation performance
 - Supports both training and evaluation modes
 
 **Usage Example:**
@@ -508,6 +511,7 @@ from src.agents.financial_strategist import FinancialStrategist
 from src.agents.budget_executor import BudgetExecutor
 from src.environment.reward_engine import RewardEngine
 from src.utils.config import EnvironmentConfig, TrainingConfig, RewardConfig
+from src.utils.logger import ExperimentLogger
 
 # Create configurations
 env_config = EnvironmentConfig(
@@ -547,12 +551,29 @@ reward_engine = RewardEngine(reward_config, safety_threshold=1000)
 strategist = FinancialStrategist(training_config)
 executor = BudgetExecutor(training_config)
 
-# Create trainer
-trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
+# Optional: Initialize TensorBoard logger
+logger = ExperimentLogger(log_dir='runs', experiment_name='balanced_training')
 
-# Train the HRL system
+# Create trainer with optional logger and configs for checkpointing
+trainer = HRLTrainer(
+    env, strategist, executor, reward_engine, training_config,
+    logger=logger,
+    env_config=env_config,
+    reward_config=reward_config
+)
+
+# Option 1: Basic training
 print("Starting training...")
 training_history = trainer.train(num_episodes=5000)
+
+# Option 2: Training with automatic checkpointing and best model tracking
+training_history = trainer.train_with_checkpointing(
+    num_episodes=5000,
+    checkpoint_dir='models/checkpoints/balanced',
+    save_interval=1000,      # Save checkpoint every 1000 episodes
+    eval_interval=1000,      # Evaluate every 1000 episodes
+    eval_episodes=10         # Use 10 episodes for evaluation
+)
 
 # Access training metrics
 print(f"\nTraining Complete!")
@@ -560,9 +581,15 @@ print(f"Final average reward: {np.mean(training_history['episode_rewards'][-100:
 print(f"Final average cash: {np.mean(training_history['cash_balances'][-100:]):.2f}")
 print(f"Final average invested: {np.mean(training_history['total_invested'][-100:]):.2f}")
 
-# Save trained models
+# Save trained models (if not using checkpointing)
 strategist.save('models/strategist.pth')
 executor.save('models/executor.pth')
+
+# Resume training from checkpoint
+episode_num, history = trainer.load_checkpoint('models/checkpoints/balanced/checkpoint_episode_1000')
+print(f"Resumed from episode {episode_num}")
+# Continue training...
+trainer.train_with_checkpointing(num_episodes=2000, checkpoint_dir='models/checkpoints/balanced')
 
 # Evaluation
 eval_metrics = trainer.evaluate(num_episodes=100)
@@ -575,6 +602,10 @@ print(f"Mean Cash Stability: {eval_metrics['mean_cash_stability']:.2%}")
 print(f"Mean Sharpe Ratio: {eval_metrics['mean_sharpe_ratio']:.2f}")
 print(f"Mean Goal Adherence: {eval_metrics['mean_goal_adherence']:.4f}")
 print(f"Mean Policy Stability: {eval_metrics['mean_policy_stability']:.4f}")
+
+# Close logger
+if logger:
+    logger.close()
 ```
 
 **Training Process:**
@@ -821,25 +852,29 @@ See `examples/logging_usage.py` for a complete demonstration of TensorBoard logg
 - [x] RewardEngine integration with BudgetEnv - Production-ready reward computation
 - [x] Low-Level Agent (Budget Executor) - PPO-based agent with policy network, action generation, and learning capabilities
 - [x] High-Level Agent (Financial Strategist) - HIRO-style agent with state aggregation, goal generation, and strategic learning
-- [x] Training Orchestrator (HRLTrainer) - Complete training loop with policy coordination and metrics tracking
+- [x] Training Orchestrator (HRLTrainer) - Complete training loop with policy coordination, metrics tracking, TensorBoard logging, and checkpointing
 - [x] Analytics Module - Performance metrics tracking and computation with comprehensive test coverage (18 test cases)
 - [x] Analytics Module integration with HRLTrainer - Automatic tracking of all 5 metrics during training and evaluation
 - [x] HRLTrainer evaluation method - Deterministic evaluation with comprehensive summary statistics
 - [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation (50+ test cases)
-- [x] Main training script (train.py) - Complete CLI tool with comprehensive features
+- [x] Main training script (train.py) - Complete CLI tool with comprehensive features including checkpointing and TensorBoard logging
 - [x] Integration tests for HRLTrainer - 13 comprehensive tests covering complete training pipeline
 - [x] Sanity check tests - 7 system-level validation tests for behavioral profiles and learning effectiveness
+- [x] TensorBoard logging - ExperimentLogger for comprehensive experiment tracking (examples/logging_usage.py)
+- [x] Checkpointing functionality - Save/load/resume with best model tracking (examples/checkpointing_usage.py, tests/test_checkpointing.py)
 
 ### 🚧 In Progress
 - [ ] Evaluation script for loading and testing trained models
 
 ### ✅ Recently Completed
+- [x] TensorBoard logging integration (Task 14) - ExperimentLogger with automatic tracking of training curves, episode metrics, action/goal distributions, and hyperparameters
+- [x] Checkpointing and resume functionality (Task 15) - Complete implementation with save/load/resume, best model tracking, and comprehensive tests (7 test cases)
 - [x] Sanity check tests (7 comprehensive tests) - System-level validation of behavioral profiles, learning effectiveness, and configuration integrity
 - [x] Integration tests for HRLTrainer (13 comprehensive tests) - Complete coverage of training pipeline, component coordination, and analytics integration
-- [x] Main training script (train.py) - Complete CLI tool with config/profile support, model saving, evaluation, and comprehensive progress monitoring
+- [x] Main training script (train.py) - Complete CLI tool with config/profile support, model saving, evaluation, TensorBoard logging, and checkpointing
 - [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation (50+ test cases)
 - [x] Analytics Module integration with HRLTrainer - Zero-overhead automatic tracking during training
-- [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statisticsetrics and summary statistics
+- [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statistics
 
 ## Architecture
 

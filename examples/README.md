@@ -134,18 +134,44 @@ tensorboard --logdir=runs
 - Comparing multiple experiments
 - Best practices for experiment tracking
 
+### 6. Checkpointing and Resume Functionality (`checkpointing_usage.py`)
+
+**Status:** ✅ Ready to run | **Tests:** ✅ 7 comprehensive test cases
+
+Demonstrates checkpointing and resume functionality for long training runs:
+- Training with automatic checkpointing
+- Saving checkpoints at regular intervals
+- Evaluating and saving the best model
+- Resuming training from a checkpoint
+- Loading the best model for evaluation
+- Checkpoint directory structure and metadata
+
+**Run:**
+```bash
+PYTHONPATH=. python3 examples/checkpointing_usage.py
+```
+
+**What you'll learn:**
+- How to enable automatic checkpointing during training
+- Configuring save intervals and evaluation intervals
+- Understanding checkpoint directory structure
+- How to resume training from a saved checkpoint
+- Loading and evaluating the best model
+- Best practices for long training runs
+- Checkpoint metadata and configuration preservation
+
 ## Coming Soon
 
-### 6. Training with PPO (Low-Level Agent)
+### 7. Training with PPO (Low-Level Agent)
 Example showing how to train a single PPO agent on the BudgetEnv without hierarchical structure.
 
-### 7. Full HRL Training
+### 8. Full HRL Training
 Complete example with both High-Level (Strategist) and Low-Level (Executor) agents.
 
-### 8. Behavioral Profile Comparison
+### 9. Behavioral Profile Comparison
 Compare performance across conservative, balanced, and aggressive profiles.
 
-### 9. Custom Reward Functions
+### 10. Custom Reward Functions
 Demonstrate how to integrate custom reward engines for different optimization objectives.
 
 ## Requirements

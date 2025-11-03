@@ -399,7 +399,7 @@
   - Save hyperparameters with each experiment
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 16. Implement checkpointing
+- [x] 16. Implement checkpointing
   - Add model saving every N episodes in HRLTrainer
   - Save both high-level and low-level agent models
   - Save configuration with each checkpoint

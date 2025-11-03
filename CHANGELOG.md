@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Checkpointing and resume functionality (`src/training/hrl_trainer.py`)
+  - Added imports: `os`, `json` for file operations
+  - Added `Tuple` type hint for return types
+  - Added `EnvironmentConfig` and `RewardConfig` imports for checkpoint metadata
+  - `save_checkpoint()` method for saving training state
+  - `load_checkpoint()` method for resuming training
+  - `train_with_checkpointing()` method for automatic checkpoint management
+  - Saves high-level and low-level agent models
+  - Saves complete configuration (environment, training, reward)
+  - Saves training history and current episode number
+  - Tracks and saves best model based on evaluation performance
+  - Supports custom checkpoint directories and naming
+  - Automatic evaluation at configurable intervals
+  - Best model selection based on mean reward during evaluation
+  - Handles NaN evaluation scores gracefully
+- Checkpointing support in train.py
+  - Command-line options: --checkpoint-dir, --resume, --eval-interval, --eval-episodes-during-training
+  - Automatic checkpoint directory creation
+  - Resume training from saved checkpoints
+  - Comprehensive checkpoint metadata preservation
+  - Integration with existing training workflow
+- Checkpointing tests (`tests/test_checkpointing.py`)
+  - 7 comprehensive test cases covering all checkpointing functionality
+  - Test checkpoint saving and loading
+  - Test best model tracking
+  - Test resume training functionality
+  - Test train_with_checkpointing method
+  - Test checkpoint metadata completeness
+  - Test training history preservation
+- Checkpointing usage example (`examples/checkpointing_usage.py`)
+  - Complete demonstration of checkpointing workflow
+  - Training with automatic checkpointing
+  - Resuming training from checkpoint
+  - Loading and evaluating best model
+  - Updated examples/README.md with checkpointing documentation
 - TensorBoard dependency (`tensorboard>=2.14.0`) added to requirements.txt
 - TensorBoard logging and monitoring system (`src/utils/logger.py`)
   - ExperimentLogger class for comprehensive experiment tracking

@@ -50,6 +50,8 @@ Examples:
   python train.py --profile balanced
   python train.py --profile aggressive --episodes 10000
   python train.py --config configs/balanced.yaml --output models/
+  python train.py --profile balanced --save-interval 500 --eval-interval 500
+  python train.py --resume models/checkpoints/balanced/checkpoint_episode_1000
         """
     )
     
@@ -108,6 +110,30 @@ Examples:
         '--no-logging',
         action='store_true',
         help='Disable TensorBoard logging'
+    )
+    parser.add_argument(
+        '--checkpoint-dir',
+        type=str,
+        default=None,
+        help='Directory for saving checkpoints (default: models/checkpoints/)'
+    )
+    parser.add_argument(
+        '--resume',
+        type=str,
+        default=None,
+        help='Path to checkpoint directory to resume training from'
+    )
+    parser.add_argument(
+        '--eval-interval',
+        type=int,
+        default=1000,
+        help='Evaluate and save best model every N episodes (default: 1000)'
+    )
+    parser.add_argument(
+        '--eval-episodes-during-training',
+        type=int,
+        default=10,
+        help='Number of evaluation episodes during training for best model selection (default: 10)'
     )
     
     return parser.parse_args()
@@ -225,36 +251,48 @@ def initialize_system(env_config, training_config, reward_config, logger=None, s
     
     # Initialize trainer
     print("\n4. Creating HRLTrainer...")
-    trainer = HRLTrainer(env, high_agent, low_agent, reward_engine, training_config, logger=logger)
+    trainer = HRLTrainer(
+        env, high_agent, low_agent, reward_engine, training_config, 
+        logger=logger, env_config=env_config, reward_config=reward_config
+    )
     print("   ✓ HRLTrainer initialized with AnalyticsModule")
     
     return env, high_agent, low_agent, reward_engine, trainer
 
 
-def train_system(trainer, training_config, output_dir, config_name, save_interval):
+def train_system(trainer, training_config, checkpoint_dir, save_interval, eval_interval, eval_episodes):
     """
-    Execute training loop with periodic checkpointing
+    Execute training loop with automatic checkpointing and best model tracking
     
     Args:
         trainer: HRLTrainer instance
         training_config: Training configuration
-        output_dir: Directory to save models
-        config_name: Name of configuration for file naming
+        checkpoint_dir: Directory to save checkpoints
         save_interval: Save checkpoint every N episodes
+        eval_interval: Evaluate and save best model every N episodes
+        eval_episodes: Number of episodes for evaluation
         
     Returns:
         Training history dictionary
     """
     print("\n" + "=" * 70)
-    print("Starting Training")
+    print("Starting Training with Checkpointing")
     print("=" * 70)
     print(f"\nTraining for {training_config.num_episodes} episodes...")
-    print(f"Checkpoints will be saved every {save_interval} episodes to: {output_dir}/")
+    print(f"Checkpoints will be saved every {save_interval} episodes")
+    print(f"Evaluation every {eval_interval} episodes ({eval_episodes} episodes per eval)")
+    print(f"Checkpoint directory: {checkpoint_dir}")
     print("\nProgress:")
     print("-" * 70)
     
-    # Run training
-    history = trainer.train(num_episodes=training_config.num_episodes)
+    # Run training with checkpointing
+    history = trainer.train_with_checkpointing(
+        num_episodes=training_config.num_episodes,
+        checkpoint_dir=checkpoint_dir,
+        save_interval=save_interval,
+        eval_interval=eval_interval,
+        eval_episodes=eval_episodes
+    )
     
     print("\n" + "-" * 70)
     print("Training completed!")
@@ -435,9 +473,31 @@ def main():
         env_config, training_config, reward_config, logger=logger, seed=args.seed
     )
     
-    # Train system
+    # Resume from checkpoint if specified
+    if args.resume:
+        print("\n" + "=" * 70)
+        print("Resuming from Checkpoint")
+        print("=" * 70)
+        print(f"\nLoading checkpoint from: {args.resume}")
+        
+        try:
+            episode, history = trainer.load_checkpoint(args.resume)
+            print(f"✓ Checkpoint loaded successfully")
+            print(f"  Resuming from episode: {episode}")
+            print(f"  Training history entries: {len(history.get('episode_rewards', []))}")
+        except Exception as e:
+            print(f"Error loading checkpoint: {e}", file=sys.stderr)
+            sys.exit(1)
+    
+    # Determine checkpoint directory
+    checkpoint_dir = args.checkpoint_dir
+    if checkpoint_dir is None:
+        checkpoint_dir = os.path.join(args.output, 'checkpoints', config_name)
+    
+    # Train system with checkpointing
     history = train_system(
-        trainer, training_config, args.output, config_name, args.save_interval
+        trainer, training_config, checkpoint_dir, 
+        args.save_interval, args.eval_interval, args.eval_episodes_during_training
     )
     
     # Print training summary
