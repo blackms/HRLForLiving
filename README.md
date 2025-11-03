@@ -276,6 +276,54 @@ The executor uses a simplified policy gradient approach with:
 - Entropy bonus (0.01 coefficient) for exploration
 - Adam optimizer with configurable learning rate
 
+### HRLTrainer - Training Orchestrator
+
+The `HRLTrainer` coordinates the hierarchical training loop, managing interactions between the high-level and low-level agents. It implements the complete HRL training process where strategic goals are set periodically and monthly actions are executed continuously.
+
+**Key Features:**
+- Coordinates high-level (Strategist) and low-level (Executor) agent training
+- Episode buffer for storing low-level transitions
+- State history tracking for high-level state aggregation
+- Training metrics tracking (rewards, lengths, cash balances, investments, losses)
+- Configurable high-level decision period (default: 6 months)
+- Supports both training and evaluation modes
+
+**Usage Example (Structure):**
+```python
+from src.training.hrl_trainer import HRLTrainer
+from src.environment.budget_env import BudgetEnv
+from src.agents.financial_strategist import FinancialStrategist
+from src.agents.budget_executor import BudgetExecutor
+from src.environment.reward_engine import RewardEngine
+from src.utils.config import EnvironmentConfig, TrainingConfig, RewardConfig
+
+# Create configurations
+env_config = EnvironmentConfig(income=3200, fixed_expenses=1400, ...)
+training_config = TrainingConfig(num_episodes=5000, gamma_low=0.95, gamma_high=0.99, ...)
+reward_config = RewardConfig(alpha=10.0, beta=0.1, ...)
+
+# Initialize components
+env = BudgetEnv(env_config, reward_config)
+reward_engine = RewardEngine(reward_config, safety_threshold=1000)
+strategist = FinancialStrategist(training_config)
+executor = BudgetExecutor(training_config)
+
+# Create trainer
+trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
+
+# Training loop (to be implemented)
+# training_history = trainer.train(num_episodes=5000)
+
+# Evaluation (to be implemented)
+# eval_metrics = trainer.evaluate(num_episodes=100)
+```
+
+**Training Process:**
+1. High-level agent generates strategic goal every N steps (default: 6)
+2. Low-level agent executes monthly allocation decisions following the goal
+3. Both agents learn from their respective experiences
+4. Metrics are tracked throughout training for analysis
+
 **Usage Example:**
 ```python
 from src.agents.financial_strategist import FinancialStrategist
@@ -409,10 +457,11 @@ config = RewardConfig(
 - [x] High-Level Agent (Financial Strategist) - HIRO-style agent with state aggregation, goal generation, and strategic learning
 
 ### 🚧 In Progress
-- [ ] Training Orchestrator
+- [ ] Training Orchestrator (HRLTrainer class structure complete, implementing training loop)
 - [ ] Analytics Module
 
 ### ✅ Recently Completed
+- [x] HRLTrainer class structure - Training orchestrator initialization with episode buffer and metrics tracking
 - [x] High-Level Agent (Financial Strategist) - HIRO-style agent for strategic goal generation
 
 ## Architecture

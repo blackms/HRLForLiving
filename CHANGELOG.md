@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- HRLTrainer class structure implementation
+  - Training orchestrator initialization in `src/training/hrl_trainer.py`
+  - Episode buffer for storing low-level transitions
+  - State history tracking for high-level agent aggregation
+  - Training metrics tracking (episode_rewards, episode_lengths, cash_balances, total_invested, low_level_losses, high_level_losses)
+  - Comprehensive docstrings explaining HRL training coordination
+  - Accepts BudgetEnv, FinancialStrategist, BudgetExecutor, RewardEngine, and TrainingConfig
 - FinancialStrategist (High-Level Agent) implementation
   - HIRO-style agent for strategic goal generation
   - Custom StrategistNetwork with [64, 64] hidden layers
@@ -68,6 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for RewardEngine (`tests/test_reward_engine.py`)
 
 ### Changed
+- Marked Task 7.1 (Create HRLTrainer class structure) as complete in tasks.md
+- Updated implementation status in HLD/LLD document to reflect HRLTrainer progress
 - Marked Task 6 (Implement High-Level Agent) as complete in tasks.md
 - Updated README.md with FinancialStrategist usage examples and API documentation
 - Updated HLD/LLD document with FinancialStrategist implementation details

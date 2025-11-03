@@ -737,33 +737,116 @@ strategist.save('models/strategist.pth')
 strategist.load('models/strategist.pth')
 ```
 
-### 4.5 Trainer
+### 4.5 Training Orchestrator: `HRLTrainer` 🚧 IN PROGRESS
+
+**Location:** `src/training/hrl_trainer.py`
+
+**Status:** Class structure implemented. Training loop and evaluation methods in progress.
+
+**Implementation Details:**
 
 ```python
 class HRLTrainer:
-    def __init__(self, env, high_agent, low_agent, cfg):
+    """
+    Training Orchestrator that coordinates the HRL training loop.
+    
+    Manages interaction between high-level (Strategist) and low-level (Executor) agents,
+    coordinating policy updates and managing the training process.
+    """
+    
+    def __init__(
+        self,
+        env: BudgetEnv,
+        high_agent: FinancialStrategist,
+        low_agent: BudgetExecutor,
+        reward_engine: RewardEngine,
+        config: TrainingConfig
+    ):
+        """
+        Initialize the HRLTrainer with all necessary components.
+        
+        Args:
+            env: BudgetEnv instance for financial simulation
+            high_agent: FinancialStrategist for strategic goal generation
+            low_agent: BudgetExecutor for monthly allocation decisions
+            reward_engine: RewardEngine for reward computation
+            config: TrainingConfig containing hyperparameters
+        """
         self.env = env
-        self.high = high_agent
-        self.low = low_agent
-        self.cfg = cfg
+        self.high_agent = high_agent
+        self.low_agent = low_agent
+        self.reward_engine = reward_engine
+        self.config = config
+        
+        # Episode buffer for storing transitions
+        self.episode_buffer: List[Transition] = []
+        
+        # State history for high-level agent aggregation
+        self.state_history: List[np.ndarray] = []
+        
+        # Training metrics
+        self.training_history = {
+            'episode_rewards': [],
+            'episode_lengths': [],
+            'cash_balances': [],
+            'total_invested': [],
+            'low_level_losses': [],
+            'high_level_losses': []
+        }
+    
+    def train(self, num_episodes: int) -> Dict:
+        """
+        Execute training loop for specified number of episodes.
+        
+        Training process:
+        1. Reset environment and get initial state
+        2. High-level agent generates strategic goal
+        3. Low-level agent executes monthly actions following goal
+        4. Every high_period steps, update high-level policy and generate new goal
+        5. Update low-level policy when buffer reaches batch size
+        6. Track metrics throughout training
+        
+        Args:
+            num_episodes: Number of training episodes
+            
+        Returns:
+            dict: Training history with metrics
+        """
+        # TODO: Implement training loop
+        pass
+    
+    def evaluate(self, num_episodes: int) -> Dict:
+        """
+        Run evaluation episodes without learning.
+        
+        Args:
+            num_episodes: Number of evaluation episodes
+            
+        Returns:
+            dict: Evaluation metrics
+        """
+        # TODO: Implement evaluation
+        pass
+```
 
-    def train(self, episodes):
-        for ep in range(episodes):
-            s = self.env.reset()
-            goal = self.high.select_goal(s)
-            for t in range(self.cfg["T"]):
-                a = self.low.act(s, goal)
-                s_next, r_low, done, _ = self.env.step(a)
-                self.low.learn((s, goal, a, r_low, s_next))
+**Usage:**
+```python
+from src.training.hrl_trainer import HRLTrainer
 
-                if t % self.cfg["high_period"] == 0:
-                    r_high = self.env.evaluate_macro_performance()
-                    self.high.learn((s, goal, r_high, s_next))
-                    goal = self.high.select_goal(s_next)
+# Initialize all components
+env = BudgetEnv(env_config, reward_config)
+strategist = FinancialStrategist(training_config)
+executor = BudgetExecutor(training_config)
+reward_engine = RewardEngine(reward_config, safety_threshold=1000)
 
-                s = s_next
-                if done:
-                    break
+# Create trainer
+trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
+
+# Train (to be implemented)
+# history = trainer.train(num_episodes=5000)
+
+# Evaluate (to be implemented)
+# metrics = trainer.evaluate(num_episodes=100)
 ```
 
 ---
@@ -832,21 +915,22 @@ training:
 | **Unit Tests - BudgetExecutor** | ✅ Complete | `tests/test_budget_executor.py` | Comprehensive tests for BudgetExecutor including action generation, learning, and policy updates |
 | **Unit Tests - FinancialStrategist** | ✅ Complete | `tests/test_financial_strategist.py` | Comprehensive tests for FinancialStrategist including goal generation, state aggregation, learning, and policy updates |
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
+| **HRLTrainer Class Structure** | ✅ Complete | `src/training/hrl_trainer.py` | Training orchestrator initialization with episode buffer, state history, and metrics tracking |
 
 ### 🚧 In Progress
 
 | Component | Status | Next Steps |
 |-----------|--------|------------|
-| **High-Level Agent** | ✅ Complete | `src/agents/financial_strategist.py` - HIRO-style agent with state aggregation, goal generation, strategic learning, and model persistence |
-| **Training Orchestrator** | Not started | Implement HRLTrainer for coordinated training |
+| **Training Orchestrator** | 🚧 In Progress | `src/training/hrl_trainer.py` - HRLTrainer class structure complete, need to implement train() and evaluate() methods |
 | **Analytics Module** | Not started | Implement performance metrics tracking |
 
 ### 📋 Next Immediate Tasks
 
-1. **Implement Training Orchestrator** (Task 7)
-   - Create HRLTrainer class
-   - Implement main training loop
-   - Implement policy update coordination
+1. **Complete Training Orchestrator** (Task 7)
+   - ✅ HRLTrainer class structure created
+   - ⏳ Implement main training loop (train method)
+   - ⏳ Implement policy update coordination
+   - ⏳ Implement evaluation method
 
 ## 9. Future Extensions
 - Multi-agent simulation (family / household)
