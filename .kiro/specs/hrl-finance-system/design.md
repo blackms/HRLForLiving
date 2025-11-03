@@ -423,6 +423,55 @@ class Transition:
     done: bool                 # Episode termination flag
 ```
 
+### Configuration Manager
+
+**Status:** ✅ **IMPLEMENTED** - Fully functional with YAML loading, behavioral profiles, and validation
+
+**Location:** `src/utils/config_manager.py`
+
+**Key Functions:**
+
+```python
+def load_config(yaml_path: str) -> Tuple[EnvironmentConfig, TrainingConfig, RewardConfig]:
+    """
+    Load configuration from YAML file.
+    
+    - Parses YAML configuration file
+    - Creates EnvironmentConfig, TrainingConfig, RewardConfig instances
+    - Validates all parameters
+    - Raises ConfigurationError for invalid configurations
+    """
+
+def load_behavioral_profile(profile_name: str) -> Tuple[EnvironmentConfig, TrainingConfig, RewardConfig]:
+    """
+    Load predefined behavioral profile.
+    
+    - Supports "conservative", "balanced", "aggressive" profiles
+    - Returns appropriate configuration with adjusted risk tolerance and reward coefficients
+    - Uses BehavioralProfile enum
+    """
+```
+
+**Usage:**
+```python
+from src.utils.config_manager import load_config, load_behavioral_profile
+
+# Load from YAML
+env_config, training_config, reward_config = load_config('configs/my_config.yaml')
+
+# Load behavioral profile
+env_config, training_config, reward_config = load_behavioral_profile('balanced')
+```
+
+**Validation:**
+- Income must be positive
+- Expenses must be non-negative
+- Inflation must be in [-1, 1]
+- Discount factors (gamma) must be in [0, 1]
+- Risk tolerance must be in [0, 1]
+- Learning rates must be positive
+- All reward coefficients must be non-negative
+
 ### Configuration
 
 System configuration parameters:
@@ -437,6 +486,7 @@ class EnvironmentConfig:
     safety_threshold: float = 1000
     max_months: int = 60
     initial_cash: float = 0
+    risk_tolerance: float = 0.5
 
 @dataclass
 class TrainingConfig:

@@ -23,15 +23,24 @@ The system implements a two-level hierarchical architecture:
 │   │   ├── budget_env.py       # ✅ BudgetEnv implementation
 │   │   └── reward_engine.py    # ✅ RewardEngine implementation
 │   ├── training/                # Training orchestration
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── hrl_trainer.py      # ✅ HRLTrainer implementation
 │   └── utils/                   # Configuration and utilities
 │       ├── __init__.py
-│       ├── config.py            # Configuration dataclasses
-│       └── data_models.py       # Core data models
+│       ├── analytics.py         # ✅ AnalyticsModule implementation
+│       ├── config.py            # ✅ Configuration dataclasses
+│       ├── config_manager.py    # ✅ Configuration Manager
+│       └── data_models.py       # ✅ Core data models
+├── configs/                     # Example configuration files
+│   ├── conservative.yaml        # ✅ Conservative profile config
+│   ├── balanced.yaml            # ✅ Balanced profile config
+│   └── aggressive.yaml          # ✅ Aggressive profile config
 ├── examples/                    # Usage examples
 │   ├── README.md               # Examples documentation
 │   ├── basic_budget_env_usage.py  # ✅ Basic BudgetEnv demo
-│   └── reward_engine_usage.py  # ✅ RewardEngine demo
+│   ├── reward_engine_usage.py  # ✅ RewardEngine demo
+│   ├── analytics_usage.py      # ✅ AnalyticsModule demo
+│   └── training_with_analytics.py # ✅ Training integration demo
 ├── tests/                       # Unit and integration tests
 │   ├── __init__.py
 │   ├── TEST_COVERAGE.md        # Test coverage summary
@@ -39,6 +48,7 @@ The system implements a two-level hierarchical architecture:
 │   ├── test_budget_env.py      # ✅ BudgetEnv tests
 │   ├── test_budget_executor.py # ✅ BudgetExecutor tests
 │   ├── test_financial_strategist.py # ✅ FinancialStrategist tests
+│   ├── test_hrl_trainer.py     # ✅ HRLTrainer tests
 │   └── test_reward_engine.py   # ✅ RewardEngine tests
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
@@ -68,22 +78,102 @@ pip install -r requirements.txt
 
 ## Configuration
 
-The system supports three behavioral profiles with different risk tolerances:
+The system supports flexible configuration through YAML files or predefined behavioral profiles.
 
-### Conservative Profile
+### Configuration Manager
+
+The `ConfigurationManager` provides two ways to configure the system:
+
+**1. Load from YAML file:**
+```python
+from src.utils.config_manager import load_config
+
+env_config, training_config, reward_config = load_config('configs/my_config.yaml')
+```
+
+**2. Load predefined behavioral profile:**
+```python
+from src.utils.config_manager import load_behavioral_profile
+
+env_config, training_config, reward_config = load_behavioral_profile('balanced')
+```
+
+### Behavioral Profiles
+
+The system includes three predefined behavioral profiles with different risk tolerances:
+
+#### Conservative Profile
 - Risk tolerance: 0.3
 - Safety threshold: $1,500
+- Investment reward coefficient (α): 5.0
+- Stability penalty coefficient (β): 0.5
 - Focus: Capital preservation and stability
 
-### Balanced Profile (Default)
+#### Balanced Profile (Default)
 - Risk tolerance: 0.5
 - Safety threshold: $1,000
+- Investment reward coefficient (α): 10.0
+- Stability penalty coefficient (β): 0.1
 - Focus: Balanced growth and stability
 
-### Aggressive Profile
+#### Aggressive Profile
 - Risk tolerance: 0.8
 - Safety threshold: $500
+- Investment reward coefficient (α): 15.0
+- Stability penalty coefficient (β): 0.05
 - Focus: Maximum investment growth
+
+### YAML Configuration Format
+
+Create a YAML file with the following structure (see `configs/` directory for examples):
+
+```yaml
+environment:
+  income: 3200
+  fixed_expenses: 1400
+  variable_expense_mean: 700
+  variable_expense_std: 100
+  inflation: 0.02
+  safety_threshold: 1000
+  max_months: 60
+  initial_cash: 0
+  risk_tolerance: 0.5
+
+training:
+  num_episodes: 5000
+  gamma_low: 0.95
+  gamma_high: 0.99
+  high_period: 6
+  batch_size: 32
+  learning_rate_low: 0.0003
+  learning_rate_high: 0.0001
+
+reward:
+  alpha: 10.0    # Investment reward coefficient
+  beta: 0.1      # Stability penalty coefficient
+  gamma: 5.0     # Overspend penalty coefficient
+  delta: 20.0    # Debt penalty coefficient
+  lambda_: 1.0   # Wealth growth coefficient
+  mu: 0.5        # Stability bonus coefficient
+```
+
+**Example Configuration Files:**
+- `configs/conservative.yaml` - Conservative profile with low risk tolerance
+- `configs/balanced.yaml` - Balanced profile with medium risk tolerance
+- `configs/aggressive.yaml` - Aggressive profile with high risk tolerance
+
+### Configuration Validation
+
+The Configuration Manager automatically validates all parameters:
+- Income must be positive
+- Expenses must be non-negative
+- Inflation must be in [-1, 1]
+- Discount factors (gamma) must be in [0, 1]
+- Risk tolerance must be in [0, 1]
+- Learning rates must be positive
+- All reward coefficients must be non-negative
+
+Invalid configurations raise a `ConfigurationError` with a descriptive message.
 
 ## Core Components
 
@@ -277,6 +367,52 @@ The executor uses a simplified policy gradient approach with:
 - Return normalization for stable training
 - Entropy bonus (0.01 coefficient) for exploration
 - Adam optimizer with configurable learning rate
+
+### Configuration Manager - System Configuration
+
+The `ConfigurationManager` provides flexible configuration loading from YAML files or predefined behavioral profiles with automatic validation.
+
+**Status:** ✅ **FULLY IMPLEMENTED** - Complete with YAML loading, behavioral profiles, and comprehensive validation
+
+**Key Features:**
+- Load configurations from YAML files
+- Load predefined behavioral profiles (conservative, balanced, aggressive)
+- Automatic parameter validation with descriptive error messages
+- Support for all configuration types (environment, training, reward)
+- Custom ConfigurationError exception for invalid configurations
+
+**Usage Example:**
+```python
+from src.utils.config_manager import load_config, load_behavioral_profile, ConfigurationError
+
+# Option 1: Load from YAML file
+try:
+    env_config, training_config, reward_config = load_config('configs/my_config.yaml')
+except ConfigurationError as e:
+    print(f"Configuration error: {e}")
+
+# Option 2: Load predefined behavioral profile
+env_config, training_config, reward_config = load_behavioral_profile('balanced')
+
+# Use configurations
+env = BudgetEnv(env_config, reward_config)
+strategist = FinancialStrategist(training_config)
+executor = BudgetExecutor(training_config)
+```
+
+**Behavioral Profiles:**
+- **Conservative**: Low risk (0.3), high safety threshold ($1,500), lower investment rewards (α=5.0)
+- **Balanced**: Medium risk (0.5), standard safety threshold ($1,000), standard rewards (α=10.0)
+- **Aggressive**: High risk (0.8), low safety threshold ($500), higher investment rewards (α=15.0)
+
+**Validation Rules:**
+- Income must be positive
+- Expenses must be non-negative
+- Inflation must be in [-1, 1]
+- Discount factors (gamma) must be in [0, 1]
+- Risk tolerance must be in [0, 1]
+- Learning rates must be positive
+- All reward coefficients must be non-negative
 
 ### AnalyticsModule - Performance Metrics Tracking
 
@@ -544,7 +680,11 @@ High-Level Reward (strategic period):
 - Wealth change: `λ * Δwealth` (rewards cash balance growth)
 - Stability bonus: `μ * stability_ratio * period_length` (rewards consistent positive balance)
 
-### Environment Configuration
+### Manual Configuration (Alternative)
+
+You can also create configurations manually using dataclasses:
+
+**Environment Configuration:**
 ```python
 from src.utils.config import EnvironmentConfig
 
@@ -558,7 +698,7 @@ config = EnvironmentConfig(
 )
 ```
 
-### Training Configuration
+**Training Configuration:**
 ```python
 from src.utils.config import TrainingConfig
 
@@ -573,7 +713,7 @@ config = TrainingConfig(
 )
 ```
 
-### Reward Configuration
+**Reward Configuration:**
 ```python
 from src.utils.config import RewardConfig
 
@@ -603,13 +743,15 @@ config = RewardConfig(
 - [x] Analytics Module - Performance metrics tracking and computation with comprehensive test coverage (18 test cases)
 - [x] Analytics Module integration with HRLTrainer - Automatic tracking of all 5 metrics during training and evaluation
 - [x] HRLTrainer evaluation method - Deterministic evaluation with comprehensive summary statistics
+- [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation
 
 ### 🚧 In Progress
+- [ ] Configuration Manager tests
 - [ ] Integration tests for training loop with analytics
-- [ ] Configuration Manager for loading behavioral profiles
 - [ ] Main training and evaluation scripts
 
 ### ✅ Recently Completed
+- [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation
 - [x] Analytics Module integration with HRLTrainer - Zero-overhead automatic tracking during training
 - [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statistics
 - [x] Enhanced progress monitoring - Stability and goal adherence metrics in training output
