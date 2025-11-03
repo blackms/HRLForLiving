@@ -743,18 +743,18 @@ config = RewardConfig(
 - [x] Analytics Module - Performance metrics tracking and computation with comprehensive test coverage (18 test cases)
 - [x] Analytics Module integration with HRLTrainer - Automatic tracking of all 5 metrics during training and evaluation
 - [x] HRLTrainer evaluation method - Deterministic evaluation with comprehensive summary statistics
-- [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation
+- [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation (50+ test cases)
+- [x] Main training script (train.py) - Complete CLI tool with comprehensive features
 
 ### 🚧 In Progress
-- [ ] Configuration Manager tests
 - [ ] Integration tests for training loop with analytics
-- [ ] Main training and evaluation scripts
+- [ ] Evaluation script for loading and testing trained models
 
 ### ✅ Recently Completed
-- [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation
+- [x] Main training script (train.py) - Complete CLI tool with config/profile support, model saving, evaluation, and comprehensive progress monitoring
+- [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation (50+ test cases)
 - [x] Analytics Module integration with HRLTrainer - Zero-overhead automatic tracking during training
 - [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statistics
-- [x] Enhanced progress monitoring - Stability and goal adherence metrics in training output
 
 ## Architecture
 
@@ -837,7 +837,49 @@ analytics.reset()
 
 ## Quick Start
 
-Run the examples to see the system in action:
+### Training the HRL System
+
+Train the system using the main training script with either YAML configuration files or predefined behavioral profiles:
+
+```bash
+# Train with a behavioral profile (recommended for quick start)
+python3 train.py --profile balanced --episodes 5000
+
+# Train with a YAML configuration file
+python3 train.py --config configs/conservative.yaml
+
+# Train with custom settings
+python3 train.py --profile aggressive --episodes 10000 --output models/aggressive_run --seed 42
+
+# Train with evaluation
+python3 train.py --profile balanced --episodes 5000 --eval-episodes 20
+```
+
+**Command-line Options:**
+- `--config PATH`: Path to YAML configuration file
+- `--profile {conservative,balanced,aggressive}`: Use predefined behavioral profile
+- `--episodes N`: Number of training episodes (overrides config)
+- `--output DIR`: Output directory for trained models (default: models/)
+- `--eval-episodes N`: Number of evaluation episodes after training (default: 10)
+- `--save-interval N`: Save checkpoint every N episodes (default: 1000)
+- `--seed N`: Random seed for reproducibility
+
+**Training Output:**
+The training script will:
+1. Load and validate configuration
+2. Initialize all system components (environment, agents, trainer)
+3. Execute training with progress updates every 100 episodes
+4. Save trained models and training history
+5. Run evaluation episodes and display performance metrics
+
+**Saved Files:**
+- `{config_name}_high_agent.pt` - Trained high-level agent (Strategist)
+- `{config_name}_low_agent.pt` - Trained low-level agent (Executor)
+- `{config_name}_history.json` - Complete training history with all metrics
+
+### Running Examples
+
+Run the examples to see individual components in action:
 
 ```bash
 # BudgetEnv demonstration
@@ -845,6 +887,12 @@ PYTHONPATH=. python3 examples/basic_budget_env_usage.py
 
 # RewardEngine demonstration
 PYTHONPATH=. python3 examples/reward_engine_usage.py
+
+# AnalyticsModule demonstration
+PYTHONPATH=. python3 examples/analytics_usage.py
+
+# Training with analytics integration
+PYTHONPATH=. python3 examples/training_with_analytics.py
 ```
 
 These examples demonstrate:
@@ -852,6 +900,8 @@ These examples demonstrate:
 - Taking actions and observing results
 - Understanding reward components and their effects
 - Running complete episodes with adaptive strategies
+- Tracking performance metrics with the AnalyticsModule
+- Full training loop with automatic analytics integration
 
 ## Documentation
 

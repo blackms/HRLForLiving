@@ -1058,7 +1058,7 @@ training:
 | Component | Status | Next Steps |
 |-----------|--------|------------|
 | **Integration Tests** | 🚧 In Progress | Write integration tests for HRLTrainer with analytics |
-| **Main Scripts** | Not started | Create train.py and evaluate.py scripts |
+| **Evaluation Script** | Not started | Create evaluate.py script for loading and testing trained models |
 
 ### 📋 Next Immediate Tasks
 

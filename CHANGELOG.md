@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Main training script (`train.py`) - Complete CLI tool for training the HRL system
+  - Comprehensive command-line interface with argparse
+  - Support for both YAML configuration files and behavioral profiles
+  - Mutually exclusive --config and --profile options
+  - Command-line options:
+    - `--config PATH`: Load configuration from YAML file
+    - `--profile {conservative,balanced,aggressive}`: Use predefined behavioral profile
+    - `--episodes N`: Override number of training episodes
+    - `--output DIR`: Specify output directory for models (default: models/)
+    - `--eval-episodes N`: Number of evaluation episodes after training (default: 10)
+    - `--save-interval N`: Save checkpoint every N episodes (default: 1000)
+    - `--seed N`: Random seed for reproducibility
+  - Configuration loading with error handling and validation
+  - Configuration summary display before training
+  - System initialization with component-by-component progress feedback
+  - Training execution with progress monitoring every 100 episodes
+  - Training summary with statistics over last 100 episodes (all 9 metrics)
+  - Automatic model saving:
+    - `{config_name}_high_agent.pt` - High-level agent (Strategist)
+    - `{config_name}_low_agent.pt` - Low-level agent (Executor)
+    - `{config_name}_history.json` - Complete training history
+  - JSON serialization with numpy array conversion for training history
+  - Optional evaluation after training with comprehensive metrics display
+  - Helpful usage examples in --help output
+  - Proper error handling for configuration errors
 - Comprehensive unit tests for ConfigurationManager (`tests/test_config_manager.py`)
   - 50+ test cases covering all functionality and validation rules
   - Configuration loading tests (5 tests)

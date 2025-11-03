@@ -1,0 +1,122 @@
+{
+  "episode_rewards": [
+    NaN,
+    NaN
+  ],
+  "episode_lengths": [
+    60,
+    60
+  ],
+  "cash_balances": [
+    NaN,
+    NaN
+  ],
+  "total_invested": [
+    NaN,
+    NaN
+  ],
+  "low_level_losses": [
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN
+  ],
+  "high_level_losses": [
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN
+  ],
+  "cumulative_wealth_growth": [
+    NaN,
+    NaN
+  ],
+  "cash_stability_index": [
+    0.1,
+    0.0
+  ],
+  "sharpe_ratio": [
+    0.0,
+    0.0
+  ],
+  "goal_adherence": [
+    NaN,
+    NaN
+  ],
+  "policy_stability": [
+    NaN,
+    NaN
+  ]
+}

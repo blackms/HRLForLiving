@@ -313,14 +313,24 @@
     - ✅ Case-insensitive profile name handling
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 11. Create main training script
-  - Create `train.py` script in project root
-  - Parse command-line arguments for config path and behavioral profile
-  - Load configuration using Configuration Manager
-  - Instantiate BudgetEnv, RewardEngine, agents, and HRLTrainer
-  - Execute training with specified number of episodes
-  - Save trained models and training history
-  - Print final evaluation metrics
+- [x] 11. Create main training script ✅ COMPLETE
+  - ✅ Created `train.py` script in project root with comprehensive CLI interface
+  - ✅ Parse command-line arguments for config path and behavioral profile (mutually exclusive)
+  - ✅ Load configuration using Configuration Manager with error handling
+  - ✅ Instantiate BudgetEnv, RewardEngine, agents, and HRLTrainer with progress feedback
+  - ✅ Execute training with specified number of episodes and progress monitoring
+  - ✅ Save trained models (high-level agent, low-level agent) and training history (JSON)
+  - ✅ Print final evaluation metrics with comprehensive summary
+  - ✅ Additional features:
+    - Command-line options: --config, --profile, --episodes, --output, --eval-episodes, --save-interval, --seed
+    - Configuration summary display before training
+    - System initialization with component-by-component feedback
+    - Training progress updates every 100 episodes
+    - Training summary with last 100 episodes statistics (all 9 metrics)
+    - Automatic model saving with proper directory creation
+    - JSON serialization with numpy array conversion
+    - Optional evaluation after training with comprehensive metrics display
+    - Helpful usage examples in --help output
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
 - [ ] 12. Create evaluation script
