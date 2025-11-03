@@ -17,14 +17,20 @@ The system implements a two-level hierarchical architecture:
 │   ├── agents/                  # HRL agent implementations
 │   │   └── __init__.py
 │   ├── environment/             # Financial environment simulation
+│   │   ├── __init__.py
+│   │   └── budget_env.py       # ✅ BudgetEnv implementation
 │   ├── training/                # Training orchestration
 │   │   └── __init__.py
 │   └── utils/                   # Configuration and utilities
 │       ├── __init__.py
 │       ├── config.py            # Configuration dataclasses
 │       └── data_models.py       # Core data models
+├── examples/                    # Usage examples
+│   ├── README.md               # Examples documentation
+│   └── basic_budget_env_usage.py  # ✅ Basic BudgetEnv demo
 ├── tests/                       # Unit and integration tests
-│   └── __init__.py
+│   ├── __init__.py
+│   └── test_budget_env.py      # ✅ BudgetEnv tests
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
 ├── .kiro/specs/                 # Specification documents
@@ -225,12 +231,27 @@ The system tracks the following metrics:
 - **Goal Adherence**: Alignment between strategic goals and actual allocations
 - **Policy Stability**: Consistency of actions over time
 
+## Quick Start
+
+Run the basic example to see BudgetEnv in action:
+
+```bash
+python examples/basic_budget_env_usage.py
+```
+
+This example demonstrates:
+- Creating and configuring a BudgetEnv
+- Taking actions and observing results
+- Running a complete 12-month episode with adaptive strategy
+
 ## Documentation
 
 - [Requirements Document](.kiro/specs/hrl-finance-system/requirements.md) - Detailed system requirements
 - [Design Document](.kiro/specs/hrl-finance-system/design.md) - Architecture and component design
 - [Implementation Tasks](.kiro/specs/hrl-finance-system/tasks.md) - Development roadmap
 - [HLD/LLD Document](Requirements/HRL_Finance_System_Design.md) - High and low-level design
+- [Basic Usage Example](examples/basic_budget_env_usage.py) - Simple BudgetEnv demonstration
+- [Changelog](CHANGELOG.md) - Version history and implementation progress
 
 ## License
 
