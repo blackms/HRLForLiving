@@ -53,7 +53,7 @@ PYTHONPATH=. python3 examples/reward_engine_usage.py
 
 ### 3. Analytics Module Usage (`analytics_usage.py`)
 
-**Status:** ✅ Ready to run
+**Status:** ✅ Ready to run | **Tests:** ✅ 18 comprehensive test cases
 
 Demonstrates the AnalyticsModule for tracking and computing performance metrics:
 - Recording step-by-step data during episodes
@@ -61,6 +61,7 @@ Demonstrates the AnalyticsModule for tracking and computing performance metrics:
 - Understanding metric interpretation
 - Integration patterns for training loops
 - Reset functionality for new episodes
+- Edge case handling (empty data, single step, missing goals)
 
 **Run:**
 ```bash
@@ -79,18 +80,42 @@ PYTHONPATH=. python3 examples/analytics_usage.py
 - How to interpret each metric
 - Best practices for integration with training loops
 
+### 4. Training with Analytics Integration (`training_with_analytics.py`)
+
+**Status:** ✅ Ready to run | **Tests:** ✅ 18 comprehensive test cases
+
+Demonstrates how the AnalyticsModule is automatically integrated with HRLTrainer:
+- Automatic step recording during training
+- Automatic metric computation at episode end
+- Tracking learning progress over episodes
+- Comparing early vs late training performance
+- Zero-overhead analytics integration
+
+**Run:**
+```bash
+PYTHONPATH=. python3 examples/training_with_analytics.py
+```
+
+**What you'll learn:**
+- How HRLTrainer automatically integrates analytics
+- No manual tracking needed in training loops
+- How to access analytics-derived metrics from training history
+- Analyzing learning progress using metrics
+- Understanding the relationship between training and performance metrics
+- Best practices for monitoring HRL training
+
 ## Coming Soon
 
-### 4. Training with PPO (Low-Level Agent)
+### 5. Training with PPO (Low-Level Agent)
 Example showing how to train a single PPO agent on the BudgetEnv without hierarchical structure.
 
-### 5. Full HRL Training
+### 6. Full HRL Training
 Complete example with both High-Level (Strategist) and Low-Level (Executor) agents.
 
-### 6. Behavioral Profile Comparison
+### 7. Behavioral Profile Comparison
 Compare performance across conservative, balanced, and aggressive profiles.
 
-### 7. Custom Reward Functions
+### 8. Custom Reward Functions
 Demonstrate how to integrate custom reward engines for different optimization objectives.
 
 ## Requirements

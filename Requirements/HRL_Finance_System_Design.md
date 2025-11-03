@@ -922,6 +922,19 @@ class HRLTrainer:
         pass
 ```
 
+**Key Features:**
+- Automatic AnalyticsModule integration (zero-overhead tracking)
+- Records step data automatically during training
+- Computes 5 key metrics per episode:
+  - Cumulative wealth growth
+  - Cash stability index
+  - Sharpe-like ratio
+  - Goal adherence
+  - Policy stability
+- Enhanced progress printing with stability and goal adherence
+- Deterministic evaluation mode
+- Comprehensive evaluation summary with mean/std statistics
+
 **Usage:**
 ```python
 from src.training.hrl_trainer import HRLTrainer
@@ -932,19 +945,28 @@ strategist = FinancialStrategist(training_config)
 executor = BudgetExecutor(training_config)
 reward_engine = RewardEngine(reward_config, safety_threshold=1000)
 
-# Create trainer
+# Create trainer (automatically creates AnalyticsModule)
 trainer = HRLTrainer(env, strategist, executor, reward_engine, training_config)
 
-# Train the HRL system
+# Train the HRL system (analytics tracked automatically)
 history = trainer.train(num_episodes=5000)
 
-# Access training metrics
+# Access training metrics (includes all analytics metrics)
 print(f"Final average reward: {np.mean(history['episode_rewards'][-100:]):.2f}")
 print(f"Final average cash: {np.mean(history['cash_balances'][-100:]):.2f}")
 print(f"Final average invested: {np.mean(history['total_invested'][-100:]):.2f}")
+print(f"Final stability: {np.mean(history['cash_stability_index'][-100:]):.2%}")
+print(f"Final goal adherence: {np.mean(history['goal_adherence'][-100:]):.4f}")
 
-# Evaluate (to be implemented)
-# metrics = trainer.evaluate(num_episodes=100)
+# Evaluate with comprehensive metrics
+eval_metrics = trainer.evaluate(num_episodes=100)
+print(f"\nEvaluation Results:")
+print(f"Mean Reward: {eval_metrics['mean_reward']:.2f} ± {eval_metrics['std_reward']:.2f}")
+print(f"Mean Wealth Growth: ${eval_metrics['mean_wealth_growth']:.2f}")
+print(f"Mean Cash Stability: {eval_metrics['mean_cash_stability']:.2%}")
+print(f"Mean Sharpe Ratio: {eval_metrics['mean_sharpe_ratio']:.2f}")
+print(f"Mean Goal Adherence: {eval_metrics['mean_goal_adherence']:.4f}")
+print(f"Mean Policy Stability: {eval_metrics['mean_policy_stability']:.4f}")
 ```
 
 ---
@@ -1015,39 +1037,41 @@ training:
 | **Examples** | ✅ Complete | `examples/basic_budget_env_usage.py` | Basic usage demonstration |
 | **HRLTrainer** | ✅ Complete | `src/training/hrl_trainer.py` | Training orchestrator with complete training loop, policy coordination, and metrics tracking |
 
-### 🚧 In Progress
-
-| Component | Status | Next Steps |
-|-----------|--------|------------|
-| **Training Orchestrator - Evaluation** | 🚧 In Progress | `src/training/hrl_trainer.py` - Training loop complete, need to integrate AnalyticsModule with evaluate() method |
-| **Analytics Module Integration** | 🚧 In Progress | Integrate AnalyticsModule with HRLTrainer for comprehensive metrics tracking |
-| **Unit Tests - AnalyticsModule** | Not started | Write comprehensive tests for AnalyticsModule |
-
 ### ✅ Recently Completed
 
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
-| **AnalyticsModule** | ✅ Complete | `src/utils/analytics.py` | Performance metrics tracking with 5 key metrics: cumulative wealth growth, cash stability index, Sharpe-like ratio, goal adherence, and policy stability |
+| **AnalyticsModule** | ✅ Complete | `src/utils/analytics.py` | Performance metrics tracking with 5 key metrics: cumulative wealth growth, cash stability index, Sharpe-like ratio, goal adherence, and policy stability. Comprehensive test coverage with 18 test cases. |
+| **AnalyticsModule Integration** | ✅ Complete | `src/training/hrl_trainer.py` | Fully integrated with HRLTrainer for automatic tracking during training and evaluation |
+| **HRLTrainer Evaluation Method** | ✅ Complete | `src/training/hrl_trainer.py` | Deterministic evaluation with comprehensive summary statistics including all 5 analytics metrics |
+| **Unit Tests - AnalyticsModule** | ✅ Complete | `tests/test_analytics.py` | 18 comprehensive test cases covering all functionality and edge cases |
+
+### 🚧 In Progress
+
+| Component | Status | Next Steps |
+|-----------|--------|------------|
+| **Integration Tests** | 🚧 In Progress | Write integration tests for HRLTrainer with analytics |
+| **Configuration Manager** | Not started | Implement configuration loading utilities for behavioral profiles |
+| **Main Scripts** | Not started | Create train.py and evaluate.py scripts |
 
 ### 📋 Next Immediate Tasks
 
-1. **Complete Training Orchestrator** (Task 7)
-   - ✅ HRLTrainer class structure created
-   - ✅ Implement main training loop (train method)
-   - ✅ Implement policy update coordination
-   - ⏳ Implement evaluation method with AnalyticsModule integration
+1. **Integration Tests** (Task 7.5)
+   - ⏳ Test complete episode execution
+   - ⏳ Test high-level/low-level coordination
+   - ⏳ Test policy updates occur correctly
+   - ⏳ Test analytics integration in training loop
 
-2. **Analytics Module** (Task 8)
-   - ✅ AnalyticsModule class implementation
-   - ✅ Data recording (record_step method)
-   - ✅ Metric computation (compute_episode_metrics method)
-   - ✅ Reset functionality
-   - ⏳ Write unit tests
+2. **Configuration Manager** (Task 10)
+   - ⏳ Implement configuration loading utilities
+   - ⏳ Implement behavioral profile loading
+   - ⏳ Implement configuration validation
+   - ⏳ Write configuration tests
 
-3. **Integration** (Task 9)
-   - ⏳ Integrate AnalyticsModule with HRLTrainer
-   - ⏳ Update training loop to record analytics data
-   - ⏳ Update evaluation method to use AnalyticsModule
+3. **Main Scripts** (Task 11-12)
+   - ⏳ Create train.py script
+   - ⏳ Create evaluate.py script
+   - ⏳ Create example configuration files
 
 ## 9. Future Extensions
 - Multi-agent simulation (family / household)

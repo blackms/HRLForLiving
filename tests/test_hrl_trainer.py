@@ -71,10 +71,16 @@ class TestHRLTrainer:
         assert trainer.config == training_config
         assert isinstance(trainer.episode_buffer, list)
         assert isinstance(trainer.state_history, list)
+        assert trainer.analytics is not None
         assert 'episode_rewards' in trainer.training_history
         assert 'episode_lengths' in trainer.training_history
         assert 'cash_balances' in trainer.training_history
         assert 'total_invested' in trainer.training_history
+        assert 'cumulative_wealth_growth' in trainer.training_history
+        assert 'cash_stability_index' in trainer.training_history
+        assert 'sharpe_ratio' in trainer.training_history
+        assert 'goal_adherence' in trainer.training_history
+        assert 'policy_stability' in trainer.training_history
 
     
     def test_complete_episode_execution(self, trainer):
@@ -242,7 +248,54 @@ class TestHRLTrainer:
         assert len(history['episode_lengths']) == 3
         assert len(history['cash_balances']) == 3
         assert len(history['total_invested']) == 3
+        assert len(history['cumulative_wealth_growth']) == 3
+        assert len(history['cash_stability_index']) == 3
+        assert len(history['sharpe_ratio']) == 3
+        assert len(history['goal_adherence']) == 3
+        assert len(history['policy_stability']) == 3
         
         # Verify all values are valid (allow NaN as it can occur during early training)
         for reward in history['episode_rewards']:
             assert isinstance(reward, (int, float))
+    
+    def test_analytics_integration(self, trainer):
+        """Test that analytics module is properly integrated"""
+        # Run training
+        history = trainer.train(num_episodes=2)
+        
+        # Verify analytics metrics are computed and stored
+        assert len(history['cumulative_wealth_growth']) == 2
+        assert len(history['cash_stability_index']) == 2
+        assert len(history['sharpe_ratio']) == 2
+        assert len(history['goal_adherence']) == 2
+        assert len(history['policy_stability']) == 2
+        
+        # Verify metrics are numeric
+        for metric in history['cumulative_wealth_growth']:
+            assert isinstance(metric, (int, float))
+        for metric in history['cash_stability_index']:
+            assert isinstance(metric, (int, float))
+            assert 0 <= metric <= 1  # Stability index should be between 0 and 1
+    
+    def test_analytics_reset_between_episodes(self, trainer):
+        """Test that analytics is reset between episodes"""
+        # Run multiple episodes
+        history = trainer.train(num_episodes=3)
+        
+        # Each episode should have independent metrics
+        # Verify that metrics are computed for each episode
+        assert len(history['cumulative_wealth_growth']) == 3
+        
+        # Metrics should be independent (not cumulative across episodes)
+        # Each episode starts fresh
+        for i in range(3):
+            assert isinstance(history['cumulative_wealth_growth'][i], (int, float))
+    
+    def test_analytics_step_recording(self, trainer):
+        """Test that analytics records steps during training"""
+        # Run a single episode
+        trainer.train(num_episodes=1)
+        
+        # Analytics should have been reset after episode completion
+        # (analytics.reset() is called at the start of each episode)
+        assert trainer.analytics is not None

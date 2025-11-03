@@ -7,6 +7,7 @@ from src.agents.budget_executor import BudgetExecutor
 from src.environment.reward_engine import RewardEngine
 from src.utils.config import TrainingConfig
 from src.utils.data_models import Transition
+from src.utils.analytics import AnalyticsModule
 
 
 class HRLTrainer:
@@ -53,6 +54,9 @@ class HRLTrainer:
         # State history for high-level agent aggregation
         self.state_history: List[np.ndarray] = []
         
+        # Analytics module for tracking performance metrics
+        self.analytics = AnalyticsModule()
+        
         # Training metrics
         self.training_history = {
             'episode_rewards': [],
@@ -60,7 +64,12 @@ class HRLTrainer:
             'cash_balances': [],
             'total_invested': [],
             'low_level_losses': [],
-            'high_level_losses': []
+            'high_level_losses': [],
+            'cumulative_wealth_growth': [],
+            'cash_stability_index': [],
+            'sharpe_ratio': [],
+            'goal_adherence': [],
+            'policy_stability': []
         }
     
     def train(self, num_episodes: int) -> Dict:
@@ -81,6 +90,9 @@ class HRLTrainer:
             dict: Training history with all collected metrics
         """
         for episode in range(num_episodes):
+            # Reset analytics for new episode
+            self.analytics.reset()
+            
             # Reset environment and get initial state
             state, _ = self.env.reset()
             
@@ -109,6 +121,18 @@ class HRLTrainer:
                 # Execute action in environment
                 next_state, reward, terminated, truncated, info = self.env.step(action)
                 done = terminated or truncated
+                
+                # Calculate invested amount for analytics
+                invested_amount = action[0] * state[0]  # invest_ratio * income
+                
+                # Record step in analytics module
+                self.analytics.record_step(
+                    state=state,
+                    action=action,
+                    reward=reward,
+                    goal=goal,
+                    invested_amount=invested_amount
+                )
                 
                 # Store transition in episode buffer
                 transition = Transition(
@@ -194,21 +218,33 @@ class HRLTrainer:
                     low_metrics = self.low_agent.learn(self.episode_buffer[-self.config.batch_size:])
                     self.training_history['low_level_losses'].append(low_metrics['loss'])
             
+            # Compute episode metrics from analytics module
+            episode_metrics = self.analytics.compute_episode_metrics()
+            
             # Store episode metrics
             self.training_history['episode_rewards'].append(episode_reward)
             self.training_history['episode_lengths'].append(episode_length)
             self.training_history['cash_balances'].append(info.get('cash_balance', 0))
             self.training_history['total_invested'].append(info.get('total_invested', 0))
+            self.training_history['cumulative_wealth_growth'].append(episode_metrics['cumulative_wealth_growth'])
+            self.training_history['cash_stability_index'].append(episode_metrics['cash_stability_index'])
+            self.training_history['sharpe_ratio'].append(episode_metrics['sharpe_ratio'])
+            self.training_history['goal_adherence'].append(episode_metrics['goal_adherence'])
+            self.training_history['policy_stability'].append(episode_metrics['policy_stability'])
             
             # Print progress every 100 episodes
             if (episode + 1) % 100 == 0:
                 avg_reward = np.mean(self.training_history['episode_rewards'][-100:])
                 avg_cash = np.mean(self.training_history['cash_balances'][-100:])
                 avg_invested = np.mean(self.training_history['total_invested'][-100:])
+                avg_stability = np.mean(self.training_history['cash_stability_index'][-100:])
+                avg_goal_adherence = np.mean(self.training_history['goal_adherence'][-100:])
                 print(f"Episode {episode + 1}/{num_episodes} - "
                       f"Avg Reward: {avg_reward:.2f}, "
                       f"Avg Cash: {avg_cash:.2f}, "
-                      f"Avg Invested: {avg_invested:.2f}")
+                      f"Avg Invested: {avg_invested:.2f}, "
+                      f"Stability: {avg_stability:.2%}, "
+                      f"Goal Adherence: {avg_goal_adherence:.4f}")
         
         return self.training_history
     
