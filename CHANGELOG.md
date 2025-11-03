@@ -8,6 +8,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- TensorBoard dependency (`tensorboard>=2.14.0`) added to requirements.txt
+- TensorBoard logging and monitoring system (`src/utils/logger.py`)
+  - ExperimentLogger class for comprehensive experiment tracking
+  - Automatic logging of training curves (rewards, losses)
+  - Episode metrics tracking (wealth, stability, Sharpe ratio)
+  - Action and goal distribution visualization with histograms
+  - Hyperparameter logging for reproducibility
+  - Real-time monitoring with TensorBoard web interface
+  - Zero-overhead integration with HRLTrainer
+  - Robust edge case handling (empty data, single values, zero variance)
+  - Context manager support for automatic cleanup
+  - Optional logging (can be disabled for tests)
+- TensorBoard integration in HRLTrainer (`src/training/hrl_trainer.py`)
+  - Optional logger parameter in __init__
+  - Automatic episode-level action and goal tracking
+  - Automatic logging after each episode (metrics, distributions, losses)
+  - Enhanced progress monitoring with logged metrics
+- TensorBoard integration in train.py
+  - Command-line options: --log-dir, --no-logging
+  - Automatic experiment naming with configuration and seed
+  - Comprehensive hyperparameter logging (environment, training, reward configs)
+  - Instructions for viewing logs with TensorBoard
+- Logging usage example (`examples/logging_usage.py`)
+  - Complete demonstration of TensorBoard logging
+  - Shows hyperparameter logging, training with logging, and viewing results
+  - Updated examples/README.md with logging example documentation
+- Updated requirements.txt with tensorboard>=2.14.0
+- Updated README.md with comprehensive logging documentation
+  - ExperimentLogger usage examples
+  - TensorBoard integration guide
+  - What gets logged and how to view it
+- BudgetEnv edge case tests (`tests/test_budget_env.py`)
+  - 19 comprehensive edge case tests covering extreme financial scenarios
+  - Very low income scenarios (barely covers expenses)
+  - Extremely low income (immediate failure when expenses exceed income)
+  - Very high fixed expenses (90% of income)
+  - Very high variable expenses with high variance (std = 80% of mean)
+  - Extreme positive inflation (50% monthly hyperinflation)
+  - Extreme negative inflation (20% monthly deflation)
+  - Zero inflation (constant expenses)
+  - Maximum episode length (120 months / 10 years)
+  - Very long episodes with compounding inflation effects
+  - Single-step episodes (max_months=1)
+  - High initial cash buffer scenarios ($50,000 starting cash)
+  - Zero initial cash survival tests
+  - Extreme variable expense variance testing
+  - Combined extreme conditions (multiple stressors simultaneously)
+  - Tests verify system robustness under stress conditions
+  - Tests ensure no crashes or undefined behavior in edge cases
+  - Tests validate proper handling of boundary values
+- Sanity check tests for system-level validation (`tests/test_sanity_checks.py`)
+  - 7 comprehensive test cases validating complete HRL system behavior
+  - Random policy baseline validation (test_random_policy_does_not_accumulate_wealth)
+  - Behavioral profile comparison tests:
+    - Conservative vs aggressive cash balance comparison
+    - Aggressive vs conservative investment comparison
+    - Balanced profile positioning between extremes
+  - Learning effectiveness validation (test_trained_policy_outperforms_random_policy)
+  - Profile configuration validation:
+    - Risk tolerance ordering across profiles
+    - Reward coefficient ordering across profiles
+  - Tests verify Requirements 1.1-1.3, 2.1-2.3, 6.2-6.3
+  - Uses realistic training durations (20-30 episodes) for faster execution
+  - Statistical validation across multiple evaluation episodes
+  - Confirms behavioral profile differentiation and learning effectiveness
 - Comprehensive integration tests for HRLTrainer (`tests/test_hrl_trainer.py`)
   - 13 new integration tests covering complete HRL training pipeline
   - Test complete episode execution with all components working together
@@ -250,6 +315,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - stable-baselines3>=2.0.0
   - torch>=2.0.0
   - pyyaml>=6.0
+  - tensorboard>=2.14.0
 
 ### Documentation
 - Created comprehensive requirements document
@@ -262,4 +328,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History
 
 - **0.1.0** (2025-11-03): Initial project setup with configuration system and documentation
-- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer (training loop + evaluation), AnalyticsModule, ConfigurationManager, and main training script (train.py) implementations complete with full integration and comprehensive tests. Test suite includes 150+ test cases: 18 for AnalyticsModule, 50+ for ConfigurationManager, 30+ for HRLTrainer (including 13 integration tests). Core HRL training system is fully functional with complete configuration management, validation, CLI training tool, and comprehensive test coverage. The system can now be trained end-to-end using `python train.py --profile balanced`. Remaining: evaluation script (evaluate.py) for loading and testing trained models.
+- **Unreleased**: BudgetEnv, RewardEngine, BudgetExecutor, FinancialStrategist, HRLTrainer (training loop + evaluation), AnalyticsModule, ConfigurationManager, and main training script (train.py) implementations complete with full integration and comprehensive tests. Test suite includes 176+ test cases: 34 for BudgetEnv (including 19 edge case tests), 18 for AnalyticsModule, 50+ for ConfigurationManager, 30+ for HRLTrainer (including 13 integration tests), and 7 sanity checks for system-level validation. Core HRL training system is fully functional with complete configuration management, validation, CLI training tool, behavioral profile validation, and comprehensive test coverage including extreme condition handling. The system can now be trained end-to-end using `python train.py --profile balanced`. Sanity checks verify learning effectiveness and behavioral profile differentiation. BudgetEnv edge case tests ensure robustness under extreme financial scenarios (hyperinflation, deflation, income shortfalls, combined stress conditions). Remaining: evaluation script (evaluate.py) for loading and testing trained models.

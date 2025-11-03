@@ -355,21 +355,43 @@
   - ✅ Added descriptive comments explaining each profile's focus
   - _Requirements: 6.2, 6.3_
 
-- [ ] 14. Create validation tests
-  - [ ] 14.1 Implement sanity check tests
-    - Test that random policy does not accumulate wealth
-    - Test that conservative profile maintains higher cash balance
-    - Test that aggressive profile invests more
+- [x] 14. Create validation tests
+  - [x] 14.1 Implement sanity check tests ✅ COMPLETE
+    - ✅ Implemented 7 comprehensive system-level validation tests in `tests/test_sanity_checks.py`
+    - ✅ Test that random policy does not accumulate wealth (test_random_policy_does_not_accumulate_wealth)
+    - ✅ Test that conservative profile maintains higher cash balance (test_conservative_profile_maintains_higher_cash_balance)
+    - ✅ Test that aggressive profile invests more (test_aggressive_profile_invests_more)
+    - ✅ Test that balanced profile falls between conservative and aggressive (test_balanced_profile_between_conservative_and_aggressive)
+    - ✅ Test that trained policy outperforms random policy (test_trained_policy_outperforms_random_policy)
+    - ✅ Test profile risk tolerance ordering (test_profile_risk_tolerance_ordering)
+    - ✅ Test profile reward coefficient ordering (test_profile_reward_coefficient_ordering)
+    - ✅ Validates behavioral profile differentiation and learning effectiveness
+    - ✅ Uses realistic training durations (20-30 episodes) for faster execution
+    - ✅ Statistical validation across multiple evaluation episodes
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 6.2, 6.3_
   
-  - [ ] 14.2 Implement edge case tests
-    - Test very low income scenarios
-    - Test very high expense scenarios
-    - Test extreme inflation rates
-    - Test maximum episode length
+  - [x] 14.2 Implement edge case tests ✅ COMPLETE
+    - ✅ Implemented 19 comprehensive edge case tests in `tests/test_budget_env.py` (TestBudgetEnvEdgeCases class)
+    - ✅ Test very low income scenarios (income barely covering expenses)
+    - ✅ Test extremely low income (immediate failure when expenses exceed income)
+    - ✅ Test very high fixed expenses (90% of income)
+    - ✅ Test very high variable expenses with high variance (std = 80% of mean)
+    - ✅ Test extreme positive inflation (50% monthly hyperinflation)
+    - ✅ Test extreme negative inflation (20% monthly deflation)
+    - ✅ Test zero inflation (constant expenses)
+    - ✅ Test maximum episode length (120 months / 10 years)
+    - ✅ Test very long episodes with compounding inflation effects
+    - ✅ Test single-step episodes (max_months=1)
+    - ✅ Test high initial cash buffer scenarios ($50,000 starting cash)
+    - ✅ Test zero initial cash survival
+    - ✅ Test extreme variable expense variance
+    - ✅ Test combined extreme conditions (multiple stressors simultaneously)
+    - ✅ Validates system robustness under stress conditions
+    - ✅ Ensures no crashes or undefined behavior in edge cases
+    - ✅ Validates proper handling of boundary values
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 15. Add logging and monitoring
+- [x] 15. Add logging and monitoring
   - Integrate TensorBoard or Weights & Biases for experiment tracking
   - Log training curves (rewards, losses) during training
   - Log episode metrics (wealth, stability) after each episode

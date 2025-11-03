@@ -25,6 +25,7 @@ Goal: maximize long-term investments while avoiding negative cash balance.
 - Hierarchical decision-making (strategic + tactical)
 - Configurable behavioral profiles (conservative, balanced, aggressive)
 - Performance metrics for financial growth and stability
+- TensorBoard integration for experiment tracking and visualization
 - Scalable for multi-agent simulations (families, organizations)
 
 ---
@@ -1030,7 +1031,7 @@ training:
 | **FinancialStrategist (High-Level Agent)** | ✅ Complete | `src/agents/financial_strategist.py` | HIRO-style agent with state aggregation, goal generation, strategic learning, and model persistence |
 | **Configuration System** | ✅ Complete | `src/utils/config.py` | EnvironmentConfig, TrainingConfig, RewardConfig, BehavioralProfile |
 | **Data Models** | ✅ Complete | `src/utils/data_models.py` | Transition dataclass |
-| **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv |
+| **Unit Tests - BudgetEnv** | ✅ Complete | `tests/test_budget_env.py` | Comprehensive tests for BudgetEnv including 19 edge case tests for extreme financial scenarios |
 | **Unit Tests - RewardEngine** | ✅ Complete | `tests/test_reward_engine.py` | Comprehensive tests for RewardEngine with all reward components |
 | **Unit Tests - BudgetExecutor** | ✅ Complete | `tests/test_budget_executor.py` | Comprehensive tests for BudgetExecutor including action generation, learning, and policy updates |
 | **Unit Tests - FinancialStrategist** | ✅ Complete | `tests/test_financial_strategist.py` | Comprehensive tests for FinancialStrategist including goal generation, state aggregation, learning, and policy updates |
@@ -1049,6 +1050,7 @@ training:
 | **Unit Tests - AnalyticsModule** | ✅ Complete | `tests/test_analytics.py` | 18 comprehensive test cases covering all functionality and edge cases |
 | **ConfigurationManager** | ✅ Complete | `src/utils/config_manager.py` | YAML loading, behavioral profiles (conservative, balanced, aggressive), comprehensive validation with descriptive error messages |
 | **Unit Tests - ConfigurationManager** | ✅ Complete | `tests/test_config_manager.py` | 50+ comprehensive test cases covering all validation rules, boundary values, error handling, and profile loading |
+| **Sanity Check Tests** | ✅ Complete | `tests/test_sanity_checks.py` | 7 system-level validation tests for behavioral profiles, learning effectiveness, and configuration integrity |
 
 ### 🚧 In Progress
 
@@ -1110,7 +1112,267 @@ training:
    - ✅ Configuration loading tests (5 tests)
    - ✅ Override tests (1 test)
 
-### 4.6 Main Training Script: `train.py` ✅ IMPLEMENTED
+### 4.6 BudgetEnv Edge Case Tests ✅ IMPLEMENTED
+
+**Location:** `tests/test_budget_env.py` (TestBudgetEnvEdgeCases class)
+
+**Status:** Fully implemented with 19 comprehensive edge case tests.
+
+**Purpose:** Validate BudgetEnv robustness under extreme financial scenarios and boundary conditions.
+
+**Test Categories:**
+
+**1. Income Stress Tests**
+```python
+def test_very_low_income_scenario(self):
+    """Test with income barely covering expenses (income=100, expenses=95)"""
+
+def test_extremely_low_income_immediate_failure(self):
+    """Test with expenses exceeding income (income=500, fixed=1500)"""
+```
+
+**2. Expense Stress Tests**
+```python
+def test_very_high_fixed_expenses(self):
+    """Test with 90% of income going to fixed expenses"""
+
+def test_very_high_variable_expenses(self):
+    """Test with high variable expenses (mean=2500, std=500)"""
+
+def test_extreme_variable_expense_variance(self):
+    """Test with 80% variance (std = 80% of mean)"""
+```
+
+**3. Inflation Stress Tests**
+```python
+def test_extreme_positive_inflation(self):
+    """Test with 50% monthly hyperinflation"""
+
+def test_extreme_negative_inflation(self):
+    """Test with 20% monthly deflation"""
+
+def test_zero_inflation(self):
+    """Test with zero inflation (constant expenses)"""
+
+def test_very_long_episode_with_inflation(self):
+    """Test compounding inflation effects over 30+ months"""
+```
+
+**4. Episode Length Tests**
+```python
+def test_maximum_episode_length(self):
+    """Test 120-month (10-year) episodes"""
+
+def test_single_step_episode(self):
+    """Test with max_months=1"""
+```
+
+**5. Initial Cash Tests**
+```python
+def test_high_initial_cash_buffer(self):
+    """Test with $50,000 starting cash"""
+
+def test_zero_initial_cash_survival(self):
+    """Test starting with zero cash"""
+```
+
+**6. Combined Stress Tests**
+```python
+def test_combined_extreme_conditions(self):
+    """Test multiple extreme conditions simultaneously:
+    - Low income (1500)
+    - High fixed expenses (1000)
+    - High variable expenses (400 ± 200)
+    - High inflation (10%)
+    - Short episode (6 months)
+    - Low initial cash (500)
+    """
+```
+
+**Key Validations:**
+- System handles extreme conditions without crashes
+- No undefined behavior or NaN values
+- Proper termination conditions (negative cash, max months)
+- State observations remain valid (correct shape, non-negative expenses)
+- Inflation effects compound correctly over time
+- Episode length constraints are respected
+- Cash balance updates correctly under stress
+
+**Edge Cases Covered:**
+- Income barely covering expenses
+- Expenses exceeding income (immediate failure)
+- 90%+ fixed expense ratios
+- High variance expenses (std = 80% of mean)
+- Hyperinflation (50% monthly)
+- Deflation (negative inflation)
+- Zero inflation (constant expenses)
+- Very long episodes (120 months)
+- Single-step episodes
+- High initial cash buffers ($50,000)
+- Zero initial cash
+- Combined extreme conditions
+
+**Test Execution:**
+```bash
+# Run all edge case tests
+pytest tests/test_budget_env.py::TestBudgetEnvEdgeCases -v
+
+# Run specific edge case
+pytest tests/test_budget_env.py::TestBudgetEnvEdgeCases::test_combined_extreme_conditions
+
+# Run with detailed output
+pytest tests/test_budget_env.py::TestBudgetEnvEdgeCases -v -s
+```
+
+**Expected Behavior:**
+- Very low income: Should survive with conservative allocation
+- Extremely low income: Should terminate immediately (negative cash)
+- High expenses: Should handle without crashes
+- Extreme inflation: Expenses should increase dramatically
+- Deflation: Expenses should decrease
+- Zero inflation: Expenses should remain constant
+- Long episodes: Should reach max_months or terminate naturally
+- Single-step: Should truncate after first step
+- High initial cash: Should enable aggressive investment
+- Zero initial cash: Should survive with conservative allocation
+- Combined stress: Should handle without crashes
+
+**Benefits:**
+- Ensures robustness under extreme market conditions
+- Validates boundary value handling
+- Confirms no crashes or undefined behavior
+- Tests realistic stress scenarios (hyperinflation, deflation, income loss)
+- Provides confidence for production deployment
+
+### 4.7 Sanity Check Tests: `test_sanity_checks.py` ✅ IMPLEMENTED
+
+**Location:** `tests/test_sanity_checks.py`
+
+**Status:** Fully implemented with 7 comprehensive system-level validation tests.
+
+**Purpose:** Validate complete HRL system behavior, behavioral profile differentiation, and learning effectiveness through end-to-end testing.
+
+**Test Categories:**
+
+**1. Random Policy Baseline Validation**
+```python
+def test_random_policy_does_not_accumulate_wealth(self, base_env_config, base_training_config, base_reward_config):
+    """
+    Verifies that untrained agents don't systematically accumulate wealth.
+    Establishes baseline for learning effectiveness.
+    
+    Validates:
+    - Random policy invests < 30% of maximum possible
+    - Episodes terminate early due to poor cash management
+    - Average episode length < 80% of max_months
+    """
+```
+
+**2. Behavioral Profile Comparison Tests**
+```python
+def test_conservative_profile_maintains_higher_cash_balance(self):
+    """
+    Validates conservative profile maintains higher cash reserves than aggressive.
+    
+    Validates:
+    - Conservative cash balance > aggressive cash balance
+    - Conservative stability index >= aggressive stability index
+    - Conservative safety threshold > aggressive safety threshold
+    - Conservative risk tolerance < aggressive risk tolerance
+    """
+
+def test_aggressive_profile_invests_more(self):
+    """
+    Confirms aggressive profile invests more than conservative.
+    
+    Validates:
+    - Aggressive total invested > conservative total invested
+    - Aggressive wealth growth > conservative wealth growth
+    - Aggressive alpha (investment reward) > conservative alpha
+    - Aggressive beta (stability penalty) < conservative beta
+    """
+
+def test_balanced_profile_between_conservative_and_aggressive(self):
+    """
+    Ensures balanced profile exhibits behavior between extremes.
+    
+    Validates:
+    - Conservative cash >= balanced cash >= aggressive cash (with 10% tolerance)
+    - Aggressive invested >= balanced invested >= conservative invested (with 10% tolerance)
+    - Conservative risk tolerance < balanced < aggressive risk tolerance
+    """
+```
+
+**3. Learning Effectiveness Validation**
+```python
+def test_trained_policy_outperforms_random_policy(self, base_env_config, base_training_config, base_reward_config):
+    """
+    Verifies trained policies outperform random policies.
+    
+    Validates:
+    - Trained reward > random reward
+    - Trained stability > random stability
+    - Trained episode length > random episode length
+    """
+```
+
+**4. Configuration Validation Tests**
+```python
+def test_profile_risk_tolerance_ordering(self):
+    """
+    Validates correct risk tolerance ordering across profiles.
+    
+    Validates:
+    - Conservative risk tolerance < balanced < aggressive
+    - Conservative safety threshold > balanced > aggressive
+    """
+
+def test_profile_reward_coefficient_ordering(self):
+    """
+    Validates correct reward coefficient ordering.
+    
+    Validates:
+    - Alpha (investment): aggressive > balanced > conservative
+    - Beta (stability penalty): conservative > balanced > aggressive
+    """
+```
+
+**Key Features:**
+- **System-Level Testing**: Tests complete HRL system rather than individual components
+- **Behavioral Validation**: Ensures different profiles produce expected behavioral differences
+- **Learning Verification**: Confirms training actually improves performance
+- **Statistical Robustness**: Uses multiple evaluation episodes for reliable comparisons
+- **Fast Execution**: Uses realistic but short training durations (20-30 episodes)
+- **Requirements Coverage**: Validates Requirements 1.1-1.3, 2.1-2.3, 6.2-6.3
+
+**Test Execution:**
+```bash
+# Run all sanity checks
+pytest tests/test_sanity_checks.py -v
+
+# Run specific sanity check
+pytest tests/test_sanity_checks.py::TestSanityChecks::test_trained_policy_outperforms_random_policy
+
+# Run with detailed output
+pytest tests/test_sanity_checks.py -v -s
+```
+
+**Expected Results:**
+- Random policies should not accumulate significant wealth
+- Conservative profiles should maintain higher cash balances
+- Aggressive profiles should invest more and achieve higher wealth growth
+- Balanced profiles should fall between conservative and aggressive
+- Trained policies should outperform random policies
+- Profile configurations should have correct ordering
+
+**Usage in CI/CD:**
+These sanity checks serve as smoke tests to validate that:
+1. The HRL system learns effectively
+2. Behavioral profiles are correctly differentiated
+3. Configuration parameters have expected effects
+4. System-level behavior matches design specifications
+
+### 4.8 Main Training Script: `train.py` ✅ IMPLEMENTED
 
 **Location:** `train.py` (project root)
 

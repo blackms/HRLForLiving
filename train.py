@@ -36,6 +36,7 @@ from src.agents.financial_strategist import FinancialStrategist
 from src.agents.budget_executor import BudgetExecutor
 from src.training.hrl_trainer import HRLTrainer
 from src.utils.config_manager import load_config, load_behavioral_profile, ConfigurationError
+from src.utils.logger import ExperimentLogger
 
 
 def parse_arguments():
@@ -96,6 +97,17 @@ Examples:
         type=int,
         default=None,
         help='Random seed for reproducibility'
+    )
+    parser.add_argument(
+        '--log-dir',
+        type=str,
+        default='runs',
+        help='Directory for TensorBoard logs (default: runs/)'
+    )
+    parser.add_argument(
+        '--no-logging',
+        action='store_true',
+        help='Disable TensorBoard logging'
     )
     
     return parser.parse_args()
@@ -170,7 +182,7 @@ def print_configuration(env_config, training_config, reward_config):
     print(f"  Mu (stability bonus): {reward_config.mu}")
 
 
-def initialize_system(env_config, training_config, reward_config, seed=None):
+def initialize_system(env_config, training_config, reward_config, logger=None, seed=None):
     """
     Initialize all system components
     
@@ -178,6 +190,7 @@ def initialize_system(env_config, training_config, reward_config, seed=None):
         env_config: Environment configuration
         training_config: Training configuration
         reward_config: Reward configuration
+        logger: Optional ExperimentLogger for TensorBoard logging
         seed: Random seed for reproducibility
         
     Returns:
@@ -212,7 +225,7 @@ def initialize_system(env_config, training_config, reward_config, seed=None):
     
     # Initialize trainer
     print("\n4. Creating HRLTrainer...")
-    trainer = HRLTrainer(env, high_agent, low_agent, reward_engine, training_config)
+    trainer = HRLTrainer(env, high_agent, low_agent, reward_engine, training_config, logger=logger)
     print("   ✓ HRLTrainer initialized with AnalyticsModule")
     
     return env, high_agent, low_agent, reward_engine, trainer
@@ -376,9 +389,50 @@ def main():
     # Print configuration
     print_configuration(env_config, training_config, reward_config)
     
+    # Initialize logger
+    logger = None
+    if not args.no_logging:
+        experiment_name = f"{config_name}_{training_config.num_episodes}ep"
+        if args.seed is not None:
+            experiment_name += f"_seed{args.seed}"
+        logger = ExperimentLogger(log_dir=args.log_dir, experiment_name=experiment_name)
+        
+        # Log hyperparameters
+        hparams = {
+            # Environment
+            'env/income': env_config.income,
+            'env/fixed_expenses': env_config.fixed_expenses,
+            'env/variable_expense_mean': env_config.variable_expense_mean,
+            'env/variable_expense_std': env_config.variable_expense_std,
+            'env/inflation': env_config.inflation,
+            'env/safety_threshold': env_config.safety_threshold,
+            'env/max_months': env_config.max_months,
+            'env/initial_cash': env_config.initial_cash,
+            'env/risk_tolerance': env_config.risk_tolerance,
+            # Training
+            'train/num_episodes': training_config.num_episodes,
+            'train/gamma_low': training_config.gamma_low,
+            'train/gamma_high': training_config.gamma_high,
+            'train/high_period': training_config.high_period,
+            'train/batch_size': training_config.batch_size,
+            'train/learning_rate_low': training_config.learning_rate_low,
+            'train/learning_rate_high': training_config.learning_rate_high,
+            # Reward
+            'reward/alpha': reward_config.alpha,
+            'reward/beta': reward_config.beta,
+            'reward/gamma': reward_config.gamma,
+            'reward/delta': reward_config.delta,
+            'reward/lambda': reward_config.lambda_,
+            'reward/mu': reward_config.mu,
+        }
+        if args.seed is not None:
+            hparams['seed'] = args.seed
+        
+        logger.log_hyperparameters(hparams)
+    
     # Initialize system
     env, high_agent, low_agent, reward_engine, trainer = initialize_system(
-        env_config, training_config, reward_config, seed=args.seed
+        env_config, training_config, reward_config, logger=logger, seed=args.seed
     )
     
     # Train system
@@ -397,6 +451,11 @@ def main():
         eval_results = evaluate_system(trainer, args.eval_episodes)
         print_evaluation_results(eval_results)
     
+    # Close logger
+    if logger is not None:
+        logger.close()
+        print(f"\nTensorBoard logs saved to: {logger.log_dir}")
+    
     print("\n" + "=" * 70)
     print("Training Complete!")
     print("=" * 70)
@@ -404,6 +463,9 @@ def main():
     print(f"  - {config_name}_high_agent.pt")
     print(f"  - {config_name}_low_agent.pt")
     print(f"  - {config_name}_history.json")
+    if logger is not None:
+        print(f"\nTo view training logs, run:")
+        print(f"  tensorboard --logdir={args.log_dir}")
     print("\nYou can now use these models for evaluation or further training.")
 
 

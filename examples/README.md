@@ -104,18 +104,48 @@ PYTHONPATH=. python3 examples/training_with_analytics.py
 - Understanding the relationship between training and performance metrics
 - Best practices for monitoring HRL training
 
+### 5. TensorBoard Logging Usage (`logging_usage.py`)
+
+**Status:** ✅ Ready to run
+
+Demonstrates TensorBoard logging for experiment tracking and visualization:
+- Initializing ExperimentLogger for TensorBoard
+- Logging hyperparameters for experiment tracking
+- Automatic logging of training curves (rewards, losses)
+- Tracking episode metrics (wealth, stability, Sharpe ratio)
+- Visualizing action and goal distributions
+- Real-time monitoring with TensorBoard web interface
+
+**Run:**
+```bash
+PYTHONPATH=. python3 examples/logging_usage.py
+
+# Then view logs with:
+tensorboard --logdir=runs
+# Open browser to: http://localhost:6006
+```
+
+**What you'll learn:**
+- How to initialize and configure ExperimentLogger
+- Logging hyperparameters for reproducibility
+- Automatic integration with HRLTrainer
+- Viewing training curves in TensorBoard
+- Analyzing action and goal distributions
+- Comparing multiple experiments
+- Best practices for experiment tracking
+
 ## Coming Soon
 
-### 5. Training with PPO (Low-Level Agent)
+### 6. Training with PPO (Low-Level Agent)
 Example showing how to train a single PPO agent on the BudgetEnv without hierarchical structure.
 
-### 6. Full HRL Training
+### 7. Full HRL Training
 Complete example with both High-Level (Strategist) and Low-Level (Executor) agents.
 
-### 7. Behavioral Profile Comparison
+### 8. Behavioral Profile Comparison
 Compare performance across conservative, balanced, and aggressive profiles.
 
-### 8. Custom Reward Functions
+### 9. Custom Reward Functions
 Demonstrate how to integrate custom reward engines for different optimization objectives.
 
 ## Requirements

@@ -1,6 +1,6 @@
 """Training Orchestrator for Hierarchical Reinforcement Learning"""
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Optional
 from src.environment.budget_env import BudgetEnv
 from src.agents.financial_strategist import FinancialStrategist
 from src.agents.budget_executor import BudgetExecutor
@@ -8,6 +8,7 @@ from src.environment.reward_engine import RewardEngine
 from src.utils.config import TrainingConfig
 from src.utils.data_models import Transition
 from src.utils.analytics import AnalyticsModule
+from src.utils.logger import ExperimentLogger
 
 
 class HRLTrainer:
@@ -30,7 +31,8 @@ class HRLTrainer:
         high_agent: FinancialStrategist,
         low_agent: BudgetExecutor,
         reward_engine: RewardEngine,
-        config: TrainingConfig
+        config: TrainingConfig,
+        logger: Optional[ExperimentLogger] = None
     ):
         """
         Initialize the HRLTrainer with all necessary components.
@@ -41,12 +43,14 @@ class HRLTrainer:
             low_agent: BudgetExecutor for monthly allocation decisions
             reward_engine: RewardEngine for reward computation
             config: TrainingConfig containing hyperparameters
+            logger: Optional ExperimentLogger for TensorBoard logging
         """
         self.env = env
         self.high_agent = high_agent
         self.low_agent = low_agent
         self.reward_engine = reward_engine
         self.config = config
+        self.logger = logger
         
         # Episode buffer for storing transitions
         self.episode_buffer: List[Transition] = []
@@ -71,6 +75,10 @@ class HRLTrainer:
             'goal_adherence': [],
             'policy_stability': []
         }
+        
+        # Episode-level tracking for logging
+        self.episode_actions: List[np.ndarray] = []
+        self.episode_goals: List[np.ndarray] = []
     
     def train(self, num_episodes: int) -> Dict:
         """
@@ -92,6 +100,10 @@ class HRLTrainer:
         for episode in range(num_episodes):
             # Reset analytics for new episode
             self.analytics.reset()
+            
+            # Reset episode-level tracking for logging
+            self.episode_actions = []
+            self.episode_goals = []
             
             # Reset environment and get initial state
             state, _ = self.env.reset()
@@ -117,6 +129,10 @@ class HRLTrainer:
             while not done:
                 # Low-level agent generates action based on state and goal
                 action = self.low_agent.act(state, goal)
+                
+                # Track actions and goals for logging
+                self.episode_actions.append(action.copy())
+                self.episode_goals.append(goal.copy())
                 
                 # Execute action in environment
                 next_state, reward, terminated, truncated, info = self.env.step(action)
@@ -231,6 +247,35 @@ class HRLTrainer:
             self.training_history['sharpe_ratio'].append(episode_metrics['sharpe_ratio'])
             self.training_history['goal_adherence'].append(episode_metrics['goal_adherence'])
             self.training_history['policy_stability'].append(episode_metrics['policy_stability'])
+            
+            # Log to TensorBoard
+            if self.logger is not None:
+                # Log episode metrics
+                self.logger.log_episode_metrics(episode, {
+                    'reward': episode_reward,
+                    'length': episode_length,
+                    'cash_balance': info.get('cash_balance', 0),
+                    'total_invested': info.get('total_invested', 0)
+                })
+                
+                # Log analytics metrics
+                self.logger.log_analytics_metrics(episode, episode_metrics)
+                
+                # Log action and goal distributions
+                if len(self.episode_actions) > 0:
+                    self.logger.log_action_distribution(episode, np.array(self.episode_actions))
+                if len(self.episode_goals) > 0:
+                    self.logger.log_goal_distribution(episode, np.array(self.episode_goals))
+                
+                # Log training losses
+                if len(self.training_history['low_level_losses']) > 0:
+                    self.logger.log_training_curves(episode, {
+                        'low_level_loss': self.training_history['low_level_losses'][-1]
+                    })
+                if len(self.training_history['high_level_losses']) > 0:
+                    self.logger.log_training_curves(episode, {
+                        'high_level_loss': self.training_history['high_level_losses'][-1]
+                    })
             
             # Print progress every 100 episodes
             if (episode + 1) % 100 == 0:

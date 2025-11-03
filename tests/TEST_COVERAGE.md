@@ -10,20 +10,21 @@ The test suite includes comprehensive unit tests and integration tests covering 
 
 | Component | Test File | Test Count | Status |
 |-----------|-----------|------------|--------|
-| **BudgetEnv** | `test_budget_env.py` | 15+ | ✅ Complete |
+| **BudgetEnv** | `test_budget_env.py` | 34 | ✅ Complete |
 | **RewardEngine** | `test_reward_engine.py` | 12+ | ✅ Complete |
 | **BudgetExecutor** | `test_budget_executor.py` | 15+ | ✅ Complete |
 | **FinancialStrategist** | `test_financial_strategist.py` | 12+ | ✅ Complete |
 | **AnalyticsModule** | `test_analytics.py` | 18 | ✅ Complete |
 | **ConfigurationManager** | `test_config_manager.py` | 50+ | ✅ Complete |
 | **HRLTrainer** | `test_hrl_trainer.py` | 30+ | ✅ Complete |
-| **Total** | - | **150+** | ✅ Complete |
+| **Sanity Checks** | `test_sanity_checks.py` | 7 | ✅ Complete |
+| **Total** | - | **176+** | ✅ Complete |
 
 ## Component Test Coverage
 
 ### 1. BudgetEnv Tests (`test_budget_env.py`)
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete (with comprehensive edge case coverage)
 
 **Coverage:**
 - Environment initialization and configuration
@@ -36,6 +37,21 @@ The test suite includes comprehensive unit tests and integration tests covering 
 - State observation construction
 - Info dictionary completeness
 - Reset functionality
+- **Edge Cases (19 comprehensive tests):**
+  - Very low income scenarios (barely covers expenses)
+  - Extremely low income (immediate failure scenarios)
+  - Very high fixed expenses (90% of income)
+  - Very high variable expenses with high variance
+  - Extreme positive inflation (50% monthly)
+  - Extreme negative inflation (deflation scenarios)
+  - Zero inflation (constant expenses)
+  - Maximum episode length (120 months)
+  - Very long episodes with compounding inflation
+  - Single-step episodes (max_months=1)
+  - High initial cash buffer scenarios
+  - Zero initial cash survival tests
+  - Extreme variable expense variance (80% of mean)
+  - Combined extreme conditions (multiple stressors)
 
 **Key Test Cases:**
 - Valid initialization with configuration
@@ -45,6 +61,19 @@ The test suite includes comprehensive unit tests and integration tests covering 
 - Episode terminates on negative cash
 - Episode terminates at max months
 - Info dictionary contains all required fields
+- **Edge Case Validation:**
+  - Survival with income barely covering expenses
+  - Immediate failure when expenses exceed income
+  - Handling of 90%+ fixed expense ratios
+  - High variance expense scenarios (std = 80% of mean)
+  - Extreme inflation effects (±50% monthly)
+  - Deflation handling (negative inflation)
+  - Zero inflation stability
+  - Long-term compounding effects (60+ months)
+  - Single-step episode handling
+  - High initial cash buffer utilization
+  - Zero initial cash survival strategies
+  - Combined extreme conditions without crashes
 
 ### 2. RewardEngine Tests (`test_reward_engine.py`)
 
@@ -328,6 +357,7 @@ Tests are organized by component:
 - `test_analytics.py` - Analytics module tests
 - `test_config_manager.py` - Configuration management tests
 - `test_hrl_trainer.py` - Training orchestrator tests (unit + integration)
+- `test_sanity_checks.py` - System-level validation and behavioral profile tests
 
 ## Edge Cases Covered
 
@@ -339,6 +369,22 @@ Tests are organized by component:
 - Zero variance (Sharpe ratio, policy stability)
 - Array references (copying to prevent mutation)
 - Negative cash balance (stability index)
+
+### BudgetEnv Edge Cases
+- Very low income (barely covers expenses)
+- Extremely low income (immediate failure)
+- Very high fixed expenses (90% of income)
+- Very high variable expenses with high variance
+- Extreme positive inflation (50% monthly)
+- Extreme negative inflation (deflation)
+- Zero inflation (constant expenses)
+- Maximum episode length (120 months)
+- Very long episodes with compounding inflation
+- Single-step episodes (max_months=1)
+- High initial cash buffer scenarios
+- Zero initial cash survival
+- Extreme variable expense variance (80% of mean)
+- Combined extreme conditions
 
 ### ConfigurationManager Edge Cases
 - Missing configuration file
@@ -400,17 +446,72 @@ Tests are designed to run in CI/CD pipelines:
 - Add tests for reported bugs
 - Keep test documentation up to date
 
+## Sanity Check Tests
+
+### 7. Sanity Checks Tests (`test_sanity_checks.py`)
+
+**Status:** ✅ Complete (7 test cases)
+
+**Coverage:**
+- Random policy baseline validation
+- Behavioral profile comparison (conservative, balanced, aggressive)
+- Trained vs untrained policy comparison
+- Profile configuration validation
+- System-level behavior validation
+
+**Key Test Cases:**
+
+#### Random Policy Validation
+- **test_random_policy_does_not_accumulate_wealth**: Verifies that untrained agents don't systematically accumulate wealth, establishing a baseline for learning effectiveness
+
+#### Behavioral Profile Tests
+- **test_conservative_profile_maintains_higher_cash_balance**: Validates that conservative profile maintains higher cash reserves and stability than aggressive profile
+- **test_aggressive_profile_invests_more**: Confirms aggressive profile invests more and achieves higher wealth growth than conservative profile
+- **test_balanced_profile_between_conservative_and_aggressive**: Ensures balanced profile exhibits behavior between the two extremes for both cash balance and investment levels
+
+#### Learning Validation
+- **test_trained_policy_outperforms_random_policy**: Verifies that trained policies achieve higher rewards, better stability, and longer episode survival than random policies
+
+#### Configuration Validation
+- **test_profile_risk_tolerance_ordering**: Validates correct ordering of risk tolerance and safety thresholds across profiles (conservative < balanced < aggressive)
+- **test_profile_reward_coefficient_ordering**: Confirms correct ordering of reward coefficients (alpha for investment, beta for stability) across profiles
+
+**Test Characteristics:**
+- **System-Level**: Tests complete HRL system behavior rather than individual components
+- **Behavioral Validation**: Ensures different profiles produce expected behavioral differences
+- **Learning Verification**: Confirms that training actually improves performance
+- **Configuration Integrity**: Validates that profile configurations are correctly ordered and differentiated
+- **Realistic Scenarios**: Uses realistic training durations (20-30 episodes) for faster execution
+- **Statistical Validation**: Compares metrics across multiple evaluation episodes for robust results
+
+**Requirements Coverage:**
+- Requirements 1.1, 1.2, 1.3: Environment simulation and state management
+- Requirements 2.1, 2.2, 2.3: Agent decision-making and learning
+- Requirements 6.2, 6.3: Behavioral profile differentiation and configuration
+
+**Edge Cases Covered:**
+- Random (untrained) policy behavior
+- Short training durations (20 episodes)
+- Profile configuration boundaries
+- Training variance and statistical comparison
+- Episode termination conditions (negative cash, max months)
+
 ## Conclusion
 
-The test suite provides comprehensive coverage of all system components with over 150 test cases. The combination of unit tests and integration tests ensures that both individual components and the complete system work correctly. The tests are well-organized, maintainable, and provide confidence in the system's correctness and reliability.
+The test suite provides comprehensive coverage of all system components with over 176 test cases. The combination of unit tests, integration tests, edge case tests, and sanity checks ensures that individual components, the complete system, and behavioral profiles all work correctly under both normal and extreme conditions. The tests are well-organized, maintainable, and provide confidence in the system's correctness and reliability.
 
 **Key Achievements:**
 - ✅ 100% of public APIs tested
-- ✅ Comprehensive edge case coverage
+- ✅ Comprehensive edge case coverage (19 edge case tests for BudgetEnv alone)
 - ✅ 13 integration tests for complete training pipeline
+- ✅ 7 sanity check tests for system-level validation
 - ✅ All components have dedicated test files
+- ✅ Behavioral profile validation and comparison
+- ✅ Learning effectiveness verification
+- ✅ Extreme condition handling (inflation, expenses, episode length)
+- ✅ Boundary value testing (zero/max values)
 - ✅ Fast execution suitable for CI/CD
 - ✅ Clear, maintainable test code
 - ✅ Excellent test documentation
 
-The test suite is production-ready and provides a solid foundation for ongoing development and maintenance of the HRL Finance System.
+The test suite is production-ready and provides a solid foundation for ongoing development and maintenance of the HRL Finance System. The extensive edge case coverage ensures robustness under extreme financial scenarios including deflation, hyperinflation, income shortfalls, and combined stress conditions.

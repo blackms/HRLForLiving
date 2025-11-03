@@ -47,9 +47,11 @@ The system implements a two-level hierarchical architecture:
 │   ├── test_analytics.py       # ✅ AnalyticsModule tests (18 cases)
 │   ├── test_budget_env.py      # ✅ BudgetEnv tests
 │   ├── test_budget_executor.py # ✅ BudgetExecutor tests
+│   ├── test_config_manager.py  # ✅ ConfigurationManager tests (50+ cases)
 │   ├── test_financial_strategist.py # ✅ FinancialStrategist tests
-│   ├── test_hrl_trainer.py     # ✅ HRLTrainer tests
-│   └── test_reward_engine.py   # ✅ RewardEngine tests
+│   ├── test_hrl_trainer.py     # ✅ HRLTrainer tests (30+ cases)
+│   ├── test_reward_engine.py   # ✅ RewardEngine tests
+│   └── test_sanity_checks.py   # ✅ Sanity check tests (7 cases)
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
 ├── .kiro/specs/                 # Specification documents
@@ -75,6 +77,7 @@ pip install -r requirements.txt
 - `stable-baselines3>=2.0.0` - RL algorithms (PPO)
 - `torch>=2.0.0` - Neural network framework
 - `pyyaml>=6.0` - Configuration file parsing
+- `tensorboard>=2.14.0` - Experiment tracking and visualization
 
 ## Configuration
 
@@ -727,6 +730,85 @@ config = RewardConfig(
 )
 ```
 
+## Logging and Monitoring
+
+The system includes comprehensive TensorBoard logging for experiment tracking and visualization.
+
+### ExperimentLogger
+
+The `ExperimentLogger` provides automatic integration with TensorBoard for tracking training progress:
+
+**Key Features:**
+- Automatic logging of training curves (rewards, losses)
+- Episode metrics tracking (wealth, stability, Sharpe ratio)
+- Action and goal distribution visualization
+- Hyperparameter logging for reproducibility
+- Real-time monitoring with TensorBoard web interface
+- Zero-overhead integration with HRLTrainer
+
+**Usage with Training Script:**
+```bash
+# Train with TensorBoard logging (enabled by default)
+python train.py --profile balanced
+
+# Disable logging if needed
+python train.py --profile balanced --no-logging
+
+# Custom log directory
+python train.py --profile balanced --log-dir my_experiments
+
+# View logs in TensorBoard
+tensorboard --logdir=runs
+# Open browser to: http://localhost:6006
+```
+
+**Manual Usage:**
+```python
+from src.utils.logger import ExperimentLogger
+from src.training.hrl_trainer import HRLTrainer
+
+# Initialize logger
+logger = ExperimentLogger(
+    log_dir='runs',
+    experiment_name='my_experiment',
+    enabled=True
+)
+
+# Log hyperparameters
+hparams = {
+    'env/income': 3200,
+    'train/num_episodes': 5000,
+    'reward/alpha': 10.0,
+}
+logger.log_hyperparameters(hparams)
+
+# Create trainer with logger
+trainer = HRLTrainer(env, high_agent, low_agent, reward_engine, config, logger=logger)
+
+# Train (logging happens automatically)
+history = trainer.train(num_episodes=5000)
+
+# Close logger
+logger.close()
+```
+
+**What Gets Logged:**
+- **Training Curves**: Episode rewards, low-level losses, high-level losses
+- **Episode Metrics**: Cash balance, total invested, episode length
+- **Analytics Metrics**: Cumulative wealth growth, cash stability index, Sharpe ratio, goal adherence, policy stability
+- **Action Distributions**: Mean and std for invest/save/consume ratios, histograms
+- **Goal Distributions**: Mean and std for target_invest_ratio/safety_buffer/aggressiveness, histograms
+- **Hyperparameters**: All environment, training, and reward configuration parameters
+
+**TensorBoard Views:**
+- **Scalars**: Training curves and episode metrics over time
+- **Distributions**: Action and goal distributions across episodes
+- **Histograms**: Detailed distribution evolution
+- **Text**: Hyperparameter configuration
+
+**Example:**
+See `examples/logging_usage.py` for a complete demonstration of TensorBoard logging.
+
 ## Development Status
 
 ### ✅ Completed
@@ -746,16 +828,18 @@ config = RewardConfig(
 - [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation (50+ test cases)
 - [x] Main training script (train.py) - Complete CLI tool with comprehensive features
 - [x] Integration tests for HRLTrainer - 13 comprehensive tests covering complete training pipeline
+- [x] Sanity check tests - 7 system-level validation tests for behavioral profiles and learning effectiveness
 
 ### 🚧 In Progress
 - [ ] Evaluation script for loading and testing trained models
 
 ### ✅ Recently Completed
+- [x] Sanity check tests (7 comprehensive tests) - System-level validation of behavioral profiles, learning effectiveness, and configuration integrity
 - [x] Integration tests for HRLTrainer (13 comprehensive tests) - Complete coverage of training pipeline, component coordination, and analytics integration
 - [x] Main training script (train.py) - Complete CLI tool with config/profile support, model saving, evaluation, and comprehensive progress monitoring
 - [x] Configuration Manager - Complete implementation with YAML loading, behavioral profiles, and validation (50+ test cases)
 - [x] Analytics Module integration with HRLTrainer - Zero-overhead automatic tracking during training
-- [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statistics
+- [x] HRLTrainer evaluation method - Complete with all 5 analytics metrics and summary statisticsetrics and summary statistics
 
 ## Architecture
 
@@ -970,6 +1054,42 @@ These examples demonstrate:
 - Running complete episodes with adaptive strategies
 - Tracking performance metrics with the AnalyticsModule
 - Full training loop with automatic analytics integration
+
+### Running Tests
+
+Run the comprehensive test suite to verify system functionality:
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with coverage report
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_sanity_checks.py
+
+# Run specific test
+pytest tests/test_sanity_checks.py::TestSanityChecks::test_trained_policy_outperforms_random_policy
+
+# Run with verbose output
+pytest tests/ -v
+
+# Run only sanity checks
+pytest tests/test_sanity_checks.py -v
+```
+
+**Test Categories:**
+- **Unit Tests**: Test individual components in isolation (150+ tests)
+- **Integration Tests**: Test complete training pipeline (13 tests in test_hrl_trainer.py)
+- **Sanity Checks**: Validate system-level behavior and learning effectiveness (7 tests)
+
+**Key Sanity Check Tests:**
+- Random policy baseline validation
+- Behavioral profile comparison (conservative vs balanced vs aggressive)
+- Trained vs untrained policy comparison
+- Profile configuration validation
+- Learning effectiveness verification
 
 ## Documentation
 
