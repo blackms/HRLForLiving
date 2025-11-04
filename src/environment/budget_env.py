@@ -70,6 +70,7 @@ class BudgetEnv(gym.Env):
         self.cash_balance = config.initial_cash
         self.current_month = 0
         self.total_invested = 0
+        self.investment_value = 0  # Track investment portfolio value with returns
         
         # Store environment parameters
         self.income = config.income
@@ -77,6 +78,11 @@ class BudgetEnv(gym.Env):
         self.inflation = config.inflation
         self.risk_tolerance = config.risk_tolerance
         self.max_months = config.max_months
+        
+        # Investment return parameters
+        self.investment_return_mean = config.investment_return_mean
+        self.investment_return_std = config.investment_return_std
+        self.investment_return_type = config.investment_return_type
         
         # Current variable expense (sampled each step)
         self.current_variable_expense = 0
@@ -103,6 +109,7 @@ class BudgetEnv(gym.Env):
         self.cash_balance = self.config.initial_cash
         self.current_month = 0
         self.total_invested = 0
+        self.investment_value = 0  # Reset portfolio value
         
         # Reset environment parameters from config
         self.income = self.config.income
@@ -182,6 +189,40 @@ class BudgetEnv(gym.Env):
         self.fixed_expenses *= (1 + self.inflation)
         # Variable expense mean is adjusted through config, but we apply to current sample
         self.current_variable_expense *= (1 + self.inflation)
+    
+    def _apply_investment_returns(self):
+        """
+        Apply investment returns to the portfolio.
+        
+        Returns can be:
+        - "none": No returns (0%)
+        - "fixed": Fixed monthly return (investment_return_mean)
+        - "stochastic": Normally distributed returns (mean, std)
+        
+        Returns:
+            float: Monthly return amount in EUR
+        """
+        if self.investment_return_type == "none" or self.investment_value == 0:
+            return 0.0
+        
+        if self.investment_return_type == "fixed":
+            monthly_return_rate = self.investment_return_mean
+        elif self.investment_return_type == "stochastic":
+            # Sample from normal distribution
+            monthly_return_rate = np.random.normal(
+                self.investment_return_mean,
+                self.investment_return_std
+            )
+        else:
+            raise ValueError(f"Unknown investment_return_type: {self.investment_return_type}")
+        
+        # Calculate return amount
+        return_amount = self.investment_value * monthly_return_rate
+        
+        # Update investment value
+        self.investment_value += return_amount
+        
+        return return_amount
 
     def step(self, action):
         """
@@ -215,6 +256,9 @@ class BudgetEnv(gym.Env):
         # Apply inflation to expenses
         self._apply_inflation()
         
+        # Apply investment returns BEFORE new investment
+        investment_return = self._apply_investment_returns()
+        
         # Calculate total expenses
         total_expenses = self.fixed_expenses + self.current_variable_expense
         
@@ -229,8 +273,11 @@ class BudgetEnv(gym.Env):
             - invest_amount
         )
         
-        # Track total invested
+        # Track total invested (principal only)
         self.total_invested += invest_amount
+        
+        # Add new investment to portfolio value
+        self.investment_value += invest_amount
         
         # Increment month counter
         self.current_month += 1
@@ -248,7 +295,9 @@ class BudgetEnv(gym.Env):
         # Additional info
         info = {
             'cash_balance': self.cash_balance,
-            'total_invested': self.total_invested,
+            'total_invested': self.total_invested,  # Principal invested
+            'investment_value': self.investment_value,  # Portfolio value with returns
+            'investment_return': investment_return,  # This month's return
             'month': self.current_month,
             'action': action,
             'invest_amount': invest_amount,

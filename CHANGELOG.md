@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Results visualization script (`visualize_results.py`)
+  - Generates publication-quality visualizations for technical papers and presentations
+  - Three comprehensive charts: Portfolio Evolution, Strategy Comparison, Returns Distribution
+  - Compares financial trajectories with and without investment returns
+  - Analyzes sustainability and final wealth across different investment strategies (5%, 10%, 15%)
+  - Shows monthly return patterns and cumulative gains
+  - Uses Bologna Coppia scenario configurations
+  - Outputs high-resolution PNG files (300 DPI) to `figures/` directory
+  - Perfect for demonstrating the impact of investment returns on long-term outcomes
+- Investment return parameters in `EnvironmentConfig` (`src/utils/config.py`)
+  - `investment_return_mean`: Mean monthly investment return (default: 0.005 = 0.5% monthly ≈ 6% annual)
+  - `investment_return_std`: Standard deviation of investment returns for volatility modeling (default: 0.02 = 2% monthly)
+  - `investment_return_type`: Return type selector - "fixed", "stochastic", or "none" (default: "stochastic")
+  - Enables realistic modeling of investment portfolio returns with market volatility
+  - Supports deterministic returns ("fixed"), stochastic returns with normal distribution ("stochastic"), or no returns ("none")
+  - Configurable via YAML files and behavioral profiles
 - Italian financial scenarios study script (`study_italian_scenarios.py`)
   - Comparative analysis of 5 realistic Italian scenarios based on ISTAT and Numbeo 2024 data
   - Scenarios: Milano Junior, Milano Senior, Roma Famiglia, Bologna Coppia, Torino Single

@@ -172,6 +172,9 @@ Main training script with comprehensive CLI options for training the HRL system.
 ### evaluate.py
 Model evaluation script that loads trained models and generates performance visualizations.
 
+### visualize_results.py
+Results visualization script that generates publication-quality charts comparing investment strategies and analyzing returns. Creates three comprehensive visualizations: Portfolio Evolution, Strategy Comparison, and Returns Distribution. Perfect for technical papers and presentations.
+
 ### analyze_strategy.py
 Strategy analysis script that explains what the agent learned and provides practical recommendations.
 

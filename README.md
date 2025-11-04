@@ -63,6 +63,7 @@ The system implements a two-level hierarchical architecture:
 │       └── tasks.md            # Implementation tasks
 ├── train.py                     # ✅ Main training script
 ├── evaluate.py                  # ✅ Model evaluation script
+├── visualize_results.py         # ✅ Results visualization script
 ├── analyze_strategy.py          # ✅ Strategy analysis script
 ├── explain_failure.py           # ✅ Explainable AI failure analysis
 ├── study_italian_scenarios.py   # ✅ Italian scenarios comparative study
@@ -201,6 +202,9 @@ The system includes three predefined behavioral profiles with different risk tol
 | `max_months` | int | > 0 | 60 | Maximum episode length in months |
 | `initial_cash` | float | any | 0 | Starting cash balance |
 | `risk_tolerance` | float | [0, 1] | 0.5 | Agent's risk appetite (0=conservative, 1=aggressive) |
+| `investment_return_mean` | float | any | 0.005 | Mean monthly investment return (0.005 = 0.5% monthly ≈ 6% annual) |
+| `investment_return_std` | float | ≥ 0 | 0.02 | Standard deviation of investment returns (volatility) |
+| `investment_return_type` | str | - | "stochastic" | Return type: "fixed", "stochastic", or "none" |
 
 **Tips for Environment Configuration:**
 - Set `income` and `fixed_expenses` based on your target scenario
@@ -208,6 +212,10 @@ The system includes three predefined behavioral profiles with different risk tol
 - Adjust `safety_threshold` based on desired cash buffer (typically 1-2 months of expenses)
 - Use `inflation` to model economic conditions (0.02 = 2% monthly ≈ 27% annually)
 - Set `max_months` to your planning horizon (60 = 5 years)
+- Configure investment returns to model realistic market behavior:
+  - `investment_return_mean`: 0.005 (0.5% monthly) ≈ 6% annual return
+  - `investment_return_std`: 0.02 (2% volatility) models market fluctuations
+  - `investment_return_type`: "stochastic" for realistic returns, "fixed" for deterministic, "none" to disable
 
 #### Training Parameters
 
@@ -279,6 +287,9 @@ environment:
   max_months: 60                  # Simulation duration (months)
   initial_cash: 0                 # Starting cash balance
   risk_tolerance: 0.5             # Risk appetite (0-1)
+  investment_return_mean: 0.005   # Mean monthly return (0.5% = ~6% annual)
+  investment_return_std: 0.02     # Return volatility (2% monthly)
+  investment_return_type: stochastic  # "fixed", "stochastic", or "none"
 
 training:
   num_episodes: 5000              # Training episodes
@@ -1385,6 +1396,42 @@ Evaluate trained models and generate performance visualizations:
 python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt
 ```
 See [Evaluating Trained Models](#evaluating-trained-models) for detailed usage.
+
+#### visualize_results.py - Results Visualization Script
+Generate publication-quality visualizations comparing investment strategies and analyzing returns:
+```bash
+python3 visualize_results.py
+```
+
+**What it creates:**
+The script generates three comprehensive visualizations in the `figures/` directory:
+
+1. **Portfolio Evolution** (`portfolio_evolution.png`): 
+   - Compares financial trajectories with and without investment returns
+   - Shows cash balance, portfolio value, total wealth, and investment gains over time
+   - Uses Bologna Coppia scenario with 10% investment strategy
+
+2. **Strategy Comparison** (`strategy_comparison.png`):
+   - Analyzes sustainability duration and final wealth across different investment strategies (5%, 10%, 15%)
+   - Compares scenarios with and without 6% annual returns
+   - Shows which strategies are sustainable for 10 years
+
+3. **Returns Distribution** (`returns_distribution.png`):
+   - Displays histogram of monthly return percentages
+   - Shows cumulative gains over time
+   - Includes statistical summary (mean, std dev, min, max)
+
+**Use cases:**
+- Technical papers and research publications
+- Presentations and stakeholder reports
+- Understanding the impact of investment returns on long-term outcomes
+- Comparing different investment strategies visually
+- Demonstrating the value of realistic return modeling
+
+**Requirements:**
+- Uses `configs/scenarios/bologna_coppia.yaml` and `bologna_coppia_with_returns.yaml`
+- Requires matplotlib for visualization
+- Automatically creates `figures/` directory if it doesn't exist
 
 #### analyze_strategy.py - Strategy Analysis Script
 Analyze learned financial strategy and get practical recommendations:

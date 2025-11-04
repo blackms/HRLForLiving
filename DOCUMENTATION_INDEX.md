@@ -96,6 +96,7 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 |--------|-------------|-------------|
 | [train.py](train.py) | Main training script with CLI | `python3 train.py --profile balanced` |
 | [evaluate.py](evaluate.py) | Model evaluation with visualizations | `python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt` |
+| [visualize_results.py](visualize_results.py) | Publication-quality charts for papers and presentations | `python3 visualize_results.py` |
 | [analyze_strategy.py](analyze_strategy.py) | Strategy analysis and recommendations | `python3 analyze_strategy.py` |
 | [explain_failure.py](explain_failure.py) | Explainable AI failure analysis with month-by-month breakdown | `python3 explain_failure.py` |
 | [study_italian_scenarios.py](study_italian_scenarios.py) | Comparative study of 5 Italian financial scenarios | `python3 study_italian_scenarios.py` |

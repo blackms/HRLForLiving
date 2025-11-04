@@ -64,6 +64,12 @@ graph TD
 ]
 ```
 
+**Investment Return Configuration**:
+The environment now supports configurable investment returns to model realistic portfolio behavior:
+- `investment_return_mean`: Mean monthly return (default: 0.005 = 0.5% monthly ≈ 6% annual)
+- `investment_return_std`: Return volatility (default: 0.02 = 2% monthly)
+- `investment_return_type`: "fixed" (deterministic), "stochastic" (normal distribution), or "none" (no returns)
+
 **Action Space** (3-dimensional continuous, constrained to sum=1):
 ```python
 [invest_ratio, save_ratio, consume_ratio]  # Each in [0, 1], sum = 1

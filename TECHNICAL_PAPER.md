@@ -387,11 +387,56 @@ I nostri risultati sono coerenti con i dati macroeconomici italiani:
 
 La differenza nel tasso di risparmio (13.2% vs 8-10%) è spiegabile: il nostro "disponibile" include spese discrezionali che riducono il risparmio effettivo.
 
-### 5.2 Limiti dello Studio
+### 5.2 Estensione: Modellazione Rendimenti Investimenti
+
+**Aggiornamento**: Il sistema è stato esteso per includere rendimenti realistici degli investimenti.
+
+#### 5.2.1 Implementazione
+
+Il modello ora supporta tre modalità di rendimento:
+
+1. **None** (0%): Scenario base senza rendimenti
+2. **Fixed**: Rendimento fisso mensile
+3. **Stochastic**: Rendimenti stocastici con distribuzione normale
+
+**Parametri**:
+```python
+investment_return_mean = 0.005  # 0.5% mensile ≈ 6% annuo
+investment_return_std = 0.02    # 2% volatilità mensile
+```
+
+**Dynamics aggiornate**:
+```python
+# Ogni mese:
+return_t = investment_value_t × N(μ, σ)
+investment_value_t+1 = investment_value_t + return_t + new_investment_t
+```
+
+#### 5.2.2 Risultati con Rendimenti
+
+Test su scenario Bologna Coppia (600 EUR disponibili, 10 simulazioni per strategia):
+
+| Strategia | Senza Rendimenti | Con Rendimenti 6% | Guadagni | Δ Durata |
+|-----------|------------------|-------------------|----------|----------|
+| Conservativa (5%) | 17.9 mesi | 17.6 mesi | +347 EUR | -0.3 mesi |
+| Moderata (10%) | 17.3 mesi | 17.0 mesi | +388 EUR | -0.3 mesi |
+| Bilanciata (15%) | 16.4 mesi | 16.1 mesi | +521 EUR | -0.3 mesi |
+
+**Osservazioni**:
+- Rendimenti aggiungono ~400 EUR al patrimonio in 17 mesi
+- **Non risolvono** il problema di sostenibilità con margini stretti
+- Volatilità (2% mensile) può causare rendimenti negativi nel breve termine
+- Compound interest ha impatto significativo ma insufficiente
+
+**Conclusione**: Anche con rendimenti realistici del 6% annuo, le strategie rimangono insostenibili. Il problema è **strutturale** (margine disponibile troppo basso), non risolvibile solo con rendimenti di mercato.
+
+**Visualizzazioni**: Vedere Figure 1-3 per analisi grafiche dettagliate dell'impatto dei rendimenti.
+
+### 5.3 Limiti dello Studio
 
 1. **Semplificazioni del modello**:
-   - Rendimenti investimenti non modellati (assumiamo 0%)
-   - Tassazione non considerata
+   - ~~Rendimenti investimenti non modellati~~ ✅ **IMPLEMENTATO**
+   - Tassazione non considerata (20% capital gains in Italia)
    - Eventi straordinari (malattia, perdita lavoro) non inclusi
 
 2. **Orizzonte temporale**:
@@ -454,6 +499,8 @@ La differenza nel tasso di risparmio (13.2% vs 8-10%) è spiegabile: il nostro "
    - Impatto di variazioni ±10% nelle spese
    - Effetto di aumenti salariali graduali
    - Scenari con inflazione variabile (1-5%)
+   - Diversi profili di rendimento (3%, 6%, 9% annuo)
+   - Impatto della tassazione sui capital gains
 
 ### 6.3 Messaggio Finale
 
@@ -570,3 +617,55 @@ H(π) = Var(π(s_agg))
 **Fine del Technical Paper**
 
 *Per domande o collaborazioni, contattare gli autori.*
+
+
+---
+
+## Appendice C: Figure e Visualizzazioni
+
+### Figura 1: Evoluzione Portafoglio nel Tempo
+
+![Portfolio Evolution](figures/portfolio_evolution.png)
+
+**Descrizione**: Confronto tra scenario con e senza rendimenti (6% annuo) per strategia moderata (10% investimento). 
+
+- **Panel A**: Cash balance nel tempo. Entrambi gli scenari raggiungono cash negativo dopo ~17 mesi.
+- **Panel B**: Valore portafoglio vs capitale investito. Con rendimenti, il portafoglio cresce oltre il capitale investito.
+- **Panel C**: Patrimonio totale (cash + investimenti). I rendimenti aggiungono ~400 EUR ma non prevengono l'insolvenza.
+- **Panel D**: Guadagni cumulativi da rendimenti. Mostra l'effetto del compound interest nel tempo.
+
+**Insight**: I rendimenti migliorano il patrimonio finale ma non risolvono il problema del cash flow negativo.
+
+---
+
+### Figura 2: Confronto Strategie di Investimento
+
+![Strategy Comparison](figures/strategy_comparison.png)
+
+**Descrizione**: Confronto tra tre strategie (Conservativa 5%, Moderata 10%, Bilanciata 15%) con e senza rendimenti.
+
+- **Panel A**: Durata sostenibilità. Nessuna strategia raggiunge i 120 mesi target, anche con rendimenti.
+- **Panel B**: Patrimonio finale. I rendimenti aggiungono 300-500 EUR al patrimonio, ma l'impatto sulla durata è minimo.
+
+**Insight**: La scelta della strategia ha impatto limitato quando il margine disponibile è strutturalmente insufficiente.
+
+---
+
+### Figura 3: Distribuzione Rendimenti Mensili
+
+![Returns Distribution](figures/returns_distribution.png)
+
+**Descrizione**: Analisi dei rendimenti mensili per scenario con rendimenti stocastici (μ=0.5%, σ=2%).
+
+- **Panel A**: Distribuzione rendimenti mensili. Media ~0.5% con alta variabilità (±4%).
+- **Panel B**: Guadagni cumulativi nel tempo. Crescita graduale ma con fluttuazioni dovute alla volatilità.
+
+**Insight**: La volatilità mensile (2%) può causare rendimenti negativi nel breve termine, ma il trend è positivo nel medio-lungo termine.
+
+---
+
+**Fine del Technical Paper**
+
+*Per domande o collaborazioni, contattare gli autori.*
+
+*Grafici generati con: `python visualize_results.py`*

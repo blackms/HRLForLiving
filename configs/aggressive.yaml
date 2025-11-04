@@ -12,6 +12,9 @@ environment:
   max_months: 60
   initial_cash: 0
   risk_tolerance: 0.8
+  investment_return_mean: 0.007    # 0.7% monthly ≈ 8.7% annual (aggressive)
+  investment_return_std: 0.03      # 3% monthly volatility (higher risk)
+  investment_return_type: stochastic  # "fixed", "stochastic", or "none"
 
 training:
   num_episodes: 5000

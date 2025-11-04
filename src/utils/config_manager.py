@@ -69,6 +69,14 @@ def load_config(yaml_path: str) -> Tuple[EnvironmentConfig, TrainingConfig, Rewa
     training_config_dict = config_dict.get('training', {})
     reward_config_dict = config_dict.get('reward', {})
     
+    # Set defaults for investment returns if not specified
+    if 'investment_return_mean' not in env_config_dict:
+        env_config_dict['investment_return_mean'] = 0.0  # Default: no returns
+    if 'investment_return_std' not in env_config_dict:
+        env_config_dict['investment_return_std'] = 0.0
+    if 'investment_return_type' not in env_config_dict:
+        env_config_dict['investment_return_type'] = "none"  # Default: no returns
+    
     # Create configuration instances
     try:
         env_config = EnvironmentConfig(**env_config_dict)

@@ -26,11 +26,12 @@ The Personal Finance Optimization HRL System is a hierarchical reinforcement lea
 
 #### Acceptance Criteria
 
-1. WHEN the BudgetEnv is initialized, THE BudgetEnv SHALL accept configuration parameters for income, fixed expenses, variable expense mean, inflation rate, and safety threshold
+1. WHEN the BudgetEnv is initialized, THE BudgetEnv SHALL accept configuration parameters for income, fixed expenses, variable expense mean, inflation rate, safety threshold, and investment return parameters
 2. WHEN a simulation step occurs, THE BudgetEnv SHALL generate variable expenses using statistical sampling with the configured mean
 3. WHEN a simulation step occurs, THE BudgetEnv SHALL apply inflation adjustments to expenses based on the configured inflation rate
-4. WHEN the simulation reaches the maximum number of months or cash balance becomes negative, THE BudgetEnv SHALL terminate the episode
-5. WHEN the environment is reset, THE BudgetEnv SHALL initialize the cash balance to zero and reset the month counter
+4. WHEN investment returns are enabled, THE BudgetEnv SHALL apply returns to invested capital based on the configured return type (fixed, stochastic, or none)
+5. WHEN the simulation reaches the maximum number of months or cash balance becomes negative, THE BudgetEnv SHALL terminate the episode
+6. WHEN the environment is reset, THE BudgetEnv SHALL initialize the cash balance to the configured initial value and reset the month counter
 
 ### Requirement 2
 

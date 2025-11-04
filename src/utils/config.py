@@ -15,6 +15,10 @@ class EnvironmentConfig:
     max_months: int = 60
     initial_cash: float = 0
     risk_tolerance: float = 0.5
+    # Investment returns (new parameters)
+    investment_return_mean: float = 0.005  # 0.5% monthly = ~6% annual
+    investment_return_std: float = 0.02    # 2% volatility monthly
+    investment_return_type: str = "stochastic"  # "fixed", "stochastic", or "none"
 
 
 @dataclass
