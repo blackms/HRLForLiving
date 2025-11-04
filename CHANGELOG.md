@@ -7,7 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated `analyze_strategy.py` to use `personal_realistic` configuration and models instead of `personal_eur`
+  - Now loads from `configs/personal_realistic.yaml`
+  - Now loads models from `models/personal_realistic_high_agent.pt` and `models/personal_realistic_low_agent.pt`
+
 ### Added
+- Explainable AI analysis script (`explain_failure.py`)
+  - Detailed month-by-month breakdown of agent behavior
+  - Shows WHY the agent fails and WHERE problems occur
+  - Displays initial situation (income, expenses, buffer, available funds)
+  - Month-by-month cash flow analysis:
+    - Cash balance at start of month
+    - Income and all expenses (fixed, variable, investment)
+    - Net cash flow and final balance
+    - Warnings when approaching failure conditions
+  - Failure analysis when cash goes negative:
+    - Structural problem identification (income vs expenses vs investment)
+    - Buffer consumption rate calculation
+    - Inflation impact over time
+  - Sustainable strategy recommendations:
+    - Maximum sustainable investment rate calculation
+    - Options to increase available funds (reduce expenses, increase income)
+    - Buffer management strategies
+  - Outputs in Italian for personal finance context
+  - Configurable via model paths and configuration files
+  - Useful for understanding agent failures and debugging training issues
+  - Provides explainable AI insights for non-technical stakeholders
+- Strategy analysis script (`analyze_strategy.py`)
+  - Loads trained models and runs deterministic simulation
+  - Analyzes learned financial strategy and decision patterns
+  - Displays initial situation summary (income, expenses, available funds)
+  - Shows simulation results (allocation ratios, financial outcomes)
+  - Provides practical recommendations:
+    - Monthly allocation breakdown in currency
+    - Recommended safety buffer amount
+    - Risk profile assessment (Conservative/Moderate/Aggressive)
+    - Long-term sustainability evaluation
+  - Outputs in Italian for personal finance context
+  - Configurable via model paths and configuration files
+  - Useful for understanding learned policies and extracting actionable advice
+- State normalization in FinancialStrategist.aggregate_state() for training stability
+  - Normalizes all 5 aggregated state features to prevent extreme values
+  - avg_cash normalized by 10000.0 → ~0.5-1.0 range
+  - avg_investment_return normalized by 1000.0 → ~-0.5 to 0.5 range
+  - spending_trend normalized by 100.0 → ~-0.1 to 0.1 range
+  - current_wealth normalized by 10000.0 → ~0.5-1.0 range
+  - months_elapsed normalized by 120.0 → [0, 1] range
+  - NaN/Inf safety checks with fallback to default state
+  - Literature-based approach: "State normalization is critical for hierarchical RL" (Nachum et al., 2018 - HIRO)
+  - Prevents training instability in high-level agent
 - Reward scaling in RewardEngine to prevent gradient explosion
   - Low-level rewards automatically scaled by 1000.0
   - Prevents numerical instability with large income values (~$3200)

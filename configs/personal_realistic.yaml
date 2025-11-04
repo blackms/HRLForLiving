@@ -1,5 +1,5 @@
-# Personal Financial Configuration (EUR)
-# Real-world scenario with Italian salary and expenses
+# Personal Realistic Configuration (EUR)
+# Your actual financial situation without unrealistic buffer
 # All values in EUR (€)
 
 environment:
@@ -11,19 +11,19 @@ environment:
   variable_expense_mean: 400      # Average variable expenses (food, utilities, etc.)
   variable_expense_std: 100       # Standard deviation for variable expenses
   inflation: 0.02                 # 2% annual inflation
-  safety_threshold: 2000          # Minimum cash buffer (EUR) - ~1 month expenses
-  max_months: 120                 # 10-year simulation (longer horizon for learning)
-  initial_cash: 15000             # Realistic starting buffer (~6 months expenses)
+  safety_threshold: 1500          # Minimum cash buffer (EUR)
+  max_months: 120                 # 10-year simulation
+  initial_cash: 8000              # Realistic starting buffer (~3 months expenses)
   risk_tolerance: 0.5             # Medium risk tolerance (0-1 scale)
 
 training:
-  num_episodes: 3000              # Number of training episodes (reduced for faster training)
+  num_episodes: 3000              # Number of training episodes
   gamma_low: 0.95                 # Discount factor for low-level agent
   gamma_high: 0.99                # Discount factor for high-level agent
   high_period: 6                  # High-level decision period (months)
   batch_size: 32                  # Training batch size
-  learning_rate_low: 0.00001      # Lower LR for stability (was 0.0003)
-  learning_rate_high: 0.000005    # Lower LR for stability (was 0.0001)
+  learning_rate_low: 0.00001      # Lower LR for stability
+  learning_rate_high: 0.000005    # Lower LR for stability
 
 reward:
   alpha: 10.0                     # Investment reward coefficient

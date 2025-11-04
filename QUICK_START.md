@@ -42,6 +42,25 @@ This will:
 - Display comprehensive performance metrics
 - Generate visualization plots in `results/` directory
 
+## 3.5. Analyze Your Learned Strategy (30 seconds)
+
+```bash
+# Analyze the learned financial strategy
+python3 analyze_strategy.py
+```
+
+This will:
+- Run a deterministic simulation with your trained models
+- Show average allocation ratios (invest/save/consume)
+- Display financial outcomes (final cash, total invested, total wealth)
+- Provide practical recommendations:
+  - Monthly allocation breakdown in currency
+  - Recommended safety buffer
+  - Risk profile assessment
+  - Long-term sustainability evaluation
+
+**Note:** By default, this script uses `configs/personal_realistic.yaml` and models from `models/personal_realistic_*`. To analyze different models, edit the paths in the script.
+
 ## 4. View Training Progress with TensorBoard (1 minute)
 
 ```bash
@@ -93,6 +112,19 @@ Then train with your custom config:
 ```bash
 python3 train.py --config my_config.yaml
 ```
+
+### Analyze Your Strategy
+
+```bash
+# Get practical recommendations from your trained model
+python3 analyze_strategy.py
+```
+
+This provides actionable advice like:
+- How much to invest each month
+- How much to keep as safety buffer
+- Your learned risk profile
+- Whether the strategy is sustainable long-term
 
 ### Run Examples
 

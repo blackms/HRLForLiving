@@ -162,6 +162,27 @@ PYTHONPATH=. python3 examples/checkpointing_usage.py
 - Best practices for long training runs
 - Checkpoint metadata and configuration preservation
 
+## Utility Scripts
+
+In addition to the examples in this directory, the project includes several utility scripts in the root directory:
+
+### train.py
+Main training script with comprehensive CLI options for training the HRL system.
+
+### evaluate.py
+Model evaluation script that loads trained models and generates performance visualizations.
+
+### analyze_strategy.py
+Strategy analysis script that explains what the agent learned and provides practical recommendations.
+
+### explain_failure.py
+Explainable AI analysis script that provides detailed month-by-month breakdown showing WHY agents fail and WHERE problems occur. Includes failure analysis and sustainable strategy recommendations.
+
+### debug_nan.py
+NaN debugging utility for testing environment and reward computation.
+
+See the main README.md for detailed usage instructions for each utility script.
+
 ## Coming Soon
 
 ### 7. Training with PPO (Low-Level Agent)

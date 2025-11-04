@@ -40,7 +40,9 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 - [README.md - Quick Start](README.md#quick-start) - Training and evaluation
 - [README.md - Training Examples](README.md#2-training-the-hrl-system) - Command-line examples
 - [README.md - Evaluation Examples](README.md#evaluating-trained-models) - Model evaluation
+- [README.md - Strategy Analysis](README.md#analyzing-learned-strategy) - Analyzing learned policies
 - [README.md - Logging and Monitoring](README.md#logging-and-monitoring) - TensorBoard usage
+- [README.md - Utility Scripts](README.md#utility-scripts) - All utility scripts overview
 
 ### Performance
 - [README.md - Performance Metrics](README.md#performance-metrics) - Metric definitions
@@ -86,12 +88,15 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 | [Extending the System](README.md#extending-the-system) | Customization guide | Developers |
 | [Contributing](README.md#contributing) | Contribution guidelines | Contributors |
 
-### Debug Scripts
+### Utility Scripts
 
 | Script | Description | Run Command |
 |--------|-------------|-------------|
+| [train.py](train.py) | Main training script with CLI | `python3 train.py --profile balanced` |
+| [evaluate.py](evaluate.py) | Model evaluation with visualizations | `python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt` |
+| [analyze_strategy.py](analyze_strategy.py) | Strategy analysis and recommendations | `python3 analyze_strategy.py` |
+| [explain_failure.py](explain_failure.py) | Explainable AI failure analysis with month-by-month breakdown | `python3 explain_failure.py` |
 | [debug_nan.py](debug_nan.py) | NaN detection in environment and rewards | `python3 debug_nan.py` |
-| [debug_training.py](debug_training.py) | Training diagnostics (if available) | `python3 debug_training.py` |
 
 ## Reference
 
@@ -123,6 +128,12 @@ python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent model
 
 # With custom episodes
 python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --episodes 50
+
+# Analyze learned strategy
+python3 analyze_strategy.py
+
+# Explain why agent fails (detailed month-by-month analysis)
+python3 explain_failure.py
 ```
 
 ### Testing Commands
@@ -152,6 +163,9 @@ python3 debug_nan.py
 
 # Training diagnostics
 python3 debug_training.py
+
+# Explainable AI failure analysis
+python3 explain_failure.py
 ```
 
 ## Documentation by Role

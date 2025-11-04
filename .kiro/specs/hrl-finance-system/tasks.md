@@ -139,6 +139,14 @@
     - ✅ Calculates average investment return from cash changes
     - ✅ Calculates spending trend using linear fit
     - ✅ Returns 5-dimensional aggregated state: [avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed]
+    - ✅ **State normalization added (2025-11-04):** All features normalized to prevent training instability
+      - avg_cash / 10000.0 → ~0.5-1.0
+      - avg_investment_return / 1000.0 → ~-0.5 to 0.5
+      - spending_trend / 100.0 → ~-0.1 to 0.1
+      - current_wealth / 10000.0 → ~0.5-1.0
+      - months_elapsed / 120.0 → [0, 1]
+    - ✅ NaN/Inf safety checks with fallback to default state
+    - ✅ Based on HIRO paper recommendations (Nachum et al., 2018)
     - _Requirements: 2.2_
   
   - [x] 6.3 Implement goal generation

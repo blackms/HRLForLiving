@@ -61,6 +61,11 @@ The system implements a two-level hierarchical architecture:
 │       ├── requirements.md      # System requirements
 │       ├── design.md           # Detailed design
 │       └── tasks.md            # Implementation tasks
+├── train.py                     # ✅ Main training script
+├── evaluate.py                  # ✅ Model evaluation script
+├── analyze_strategy.py          # ✅ Strategy analysis script
+├── explain_failure.py           # ✅ Explainable AI failure analysis
+├── debug_nan.py                 # ✅ NaN debugging utility
 └── requirements.txt            # Python dependencies
 
 ```
@@ -830,12 +835,15 @@ strategist.load('models/financial_strategist.pth')
 ```
 
 **State Aggregation:**
-The strategist aggregates recent state history to compute strategic-level features:
-- Average cash balance over last N months
-- Average investment return (estimated from cash changes)
-- Spending trend (linear fit slope of variable expenses)
-- Current wealth (most recent cash balance)
-- Months elapsed in the episode
+The strategist aggregates recent state history to compute strategic-level features with automatic normalization:
+- Average cash balance over last N months (normalized by 10000.0 → ~0.5-1.0)
+- Average investment return (estimated from cash changes, normalized by 1000.0 → ~-0.5 to 0.5)
+- Spending trend (linear fit slope of variable expenses, normalized by 100.0 → ~-0.1 to 0.1)
+- Current wealth (most recent cash balance, normalized by 10000.0 → ~0.5-1.0)
+- Months elapsed in the episode (normalized by 120.0 → [0, 1])
+
+**State Normalization:**
+State normalization is critical for hierarchical RL training stability (Nachum et al., 2018 - HIRO). The aggregated state values are automatically normalized to prevent extreme values that could destabilize training. If NaN or Inf values are detected in the aggregated state, a safe default state is returned with a warning.
 
 **Goal Generation:**
 Goals are constrained to valid ranges:
@@ -1000,13 +1008,13 @@ See `examples/logging_usage.py` for a complete demonstration of TensorBoard logg
 - [x] HRLTrainer evaluation method - Deterministic evaluation with comprehensive summary statistics
 - [x] Configuration Manager - YAML loading, behavioral profiles, and comprehensive validation (50+ test cases)
 - [x] Main training script (train.py) - Complete CLI tool with comprehensive features including checkpointing and TensorBoard logging
+- [x] Evaluation script (evaluate.py) - Complete evaluation tool with visualizations and comprehensive metrics
+- [x] Strategy analysis script (analyze_strategy.py) - Analyzes learned strategy and provides practical recommendations
+- [x] Explainable AI analysis script (explain_failure.py) - Month-by-month breakdown showing why agents fail and providing recommendations
 - [x] Integration tests for HRLTrainer - 13 comprehensive tests covering complete training pipeline
 - [x] Sanity check tests - 7 system-level validation tests for behavioral profiles and learning effectiveness
 - [x] TensorBoard logging - ExperimentLogger for comprehensive experiment tracking (examples/logging_usage.py)
 - [x] Checkpointing functionality - Save/load/resume with best model tracking (examples/checkpointing_usage.py, tests/test_checkpointing.py)
-
-### 🚧 In Progress
-- [ ] Evaluation script for loading and testing trained models
 
 ### ✅ Recently Completed
 - [x] TensorBoard logging integration (Task 14) - ExperimentLogger with automatic tracking of training curves, episode metrics, action/goal distributions, and hyperparameters
@@ -1195,6 +1203,98 @@ python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent model
 python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt --seed 42
 ```
 
+### Analyzing Learned Strategy
+
+After training, you can analyze the learned financial strategy to understand the agent's decision-making patterns and get practical recommendations:
+
+```bash
+# Analyze strategy from trained models
+python3 analyze_strategy.py
+```
+
+**What it does:**
+The `analyze_strategy.py` script loads trained models and runs a deterministic simulation to analyze the learned financial strategy. It provides:
+
+1. **Initial Situation Summary**: Displays income, expenses, and available funds
+2. **Simulation Results**: Runs a complete episode (up to 120 months) with the trained policy
+3. **Allocation Analysis**: Shows average investment, savings, and consumption ratios
+4. **Financial Outcomes**: Reports final cash balance, total invested, and total wealth
+5. **Practical Recommendations**: Provides actionable advice including:
+   - Monthly allocation breakdown in currency (EUR/USD)
+   - Recommended safety buffer amount
+   - Risk profile assessment (Conservative/Moderate/Aggressive)
+   - Long-term sustainability evaluation
+
+**Example Output:**
+```
+======================================================================
+ANALISI STRATEGIA FINANZIARIA APPRESA
+======================================================================
+
+Situazione Iniziale:
+  Entrate mensili: 3200 EUR
+  Spese fisse: 1400 EUR
+  Spese variabili medie: 700 EUR
+  Disponibile: 1100 EUR/mese
+  Cash iniziale: 0 EUR
+
+======================================================================
+RISULTATI SIMULAZIONE (120 mesi)
+======================================================================
+
+Allocazione Media:
+  Investimento: 32.5%
+  Risparmio: 45.0%
+  Consumo: 22.5%
+
+Risultati Finali:
+  Cash finale: 15234.56 EUR
+  Totale investito: 124800.00 EUR
+  Patrimonio totale: 140034.56 EUR
+
+Investimento Mensile Medio: 1040.00 EUR
+
+======================================================================
+RACCOMANDAZIONI PRATICHE
+======================================================================
+
+1. ALLOCAZIONE MENSILE CONSIGLIATA:
+   Con 3200 EUR/mese:
+   - Investi: 1040.00 EUR (32.5%)
+   - Risparmia: 1440.00 EUR (45.0%)
+   - Spese discrezionali: 720.00 EUR (22.5%)
+
+2. BUFFER DI SICUREZZA:
+   Mantieni almeno 1200.00 EUR di riserva
+
+3. STRATEGIA DI INVESTIMENTO:
+   Profilo di rischio: Moderata (aggressività: 0.52)
+
+4. ORIZZONTE TEMPORALE:
+   L'agente è riuscito a gestire 120 mesi
+   ✓ Strategia sostenibile a lungo termine!
+```
+
+**Configuration:**
+The script currently loads configuration from `configs/personal_realistic.yaml` and trained models from:
+- `models/personal_realistic_high_agent.pt` (High-level agent)
+- `models/personal_realistic_low_agent.pt` (Low-level agent)
+
+To analyze different trained models, modify the paths in the script:
+```python
+# Load config and trained models
+env_config, training_config, reward_config = load_config('configs/your_config.yaml')
+high_agent.load('models/your_high_agent.pt')
+low_agent.load('models/your_low_agent.pt')
+```
+
+**Use Cases:**
+- Understanding what the agent learned during training
+- Getting practical financial advice based on learned policy
+- Validating that the learned strategy makes sense
+- Extracting actionable recommendations for real-world application
+- Comparing strategies across different behavioral profiles
+
 **Command-line Options:**
 - `--high-agent PATH`: Path to trained high-level agent model (.pt file) [required]
 - `--low-agent PATH`: Path to trained low-level agent model (.pt file) [required]
@@ -1266,6 +1366,188 @@ These examples demonstrate:
 - Running complete episodes with adaptive strategies
 - Tracking performance metrics with the AnalyticsModule
 - Full training loop with automatic analytics integration
+
+### Utility Scripts
+
+The system includes several utility scripts for training, evaluation, and analysis:
+
+#### train.py - Main Training Script
+Complete CLI tool for training the HRL system with comprehensive features:
+```bash
+python3 train.py --profile balanced --episodes 5000
+```
+See [Training the HRL System](#2-training-the-hrl-system) for detailed usage.
+
+#### evaluate.py - Model Evaluation Script
+Evaluate trained models and generate performance visualizations:
+```bash
+python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt
+```
+See [Evaluating Trained Models](#evaluating-trained-models) for detailed usage.
+
+#### analyze_strategy.py - Strategy Analysis Script
+Analyze learned financial strategy and get practical recommendations:
+```bash
+python3 analyze_strategy.py
+```
+See [Analyzing Learned Strategy](#analyzing-learned-strategy) for detailed usage.
+
+#### debug_nan.py - NaN Debugging Utility
+Test environment and reward computation for NaN values:
+```bash
+python3 debug_nan.py
+```
+Useful for diagnosing training issues and verifying configuration parameters.
+
+#### explain_failure.py - Explainable AI Analysis Script
+Detailed month-by-month breakdown showing WHY the agent fails and WHERE problems occur:
+```bash
+python3 explain_failure.py
+```
+
+**What it does:**
+The `explain_failure.py` script provides explainable AI analysis by running a detailed simulation with trained models and showing:
+
+1. **Initial Situation**: Displays income, expenses, available funds, and buffer
+2. **Month-by-Month Breakdown**: Shows detailed cash flow for each month:
+   - Cash balance at start of month
+   - Income received
+   - All expenses (fixed, variable, investment)
+   - Net cash flow
+   - Final cash balance
+   - Warnings when approaching failure
+3. **Failure Analysis**: When the agent fails (negative cash), explains:
+   - Structural problems (income vs expenses vs investment)
+   - Buffer consumption rate
+   - Inflation impact over time
+4. **Sustainable Strategy Recommendations**: Calculates and suggests:
+   - Maximum sustainable investment rate
+   - Options to increase available funds
+   - Buffer management strategies
+
+**Example Output:**
+```
+======================================================================
+EXPLAINABLE AI - ANALISI DETTAGLIATA DEL FALLIMENTO
+======================================================================
+
+📊 SITUAZIONE INIZIALE:
+  💰 Entrate mensili: 3,200.00 EUR
+  🏠 Spese fisse: 1,400.00 EUR
+  🛒 Spese variabili medie: 700.00 EUR (±100 EUR)
+  💵 Cash iniziale (buffer): 5,000.00 EUR
+  ⚠️  Soglia sicurezza: 1,000.00 EUR
+  📈 Inflazione annua: 2.0%
+
+  ✅ Disponibile teorico: 1,100.00 EUR/mese
+
+======================================================================
+SIMULAZIONE MESE PER MESE
+======================================================================
+
+📅 MESE 1:
+  💰 Cash iniziale: 5,000.00 EUR
+  
+  📥 ENTRATE:
+    Stipendio: +3,200.00 EUR
+  
+  📤 USCITE:
+    Spese fisse: -1,400.00 EUR
+    Spese variabili: -720.00 EUR
+    Investimento: -1,040.00 EUR (32.5%)
+    TOTALE USCITE: -3,160.00 EUR
+  
+  💸 FLUSSO NETTO: +40.00 EUR
+  💵 Cash finale: 5,040.00 EUR
+  📊 Totale investito: 1,040.00 EUR
+  🎁 Reward: +8.50
+
+[... continues for each month ...]
+
+📅 MESE 15:
+  💰 Cash iniziale: 850.00 EUR
+  
+  📥 ENTRATE:
+    Stipendio: +3,200.00 EUR
+  
+  📤 USCITE:
+    Spese fisse: -1,420.00 EUR
+    Spese variabili: -780.00 EUR
+    Investimento: -1,040.00 EUR (32.5%)
+    TOTALE USCITE: -3,240.00 EUR
+  
+  💸 FLUSSO NETTO: -40.00 EUR
+  💵 Cash finale: -190.00 EUR
+  
+  ❌ FALLIMENTO: Cash negativo!
+  🔍 CAUSA: Hai speso 40.00 EUR più di quanto guadagnato
+  💡 Il buffer di 5,000.00 EUR si è esaurito
+
+======================================================================
+ANALISI DEL FALLIMENTO
+======================================================================
+
+⏱️  Durata: 15 mesi
+💰 Cash finale: -190.00 EUR
+📊 Totale investito: 15,600.00 EUR
+💎 Patrimonio totale: 15,410.00 EUR
+
+🔍 PERCHÉ È FALLITO?
+
+1. PROBLEMA STRUTTURALE:
+   Disponibile reale: ~1,100.00 EUR/mese
+   Investimento medio: 1,040.00 EUR/mese
+   Deficit mensile: -60.00 EUR
+
+2. CONSUMO DEL BUFFER:
+   Buffer iniziale: 5,000.00 EUR
+   Buffer consumato: 5,190.00 EUR
+   Consumo mensile medio: 346.00 EUR
+
+3. EFFETTO INFLAZIONE:
+   Aumento spese fisse: +35.00 EUR
+   Questo riduce ulteriormente il disponibile
+
+💡 CONCLUSIONE:
+   L'agente ha imparato a investire 32.5% del reddito (~1,040.00 EUR/mese)
+   Ma con solo 1,100.00 EUR disponibili, questo è INSOSTENIBILE
+   Il buffer di 5,000.00 EUR copre solo ~15 mesi
+
+📈 STRATEGIA SOSTENIBILE:
+   Investimento massimo sostenibile: 550.00 EUR/mese (17.2%)
+   Questo lascerebbe 550.00 EUR/mese per imprevisti
+
+======================================================================
+RACCOMANDAZIONI
+======================================================================
+
+1. 🎯 OBIETTIVO REALISTICO:
+   Investi MAX 550.00 EUR/mese (17.2% del reddito)
+
+2. 💰 AUMENTA IL DISPONIBILE:
+   Opzione A: Riduci spese variabili da 700 a 300 EUR (+100 EUR/mese)
+   Opzione B: Aumenta entrate a 3400 EUR (+200 EUR/mese)
+   Opzione C: Entrambe (+300 EUR/mese disponibili)
+
+3. 🛡️  MANTIENI IL BUFFER:
+   Non scendere mai sotto 1,000.00 EUR
+   Ricostruisci il buffer quando possibile
+```
+
+**Configuration:**
+The script currently loads configuration from `configs/personal_realistic.yaml` and trained models from:
+- `models/personal_realistic_high_agent.pt` (High-level agent)
+- `models/personal_realistic_low_agent.pt` (Low-level agent)
+
+To analyze different trained models, modify the paths in the script.
+
+**Use Cases:**
+- Understanding why a trained agent fails to maintain positive cash balance
+- Identifying structural problems in the financial scenario (income vs expenses)
+- Analyzing the impact of inflation over time
+- Getting specific recommendations for sustainable investment strategies
+- Debugging training issues by seeing exact month-by-month behavior
+- Explaining agent decisions to non-technical stakeholders
 
 ### Running Tests
 
@@ -1370,7 +1652,7 @@ python3 debug_nan.py
 ```
 
 **What it does:**
-- Loads configuration from `configs/personal_eur.yaml`
+- Loads configuration from `configs/personal_realistic.yaml`
 - Displays configuration parameters and available income after expenses
 - Runs a test episode with simple balanced actions (30% invest, 40% save, 30% consume)
 - Checks for NaN values in rewards and state observations

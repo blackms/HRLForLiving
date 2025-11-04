@@ -428,7 +428,13 @@ The `compute_low_level_reward()` method automatically scales rewards by dividing
 
 **Location:** `src/agents/financial_strategist.py`
 
-**Status:** Fully implemented. Ready for integration with training orchestrator and testing.
+**Status:** Fully implemented with state normalization for training stability. Ready for integration with training orchestrator and testing.
+
+**Recent Updates:**
+- Added state normalization in `aggregate_state()` method (2025-11-04)
+- All 5 aggregated state features are now normalized to prevent extreme values
+- NaN/Inf safety checks with fallback to default state
+- Based on HIRO paper recommendations for hierarchical RL stability
 
 **Implementation Details:**
 
@@ -610,10 +616,12 @@ class FinancialStrategist:
 
     def aggregate_state(self, history: List[np.ndarray]) -> np.ndarray:
         """
-        Compute macro features from state history.
+        Compute macro features from state history with automatic normalization.
         
-        Returns 5-dimensional aggregated state:
+        Returns 5-dimensional normalized aggregated state:
         [avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed]
+        
+        State normalization is critical for hierarchical RL (Nachum et al., 2018 - HIRO).
         """
         if not history:
             return np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
@@ -628,7 +636,21 @@ class FinancialStrategist:
         current_wealth = cash_balances[-1]
         months_elapsed = history_array[0, 6] - history_array[-1, 6] if len(history_array) > 0 else 0.0
         
-        return np.array([avg_cash, avg_investment_return, spending_trend, current_wealth, months_elapsed], dtype=np.float32)
+        # Normalize to prevent extreme values that destabilize training
+        aggregated_state = np.array([
+            avg_cash / 10000.0,                    # Normalize to ~0.5-1.0
+            avg_investment_return / 1000.0,        # Normalize to ~-0.5 to 0.5
+            spending_trend / 100.0,                # Normalize to ~-0.1 to 0.1
+            current_wealth / 10000.0,              # Normalize to ~0.5-1.0
+            months_elapsed / 120.0                 # Normalize to [0, 1]
+        ], dtype=np.float32)
+        
+        # Safety check for NaN/Inf values
+        if np.any(np.isnan(aggregated_state)) or np.any(np.isinf(aggregated_state)):
+            print(f"WARNING: Invalid aggregated state! Returning default.")
+            aggregated_state = np.array([0.5, 0.0, 0.0, 0.5, 0.0], dtype=np.float32)
+        
+        return aggregated_state
 
     def select_goal(self, state: np.ndarray) -> np.ndarray:
         """
