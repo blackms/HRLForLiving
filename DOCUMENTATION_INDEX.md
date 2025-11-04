@@ -25,6 +25,8 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 - [configs/conservative.yaml](configs/conservative.yaml) - Conservative profile example
 - [configs/balanced.yaml](configs/balanced.yaml) - Balanced profile example
 - [configs/aggressive.yaml](configs/aggressive.yaml) - Aggressive profile example
+- [configs/scenarios/README.md](configs/scenarios/README.md) - Italian financial scenarios (ISTAT/Numbeo 2024 data)
+- [configs/scenarios/](configs/scenarios/) - 5 realistic Italian scenario configurations
 
 ### Components
 - [README.md - Core Components](README.md#core-components) - All system components
@@ -96,6 +98,7 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 | [evaluate.py](evaluate.py) | Model evaluation with visualizations | `python3 evaluate.py --high-agent models/balanced_high_agent.pt --low-agent models/balanced_low_agent.pt` |
 | [analyze_strategy.py](analyze_strategy.py) | Strategy analysis and recommendations | `python3 analyze_strategy.py` |
 | [explain_failure.py](explain_failure.py) | Explainable AI failure analysis with month-by-month breakdown | `python3 explain_failure.py` |
+| [study_italian_scenarios.py](study_italian_scenarios.py) | Comparative study of 5 Italian financial scenarios | `python3 study_italian_scenarios.py` |
 | [debug_nan.py](debug_nan.py) | NaN detection in environment and rewards | `python3 debug_nan.py` |
 
 ## Reference
@@ -134,6 +137,9 @@ python3 analyze_strategy.py
 
 # Explain why agent fails (detailed month-by-month analysis)
 python3 explain_failure.py
+
+# Study Italian financial scenarios (comparative analysis)
+python3 study_italian_scenarios.py
 ```
 
 ### Testing Commands

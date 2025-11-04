@@ -1,0 +1,267 @@
+[
+  {
+    "name": "Milano Junior",
+    "income": 1800,
+    "expenses": 1650,
+    "disponibile": 150,
+    "disponibile_pct": 8.333333333333332,
+    "strategies": [
+      {
+        "name": "Conservativa (5%)",
+        "invest_pct": 0.05,
+        "monthly_investment": 90.0,
+        "months": 7,
+        "total_invested": 3097.505870461464,
+        "final_cash": -208.9714838425847,
+        "total_wealth": 2888.534386618879,
+        "sustainability": "Insostenibile",
+        "reward": 24.341899894714356
+      },
+      {
+        "name": "Moderata (10%)",
+        "invest_pct": 0.1,
+        "monthly_investment": 180.0,
+        "months": 7,
+        "total_invested": 3279.8120498657227,
+        "final_cash": -391.2776632468432,
+        "total_wealth": 2888.5343866188796,
+        "sustainability": "Insostenibile",
+        "reward": 22.453731773376468
+      },
+      {
+        "name": "Bilanciata (15%)",
+        "invest_pct": 0.15,
+        "monthly_investment": 270.0,
+        "months": 7,
+        "total_invested": 3467.3642814159393,
+        "final_cash": -578.8298947970599,
+        "total_wealth": 2888.5343866188796,
+        "sustainability": "Insostenibile",
+        "reward": 20.511225911331174
+      },
+      {
+        "name": "Aggressiva (20%)",
+        "invest_pct": 0.2,
+        "monthly_investment": 360.0,
+        "months": 6,
+        "total_invested": 3136.9765877723694,
+        "final_cash": -132.74105760075668,
+        "total_wealth": 3004.2355301716125,
+        "sustainability": "Insostenibile",
+        "reward": 26.916026150512693
+      }
+    ]
+  },
+  {
+    "name": "Milano Senior",
+    "income": 2800,
+    "expenses": 2300,
+    "disponibile": 500,
+    "disponibile_pct": 17.857142857142858,
+    "strategies": [
+      {
+        "name": "Conservativa (5%)",
+        "invest_pct": 0.05,
+        "monthly_investment": 140.0,
+        "months": 16,
+        "total_invested": 11013.354206085205,
+        "final_cash": -91.28239308069101,
+        "total_wealth": 10922.071813004513,
+        "sustainability": "Insostenibile",
+        "reward": 106.85273358306885
+      },
+      {
+        "name": "Moderata (10%)",
+        "invest_pct": 0.1,
+        "monthly_investment": 280.0,
+        "months": 16,
+        "total_invested": 11661.553955078125,
+        "final_cash": -739.4821420736109,
+        "total_wealth": 10922.071813004513,
+        "sustainability": "Insostenibile",
+        "reward": 100.00996050033572
+      },
+      {
+        "name": "Bilanciata (15%)",
+        "invest_pct": 0.15,
+        "monthly_investment": 420.0,
+        "months": 15,
+        "total_invested": 11557.880938053131,
+        "final_cash": -614.0439555235099,
+        "total_wealth": 10943.836982529621,
+        "sustainability": "Insostenibile",
+        "reward": 101.6876942337036
+      },
+      {
+        "name": "Aggressiva (20%)",
+        "invest_pct": 0.2,
+        "monthly_investment": 560.0,
+        "months": 14,
+        "total_invested": 11386.063170433044,
+        "final_cash": -411.0740063314938,
+        "total_wealth": 10974.989164101551,
+        "sustainability": "Insostenibile",
+        "reward": 104.30100338897704
+      }
+    ]
+  },
+  {
+    "name": "Roma Famiglia",
+    "income": 2400,
+    "expenses": 2200,
+    "disponibile": 200,
+    "disponibile_pct": 8.333333333333332,
+    "strategies": [
+      {
+        "name": "Conservativa (5%)",
+        "invest_pct": 0.05,
+        "monthly_investment": 120.0,
+        "months": 9,
+        "total_invested": 5310.010063648224,
+        "final_cash": -670.1277987433887,
+        "total_wealth": 4639.882264904835,
+        "sustainability": "Insostenibile",
+        "reward": 34.92491628952026
+      },
+      {
+        "name": "Moderata (10%)",
+        "invest_pct": 0.1,
+        "monthly_investment": 240.0,
+        "months": 8,
+        "total_invested": 4997.808837890625,
+        "final_cash": -168.27603338367066,
+        "total_wealth": 4829.532804506955,
+        "sustainability": "Insostenibile",
+        "reward": 43.0510280670166
+      },
+      {
+        "name": "Bilanciata (15%)",
+        "invest_pct": 0.15,
+        "monthly_investment": 360.0,
+        "months": 8,
+        "total_invested": 5283.602714538574,
+        "final_cash": -454.0699100316199,
+        "total_wealth": 4829.532804506955,
+        "sustainability": "Insostenibile",
+        "reward": 40.085918630981446
+      },
+      {
+        "name": "Aggressiva (20%)",
+        "invest_pct": 0.2,
+        "monthly_investment": 480.0,
+        "months": 7,
+        "total_invested": 4879.741358757019,
+        "final_cash": -50.549063794713675,
+        "total_wealth": 4829.192294962306,
+        "sustainability": "Insostenibile",
+        "reward": 44.37981729812622
+      }
+    ]
+  },
+  {
+    "name": "Bologna Coppia",
+    "income": 3200,
+    "expenses": 2600,
+    "disponibile": 600,
+    "disponibile_pct": 18.75,
+    "strategies": [
+      {
+        "name": "Conservativa (5%)",
+        "invest_pct": 0.05,
+        "monthly_investment": 160.0,
+        "months": 18,
+        "total_invested": 14160.026836395264,
+        "final_cash": -176.94396677870782,
+        "total_wealth": 13983.082869616555,
+        "sustainability": "Insostenibile",
+        "reward": 135.90361850585938
+      },
+      {
+        "name": "Moderata (10%)",
+        "invest_pct": 0.1,
+        "monthly_investment": 320.0,
+        "months": 17,
+        "total_invested": 14160.458374023438,
+        "final_cash": -129.45994232433497,
+        "total_wealth": 14030.998431699103,
+        "sustainability": "Insostenibile",
+        "reward": 137.126032460022
+      },
+      {
+        "name": "Bilanciata (15%)",
+        "invest_pct": 0.15,
+        "monthly_investment": 480.0,
+        "months": 17,
+        "total_invested": 14970.207691192627,
+        "final_cash": -939.2092594935244,
+        "total_wealth": 14030.998431699103,
+        "sustainability": "Insostenibile",
+        "reward": 128.6141396003723
+      },
+      {
+        "name": "Aggressiva (20%)",
+        "invest_pct": 0.2,
+        "monthly_investment": 640.0,
+        "months": 16,
+        "total_invested": 14871.592712402344,
+        "final_cash": -656.0798842697991,
+        "total_wealth": 14215.512828132545,
+        "sustainability": "Insostenibile",
+        "reward": 134.2840148468017
+      }
+    ]
+  },
+  {
+    "name": "Torino Single",
+    "income": 1600,
+    "expenses": 1400,
+    "disponibile": 200,
+    "disponibile_pct": 12.5,
+    "strategies": [
+      {
+        "name": "Conservativa (5%)",
+        "invest_pct": 0.05,
+        "monthly_investment": 80.0,
+        "months": 8,
+        "total_invested": 3146.6726303100586,
+        "final_cash": -146.1141541294587,
+        "total_wealth": 3000.5584761806,
+        "sustainability": "Insostenibile",
+        "reward": 27.687282762145998
+      },
+      {
+        "name": "Moderata (10%)",
+        "invest_pct": 0.1,
+        "monthly_investment": 160.0,
+        "months": 8,
+        "total_invested": 3331.87255859375,
+        "final_cash": -331.3140824131501,
+        "total_wealth": 3000.5584761806,
+        "sustainability": "Insostenibile",
+        "reward": 25.765833580970764
+      },
+      {
+        "name": "Bilanciata (15%)",
+        "invest_pct": 0.15,
+        "monthly_investment": 240.0,
+        "months": 7,
+        "total_invested": 3082.101583480835,
+        "final_cash": -140.19283619026152,
+        "total_wealth": 2941.9087472905735,
+        "sustainability": "Insostenibile",
+        "reward": 27.218049475097654
+      },
+      {
+        "name": "Aggressiva (20%)",
+        "invest_pct": 0.2,
+        "monthly_investment": 320.0,
+        "months": 7,
+        "total_invested": 3253.1609058380127,
+        "final_cash": -311.25215854743925,
+        "total_wealth": 2941.9087472905735,
+        "sustainability": "Insostenibile",
+        "reward": 25.446363290405273
+      }
+    ]
+  }
+]

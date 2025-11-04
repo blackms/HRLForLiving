@@ -1,0 +1,40 @@
+# Scenario: Bologna - Coppia Giovane (Doppio Reddito)
+# Fonte dati: ISTAT 2024, Numbeo Bologna
+# Descrizione: Coppia 28-35 anni, entrambi lavorano, bilocale
+
+environment:
+  income: 3200                    # Doppio reddito netto medio Bologna (ISTAT)
+  fixed_expenses: 1800            # Spese fisse totali
+                                  # - Affitto bilocale: 1100 EUR (Numbeo Bologna)
+                                  # - Utenze: 180 EUR
+                                  # - Trasporti: 200 EUR (2 persone)
+                                  # - Assicurazioni: 120 EUR
+                                  # - Palestra/Sport: 100 EUR
+                                  # - Altro: 100 EUR
+  variable_expense_mean: 800      # Spese variabili medie (coppia)
+                                  # - Alimentari: 500 EUR
+                                  # - Tempo libero: 250 EUR
+                                  # - Altro: 50 EUR
+  variable_expense_std: 150       # Deviazione standard
+  inflation: 0.02                 # 2% annuo
+  safety_threshold: 3500          # Buffer minimo (1.5 mesi spese)
+  max_months: 120                 # 10 anni
+  initial_cash: 10000             # Risparmi combinati
+  risk_tolerance: 0.55            # Moderato-alto
+
+training:
+  num_episodes: 3000
+  gamma_low: 0.95
+  gamma_high: 0.99
+  high_period: 6
+  batch_size: 32
+  learning_rate_low: 0.00001
+  learning_rate_high: 0.000005
+
+reward:
+  alpha: 10.0
+  beta: 0.1
+  gamma: 5.0
+  delta: 20.0
+  lambda_: 1.0
+  mu: 0.5

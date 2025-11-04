@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Italian financial scenarios study script (`study_italian_scenarios.py`)
+  - Comparative analysis of 5 realistic Italian scenarios based on ISTAT and Numbeo 2024 data
+  - Scenarios: Milano Junior, Milano Senior, Roma Famiglia, Bologna Coppia, Torino Single
+  - Tests multiple investment strategies (5%, 10%, 15%, 20%) for each scenario
+  - Simulates up to 120 months to determine sustainability
+  - Provides comparative analysis and insights across scenarios
+  - Calculates available funds and maximum sustainable investment rates
+  - Generates recommendations for Italian financial planning
+  - Outputs results to `study_results.json`
+  - Uses scenario-specific configurations from `configs/scenarios/` directory
+
 ### Changed
 - Updated `analyze_strategy.py` to use `personal_realistic` configuration and models instead of `personal_eur`
   - Now loads from `configs/personal_realistic.yaml`

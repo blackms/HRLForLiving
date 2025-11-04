@@ -65,6 +65,7 @@ The system implements a two-level hierarchical architecture:
 ├── evaluate.py                  # ✅ Model evaluation script
 ├── analyze_strategy.py          # ✅ Strategy analysis script
 ├── explain_failure.py           # ✅ Explainable AI failure analysis
+├── study_italian_scenarios.py   # ✅ Italian scenarios comparative study
 ├── debug_nan.py                 # ✅ NaN debugging utility
 └── requirements.txt            # Python dependencies
 
@@ -1398,6 +1399,91 @@ Test environment and reward computation for NaN values:
 python3 debug_nan.py
 ```
 Useful for diagnosing training issues and verifying configuration parameters.
+
+#### study_italian_scenarios.py - Italian Financial Scenarios Study
+Comparative analysis of financial behaviors across different Italian scenarios based on ISTAT and Numbeo 2024 data:
+```bash
+python3 study_italian_scenarios.py
+```
+
+**What it does:**
+The `study_italian_scenarios.py` script performs a comprehensive comparative analysis of financial behaviors across five realistic Italian scenarios:
+
+1. **Milano Junior**: Young professional (25-30 years), studio apartment in Milan
+2. **Milano Senior**: Experienced professional (35-45 years), two-room apartment in Milan
+3. **Roma Famiglia**: Family with children, three-room apartment in Rome
+4. **Bologna Coppia**: Dual-income couple, two-room apartment in Bologna
+5. **Torino Single**: Single professional (30-40 years), studio apartment in Turin
+
+**Analysis Performed:**
+- Loads realistic configurations from `configs/scenarios/` directory
+- Calculates available funds after expenses for each scenario
+- Tests multiple investment strategies (5%, 10%, 15%, 20% of income)
+- Simulates up to 120 months (10 years) for each strategy
+- Determines sustainability of each investment level
+- Provides comparative analysis across all scenarios
+- Generates insights and recommendations
+
+**Example Output:**
+```
+================================================================================
+STUDIO: COMPORTAMENTI FINANZIARI IN ITALIA
+Analisi Comparativa basata su dati ISTAT e Numbeo 2024
+================================================================================
+
+SCENARIO: MILANO JUNIOR
+Descrizione: Professionista 25-30 anni, monolocale Milano
+
+📊 DATI FINANZIARI:
+  Reddito netto: 1,800 EUR/mese
+  Spese fisse: 1,100 EUR/mese
+  Spese variabili: 500 EUR/mese (±80)
+  Totale spese: 1,600 EUR/mese
+  Disponibile: 200 EUR/mese (11.1%)
+  Buffer iniziale: 1,000 EUR
+  Profilo rischio: 0.4
+
+📈 SIMULAZIONE STRATEGIE DI INVESTIMENTO:
+  Conservativa (5%): ✅ SOSTENIBILE (120 mesi)
+  Moderata (10%): ❌ INSOSTENIBILE (18 mesi)
+  ...
+
+ANALISI COMPARATIVA:
+Scenario              Disponibile    % Reddito    Investimento Max Sostenibile
+--------------------------------------------------------------------------------
+Milano Junior            200 EUR        11.1%      5% (90 EUR)
+Bologna Coppia         1,200 EUR        24.0%      20% (1,000 EUR)
+...
+
+💡 INSIGHTS:
+1. MARGINE MEDIO ITALIANO: 15.2% del reddito disponibile
+2. SCENARIO PIÙ FAVOREVOLE: Bologna Coppia (24.0%)
+3. SCENARIO PIÙ CRITICO: Milano Junior (11.1%)
+4. RACCOMANDAZIONI GENERALI:
+   - Investimento sostenibile: 5-10% per la maggior parte degli scenari
+   - Buffer di sicurezza: 2-3 mesi di spese (1,500-3,500 EUR)
+   - Priorità: Costruire buffer prima di investire aggressivamente
+```
+
+**Generated Files:**
+- `study_results.json` - Complete results for all scenarios and strategies in JSON format
+
+**Use Cases:**
+- Understanding financial constraints across different Italian cities and life situations
+- Comparing investment capacity across income levels and expense structures
+- Validating realistic configurations for training
+- Identifying which scenarios are most/least favorable for investment
+- Getting data-driven recommendations for Italian financial planning
+
+**Configuration Files:**
+The script uses scenario-specific YAML configurations in `configs/scenarios/`:
+- `milano_junior.yaml` - Young professional in Milan
+- `milano_senior.yaml` - Senior professional in Milan
+- `roma_famiglia.yaml` - Family in Rome
+- `bologna_coppia.yaml` - Dual-income couple in Bologna
+- `torino_single.yaml` - Single professional in Turin
+
+Each configuration includes realistic income, expenses, and risk tolerance based on 2024 Italian economic data.
 
 #### explain_failure.py - Explainable AI Analysis Script
 Detailed month-by-month breakdown showing WHY the agent fails and WHERE problems occur:

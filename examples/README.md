@@ -178,6 +178,9 @@ Strategy analysis script that explains what the agent learned and provides pract
 ### explain_failure.py
 Explainable AI analysis script that provides detailed month-by-month breakdown showing WHY agents fail and WHERE problems occur. Includes failure analysis and sustainable strategy recommendations.
 
+### study_italian_scenarios.py
+Comparative analysis of financial behaviors across 5 realistic Italian scenarios (Milano Junior, Milano Senior, Roma Famiglia, Bologna Coppia, Torino Single) based on ISTAT and Numbeo 2024 data. Tests multiple investment strategies and provides insights on sustainable investment rates for different Italian life situations.
+
 ### debug_nan.py
 NaN debugging utility for testing environment and reward computation.
 

@@ -1,0 +1,38 @@
+# Scenario: Milano - Professionista Junior
+# Fonte dati: ISTAT 2024, Numbeo Milano
+# Descrizione: Giovane professionista 25-30 anni, monolocale in zona semi-centrale
+
+environment:
+  income: 1800                    # Stipendio netto medio junior Milano (ISTAT)
+  fixed_expenses: 1200            # Spese fisse totali
+                                  # - Affitto monolocale: 900 EUR (Numbeo Milano)
+                                  # - Utenze: 150 EUR
+                                  # - Trasporti: 100 EUR (abbonamento ATM + extra)
+                                  # - Assicurazioni: 50 EUR
+  variable_expense_mean: 450      # Spese variabili medie
+                                  # - Alimentari: 250 EUR
+                                  # - Tempo libero: 150 EUR
+                                  # - Altro: 50 EUR
+  variable_expense_std: 100       # Deviazione standard
+  inflation: 0.02                 # 2% annuo (media italiana)
+  safety_threshold: 2000          # Buffer minimo (1.5 mesi spese)
+  max_months: 120                 # 10 anni
+  initial_cash: 3000              # Risparmi iniziali tipici
+  risk_tolerance: 0.6             # Giovane, più tollerante al rischio
+
+training:
+  num_episodes: 3000
+  gamma_low: 0.95
+  gamma_high: 0.99
+  high_period: 6
+  batch_size: 32
+  learning_rate_low: 0.00001
+  learning_rate_high: 0.000005
+
+reward:
+  alpha: 10.0
+  beta: 0.1
+  gamma: 5.0
+  delta: 20.0
+  lambda_: 1.0
+  mu: 0.5
