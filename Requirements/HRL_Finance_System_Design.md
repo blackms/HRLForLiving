@@ -88,7 +88,10 @@ A -->|reward_high (aggregated)| B
 
 **Low-Level Reward Function:**
 \[
-r_t = \alpha \cdot invest_{amount} - \beta \cdot max(0, threshold - cash) - \gamma \cdot overspend - \delta \cdot |min(0, cash)|
+r_{raw} = \alpha \cdot invest_{amount} - \beta \cdot max(0, threshold - cash) - \gamma \cdot overspend - \delta \cdot |min(0, cash)|
+\]
+\[
+r_t = r_{raw} / 1000.0 \quad \text{(scaled for training stability)}
 \]
 
 **High-Level Reward Function:**
@@ -104,6 +107,8 @@ r_{high} = \sum r_{low} + \lambda \cdot \Delta wealth + \mu \cdot stability_{rat
 - Debt penalties to heavily discourage negative balance
 - Wealth growth tracking for strategic rewards
 - Stability bonus for consistent positive balance
+- **Automatic reward scaling (÷1000) to prevent gradient explosion**
+- NaN/Inf safety checks with fallback penalties
 
 ### 3.3 High-Level Agent
 - Decision every 6–12 steps
@@ -398,12 +403,20 @@ from src.utils.config import RewardConfig
 config = RewardConfig(alpha=10.0, beta=0.1, gamma=5.0, delta=20.0, lambda_=1.0, mu=0.5)
 reward_engine = RewardEngine(config, safety_threshold=1000)
 
-# Compute low-level reward
+# Compute low-level reward (automatically scaled by 1000.0)
 reward = reward_engine.compute_low_level_reward(action, state, next_state)
+# Returns scaled reward in range ~[-10, 10] for training stability
 
 # Compute high-level reward
 high_reward = reward_engine.compute_high_level_reward(episode_history)
 ```
+
+**Important Note on Reward Scaling:**
+The `compute_low_level_reward()` method automatically scales rewards by dividing by 1000.0. This is critical for training stability:
+- With typical income (~$3200), raw rewards can exceed 10,000
+- Large rewards cause gradient explosion in neural networks
+- Scaling brings rewards into the recommended range of [-10, 10]
+- The scaling factor (1000.0) is based on typical income values
 
 ### 4.3 Low-Level Agent: `BudgetExecutor` ✅ IMPLEMENTED
 

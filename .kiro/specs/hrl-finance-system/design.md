@@ -168,12 +168,16 @@ class BudgetExecutor:
 
 **Purpose**: Computes multi-objective rewards for both agents
 
+**Status**: ✅ **IMPLEMENTED** - Fully functional with automatic reward scaling
+
 **Low-Level Reward Function**:
 ```python
-r_low = α * invest_amount          # Encourage investment
+r_raw = α * invest_amount          # Encourage investment
         - β * max(0, threshold - cash)  # Penalize low cash
         - γ * overspend                 # Penalize excess consumption
         - δ * abs(min(0, cash))         # Penalize debt
+
+r_low = r_raw / 1000.0             # Scale for training stability
 ```
 
 **High-Level Reward Function**:
@@ -182,6 +186,9 @@ r_high = Σ(r_low over period)      # Aggregate low-level rewards
          + λ * Δwealth              # Reward wealth growth
          + μ * stability_bonus      # Reward consistent positive balance
 ```
+
+**Critical Implementation Detail - Reward Scaling**:
+The low-level reward is automatically scaled by dividing by 1000.0 to prevent gradient explosion during neural network training. With typical income values (~$3200), raw rewards can exceed 10,000, which causes numerical instability. The scaling factor brings rewards into the recommended range of [-10, 10] for stable training, following best practices from RL literature.
 
 **Interface**:
 ```python
@@ -195,7 +202,8 @@ class RewardEngine:
         state: np.ndarray, 
         next_state: np.ndarray
     ) -> float
-        # Compute immediate monthly reward
+        # Compute immediate monthly reward (automatically scaled)
+        # Returns: scaled reward in range ~[-10, 10]
         
     def compute_high_level_reward(
         self, 

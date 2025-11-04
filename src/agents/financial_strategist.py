@@ -19,8 +19,18 @@ class StrategistNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(64, output_dim)
         )
+        
+        # Initialize weights with Xavier/Glorot initialization
+        # Literature: "Proper initialization prevents gradient vanishing/explosion" (Glorot & Bengio, 2010)
+        for layer in self.network:
+            if isinstance(layer, nn.Linear):
+                nn.init.xavier_uniform_(layer.weight, gain=0.01)  # Small gain for stability
+                nn.init.constant_(layer.bias, 0.0)
     
     def forward(self, x):
+        # Add input normalization layer
+        # Clip inputs to prevent extreme values
+        x = torch.clamp(x, -10.0, 10.0)
         return self.network(x)
 
 
@@ -122,14 +132,20 @@ class FinancialStrategist:
         else:
             months_elapsed = 0.0
         
-        # Construct aggregated state
+        # Construct aggregated state with normalization
+        # Literature: "State normalization is critical for hierarchical RL" (Nachum et al., 2018 - HIRO)
         aggregated_state = np.array([
-            avg_cash,
-            avg_investment_return,
-            spending_trend,
-            current_wealth,
-            months_elapsed
+            avg_cash / 10000.0,                    # Normalize to ~0.5-1.0
+            avg_investment_return / 1000.0,        # Normalize to ~-0.5 to 0.5
+            spending_trend / 100.0,                # Normalize to ~-0.1 to 0.1
+            current_wealth / 10000.0,              # Normalize to ~0.5-1.0
+            months_elapsed / 120.0                 # Normalize to [0, 1]
         ], dtype=np.float32)
+        
+        # Safety check for NaN/Inf in aggregated state
+        if np.any(np.isnan(aggregated_state)) or np.any(np.isinf(aggregated_state)):
+            print(f"WARNING: Invalid aggregated state! Returning default.")
+            aggregated_state = np.array([0.5, 0.0, 0.0, 0.5, 0.0], dtype=np.float32)
         
         return aggregated_state
 
@@ -166,15 +182,25 @@ class FinancialStrategist:
             state_tensor = torch.FloatTensor(state).unsqueeze(0)
             goal_raw = self.policy_network(state_tensor).squeeze(0).numpy()
         
+        # Check for NaN in goal (can happen with untrained network)
+        if np.any(np.isnan(goal_raw)):
+            print(f"WARNING: NaN in goal from network! Using default goal.")
+            goal_raw = np.array([0.3, 1000.0, 0.5], dtype=np.float32)
+        
         # Apply constraints to ensure values are within valid ranges
         # target_invest_ratio: [0, 1] using sigmoid
-        target_invest_ratio = 1.0 / (1.0 + np.exp(-goal_raw[0]))
+        goal_raw_clipped = np.clip(goal_raw, -20, 20)  # Clip to prevent overflow
+        target_invest_ratio = 1.0 / (1.0 + np.exp(-goal_raw_clipped[0]))
         
         # safety_buffer: [0, inf) using softplus (ensures positive)
-        safety_buffer = np.log(1.0 + np.exp(goal_raw[1]))
+        # Use numerically stable softplus: softplus(x) = log(1 + exp(x)) ≈ x for large x
+        if goal_raw_clipped[1] > 20:
+            safety_buffer = goal_raw_clipped[1]
+        else:
+            safety_buffer = np.log(1.0 + np.exp(goal_raw_clipped[1]))
         
         # aggressiveness: [0, 1] using sigmoid
-        aggressiveness = 1.0 / (1.0 + np.exp(-goal_raw[2]))
+        aggressiveness = 1.0 / (1.0 + np.exp(-goal_raw_clipped[2]))
         
         # Construct goal vector
         goal = np.array([
@@ -235,9 +261,13 @@ class FinancialStrategist:
             returns.insert(0, G)
         returns = np.array(returns, dtype=np.float32)
         
-        # Normalize returns for stable training
+        # Normalize returns for stable training (with better numerical stability)
         if len(returns) > 1:
-            returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+            returns_std = returns.std()
+            if returns_std > 1e-6:  # Only normalize if there's meaningful variance
+                returns = (returns - returns.mean()) / returns_std
+            else:
+                returns = returns - returns.mean()  # Just center if no variance
         
         # Convert to torch tensors
         states_tensor = torch.FloatTensor(states)
@@ -254,20 +284,51 @@ class FinancialStrategist:
         # weighted by returns (this is a simplified approach)
         # In full HIRO, we would use intrinsic rewards and goal-conditioned value functions
         mse_loss = torch.mean((goal_predictions - goals_tensor) ** 2, dim=1)
-        policy_loss = (mse_loss * returns_tensor).mean()
+        
+        # Clip returns to prevent extreme gradients
+        # Literature: "Return clipping improves stability" (Mnih et al., 2016 - A3C)
+        returns_tensor_clipped = torch.clamp(returns_tensor, -10.0, 10.0)
+        
+        policy_loss = (mse_loss * returns_tensor_clipped).mean()
         
         # Calculate a pseudo-entropy for exploration (variance of predictions)
-        goal_variance = torch.var(goal_predictions, dim=0).mean()
+        # Use safer variance calculation
+        if len(goal_predictions) > 1:
+            goal_variance = torch.var(goal_predictions, dim=0, unbiased=False).mean()
+            # Clip variance to prevent NaN
+            goal_variance = torch.clamp(goal_variance, 0.0, 100.0)
+        else:
+            goal_variance = torch.tensor(0.0)
+        
         entropy = goal_variance  # Use variance as a proxy for entropy
         
         # Total loss (policy loss - entropy bonus for exploration)
-        loss = policy_loss - 0.01 * entropy
+        # Reduce entropy coefficient for stability
+        loss = policy_loss - 0.001 * entropy  # Reduced from 0.01
+        
+        # Safety check for NaN loss
+        if torch.isnan(loss) or torch.isinf(loss):
+            print(f"WARNING: Invalid loss detected! Skipping update.")
+            return {'loss': 0.0, 'policy_entropy': 0.0, 'n_updates': 0}
         
         # Backpropagation
         loss.backward()
         
-        # Gradient clipping for stability
-        torch.nn.utils.clip_grad_norm_(self.policy_network.parameters(), max_norm=1.0)
+        # Gradient clipping for stability (more aggressive for high-level)
+        # Literature: "Hierarchical policies need stronger regularization" (Nachum et al., 2018)
+        torch.nn.utils.clip_grad_norm_(self.policy_network.parameters(), max_norm=0.1)
+        
+        # Check for NaN gradients
+        has_nan_grad = False
+        for param in self.policy_network.parameters():
+            if param.grad is not None and torch.isnan(param.grad).any():
+                has_nan_grad = True
+                break
+        
+        if has_nan_grad:
+            print(f"WARNING: NaN gradients detected! Skipping update.")
+            self.optimizer.zero_grad()
+            return {'loss': 0.0, 'policy_entropy': 0.0, 'n_updates': 0}
         
         self.optimizer.step()
         

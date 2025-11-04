@@ -1,0 +1,31 @@
+# Personal Financial Configuration (EUR) - Scaled Version
+# Values scaled down by factor of 100 to help with neural network training
+# All values in EUR (€) / 100
+
+environment:
+  income: 32                      # Monthly net salary (3200 EUR / 100)
+  fixed_expenses: 21.6            # Total fixed monthly expenses (2160 EUR / 100)
+  variable_expense_mean: 3        # Average variable expenses (300 EUR / 100)
+  variable_expense_std: 0.5       # Standard deviation (50 EUR / 100)
+  inflation: 0.02                 # 2% annual inflation
+  safety_threshold: 10            # Minimum cash buffer (1000 EUR / 100)
+  max_months: 60                  # 5-year simulation period
+  initial_cash: 30                # Starting cash balance (3000 EUR / 100)
+  risk_tolerance: 0.5             # Medium risk tolerance (0-1 scale)
+
+training:
+  num_episodes: 5000              # Number of training episodes
+  gamma_low: 0.95                 # Discount factor for low-level agent
+  gamma_high: 0.99                # Discount factor for high-level agent
+  high_period: 6                  # High-level decision period (months)
+  batch_size: 32                  # Training batch size
+  learning_rate_low: 0.0003       # Learning rate for low-level agent
+  learning_rate_high: 0.0001      # Learning rate for high-level agent
+
+reward:
+  alpha: 10.0                     # Investment reward coefficient
+  beta: 0.1                       # Stability penalty coefficient
+  gamma: 5.0                      # Overspend penalty coefficient
+  delta: 20.0                     # Debt penalty coefficient
+  lambda_: 1.0                    # Wealth growth coefficient
+  mu: 0.5                         # Stability bonus coefficient

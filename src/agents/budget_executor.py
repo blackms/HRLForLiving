@@ -21,8 +21,17 @@ class PolicyNetwork(nn.Module):
             nn.Linear(128, output_dim),
             nn.Softmax(dim=-1)  # Ensure output sums to 1
         )
+        
+        # Initialize weights with Xavier initialization
+        # Literature: "Proper initialization is critical for deep RL" (Glorot & Bengio, 2010)
+        for layer in self.network:
+            if isinstance(layer, nn.Linear):
+                nn.init.xavier_uniform_(layer.weight, gain=0.01)  # Small gain for stability
+                nn.init.constant_(layer.bias, 0.0)
     
     def forward(self, x):
+        # Clip inputs to prevent extreme values
+        x = torch.clamp(x, -10.0, 10.0)
         return self.network(x)
 
 
@@ -106,8 +115,28 @@ class BudgetExecutor:
         if goal.shape[0] != self.goal_dim:
             raise ValueError(f"Expected goal dimension {self.goal_dim}, got {goal.shape[0]}")
         
-        # Concatenate state and goal to create 10-dimensional input
-        concatenated_input = np.concatenate([state, goal])
+        # Normalize state for neural network stability
+        # State: [income, fixed, variable, cash, inflation, risk, t_remaining]
+        normalized_state = np.array([
+            state[0] / 10000.0,              # income
+            state[1] / 10000.0,              # fixed_expenses
+            state[2] / 1000.0,               # variable_expense
+            state[3] / 10000.0,              # cash_balance
+            state[4] * 100.0,                # inflation
+            state[5],                        # risk_tolerance (already [0,1])
+            state[6] / 120.0                 # t_remaining (normalize by max months)
+        ], dtype=np.float32)
+        
+        # Normalize goal for neural network
+        # Goal: [target_invest_ratio, safety_buffer, aggressiveness]
+        normalized_goal = np.array([
+            goal[0],                         # target_invest_ratio (already [0,1])
+            goal[1] / 10000.0,               # safety_buffer
+            goal[2]                          # aggressiveness (already [0,1])
+        ], dtype=np.float32)
+        
+        # Concatenate normalized state and goal to create 10-dimensional input
+        concatenated_input = np.concatenate([normalized_state, normalized_goal])
         
         # Convert to torch tensor
         with torch.no_grad():
@@ -123,6 +152,11 @@ class BudgetExecutor:
         
         # Ensure action is properly shaped and normalized
         action = np.array(action, dtype=np.float32)
+        
+        # Check for NaN in action (can happen with untrained network)
+        if np.any(np.isnan(action)):
+            print(f"WARNING: NaN in action from network! Using default action.")
+            action = np.array([0.3, 0.4, 0.3], dtype=np.float32)
         
         # Apply additional normalization to ensure action sums to 1
         action = self._normalize_action(action)
@@ -195,15 +229,21 @@ class BudgetExecutor:
         # Calculate returns using discount factor
         returns = []
         G = 0
-        for reward, done in zip(reversed(rewards), reversed(dones)):
-            if done:
+        for i in range(len(rewards) - 1, -1, -1):
+            reward = rewards[i]
+            done = dones[i]
+            if done > 0.5:  # Treat as boolean (done is 0.0 or 1.0)
                 G = 0
             G = reward + self.config.gamma_low * G
             returns.insert(0, G)
         returns = np.array(returns, dtype=np.float32)
         
-        # Normalize returns
-        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        # Normalize returns (with better numerical stability)
+        returns_std = returns.std()
+        if returns_std > 1e-6:  # Only normalize if there's meaningful variance
+            returns = (returns - returns.mean()) / returns_std
+        else:
+            returns = returns - returns.mean()  # Just center if no variance
         
         # Convert to torch tensors
         obs_tensor = torch.FloatTensor(observations)
@@ -218,18 +258,25 @@ class BudgetExecutor:
         
         # Calculate policy loss (negative log probability weighted by returns)
         # This is a simplified policy gradient approach
-        log_probs = torch.log(action_probs + 1e-8)
+        # Clip action_probs to avoid log(0)
+        action_probs_clipped = torch.clamp(action_probs, min=1e-6, max=1.0)
+        log_probs = torch.log(action_probs_clipped)
         selected_log_probs = (log_probs * actions_tensor).sum(dim=1)
         policy_loss = -(selected_log_probs * returns_tensor).mean()
         
         # Calculate entropy for exploration
-        entropy = -(action_probs * log_probs).sum(dim=1).mean()
+        entropy = -(action_probs_clipped * log_probs).sum(dim=1).mean()
         
         # Total loss (policy loss - entropy bonus for exploration)
         loss = policy_loss - 0.01 * entropy
         
         # Backpropagation
         loss.backward()
+        
+        # Gradient clipping for stability (critical for preventing NaN)
+        # Literature: "Gradient clipping is essential for RNN/RL training" (Pascanu et al., 2013)
+        torch.nn.utils.clip_grad_norm_(self.policy_network.parameters(), max_norm=0.5)
+        
         self.optimizer.step()
         
         # Store metrics

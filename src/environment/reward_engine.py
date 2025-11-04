@@ -100,7 +100,20 @@ class RewardEngine:
             - debt_penalty
         )
         
-        return reward
+        # CRITICAL: Scale reward to prevent numerical instability
+        # Literature recommends rewards in range [-1, 1] or [-10, 10]
+        # With income ~3200, rewards can be ~10000+, causing gradient explosion
+        reward_scale = 1000.0  # Scale factor based on typical income
+        scaled_reward = reward / reward_scale
+        
+        # Safety check for NaN/Inf
+        if np.isnan(scaled_reward) or np.isinf(scaled_reward):
+            print(f"WARNING: Invalid reward detected! Raw: {reward}, Scaled: {scaled_reward}")
+            print(f"  Investment: {investment_reward}, Stability: {stability_penalty}")
+            print(f"  Overspend: {overspend_penalty}, Debt: {debt_penalty}")
+            scaled_reward = -10.0  # Large penalty for invalid state
+        
+        return scaled_reward
 
     def compute_high_level_reward(self, episode_history: List[Transition]) -> float:
         """

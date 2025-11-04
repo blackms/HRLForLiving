@@ -1,0 +1,34 @@
+# Personal Financial Configuration (EUR)
+# Real-world scenario with Italian salary and expenses
+# All values in EUR (€)
+
+environment:
+  income: 3200                    # Monthly net salary (EUR)
+  fixed_expenses: 2160            # Total fixed monthly expenses (EUR)
+                                  # - Rent: 1300
+                                  # - Car: 450
+                                  # - Health insurance: 410
+  variable_expense_mean: 400      # Average variable expenses (food, utilities, etc.)
+  variable_expense_std: 100       # Standard deviation for variable expenses
+  inflation: 0.02                 # 2% annual inflation
+  safety_threshold: 1000          # Minimum cash buffer (EUR)
+  max_months: 120                 # 10-year simulation (longer horizon for learning)
+  initial_cash: 10000             # Larger starting buffer (2-3 months expenses)
+  risk_tolerance: 0.5             # Medium risk tolerance (0-1 scale)
+
+training:
+  num_episodes: 5000              # Number of training episodes
+  gamma_low: 0.95                 # Discount factor for low-level agent
+  gamma_high: 0.99                # Discount factor for high-level agent
+  high_period: 6                  # High-level decision period (months)
+  batch_size: 32                  # Training batch size
+  learning_rate_low: 0.00001      # Lower LR for stability (was 0.0003)
+  learning_rate_high: 0.000005    # Lower LR for stability (was 0.0001)
+
+reward:
+  alpha: 10.0                     # Investment reward coefficient
+  beta: 0.1                       # Stability penalty coefficient
+  gamma: 5.0                      # Overspend penalty coefficient
+  delta: 20.0                     # Debt penalty coefficient
+  lambda_: 1.0                    # Wealth growth coefficient
+  mu: 0.5                         # Stability bonus coefficient

@@ -81,9 +81,17 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 | Document | Description | Audience |
 |----------|-------------|----------|
 | [Troubleshooting](README.md#troubleshooting) | Common issues and solutions | All users |
+| [Debug Scripts](README.md#debug-scripts) | Diagnostic tools for debugging | Developers |
 | [FAQ](README.md#frequently-asked-questions) | Frequently asked questions | All users |
 | [Extending the System](README.md#extending-the-system) | Customization guide | Developers |
 | [Contributing](README.md#contributing) | Contribution guidelines | Contributors |
+
+### Debug Scripts
+
+| Script | Description | Run Command |
+|--------|-------------|-------------|
+| [debug_nan.py](debug_nan.py) | NaN detection in environment and rewards | `python3 debug_nan.py` |
+| [debug_training.py](debug_training.py) | Training diagnostics (if available) | `python3 debug_training.py` |
 
 ## Reference
 
@@ -135,6 +143,15 @@ pytest tests/test_sanity_checks.py -v
 tensorboard --logdir=runs
 
 # Open browser to: http://localhost:6006
+```
+
+### Debug Commands
+```bash
+# Check for NaN issues
+python3 debug_nan.py
+
+# Training diagnostics
+python3 debug_training.py
 ```
 
 ## Documentation by Role

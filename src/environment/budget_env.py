@@ -123,10 +123,11 @@ class BudgetEnv(gym.Env):
         Construct the current state observation vector.
         
         Returns:
-            np.ndarray: 7-dimensional state vector
+            np.ndarray: 7-dimensional state vector (original values, not normalized)
         """
         t_remaining = self.max_months - self.current_month
         
+        # Return original values - normalization will be done in the neural networks if needed
         state = np.array([
             self.income,
             self.fixed_expenses,

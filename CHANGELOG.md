@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Reward scaling in RewardEngine to prevent gradient explosion
+  - Low-level rewards automatically scaled by 1000.0
+  - Prevents numerical instability with large income values (~$3200)
+  - Brings rewards into recommended range [-10, 10] for stable training
+  - Added NaN/Inf safety checks with fallback penalties
+  - Literature-based approach for neural network training stability
+- Simplified debug_nan.py script for environment and reward testing
+  - Focuses on basic environment functionality without agent complexity
+  - Tests BudgetEnv and RewardEngine for NaN values
+  - Runs 12-step test episode with balanced actions
+  - Displays step-by-step cash flow and reward information
+  - Provides early NaN detection with diagnostic output
+  - Useful for configuration validation and troubleshooting
 - Comprehensive README documentation (Task 17)
   - Detailed behavioral profile descriptions with use cases and characteristics
   - Complete configuration parameters reference with tables and ranges

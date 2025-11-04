@@ -37,6 +37,7 @@ Demonstrates the multi-objective reward computation system:
 - Understanding reward components (investment, stability, overspend, debt)
 - Computing high-level strategic rewards
 - Aggregating rewards over multiple time steps
+- Automatic reward scaling for training stability
 
 **Run:**
 ```bash
@@ -50,6 +51,7 @@ PYTHONPATH=. python3 examples/reward_engine_usage.py
 - How overspending and debt are penalized
 - How high-level rewards aggregate low-level performance
 - Understanding wealth growth and stability bonuses
+- **Why rewards are automatically scaled by 1000.0 for training stability**
 
 ### 3. Analytics Module Usage (`analytics_usage.py`)
 

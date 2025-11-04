@@ -243,16 +243,20 @@ The system includes three predefined behavioral profiles with different risk tol
 **Reward Formula:**
 ```
 Low-Level Reward (monthly):
-r_low = α * invest_amount                    # Encourage investment
+r_raw = α * invest_amount                    # Encourage investment
         - β * max(0, threshold - cash)       # Penalize low cash
         - γ * overspend                      # Penalize excess spending
         - δ * abs(min(0, cash))              # Penalize debt
+
+r_low = r_raw / 1000.0                       # Scale to prevent gradient explosion
 
 High-Level Reward (strategic period):
 r_high = Σ(r_low over period)                # Aggregate monthly rewards
          + λ * Δwealth                       # Reward wealth growth
          + μ * stability_bonus               # Reward consistent positive balance
 ```
+
+**Note on Reward Scaling:** Low-level rewards are scaled by 1000.0 to prevent numerical instability. With typical income values (~$3200), raw rewards can exceed 10,000, causing gradient explosion during training. The scaling factor brings rewards into the recommended range of [-10, 10] for stable neural network training.
 
 ### YAML Configuration Format
 
@@ -385,6 +389,12 @@ Actions are automatically normalized to sum to 1 using softmax.
 
 The `RewardEngine` is automatically integrated with `BudgetEnv` and computes rewards balancing multiple financial objectives. You can also use it standalone for custom reward calculations.
 
+**Key Features:**
+- Multi-objective reward computation balancing investment, stability, and risk
+- Automatic reward scaling (÷1000) to prevent gradient explosion during training
+- NaN/Inf safety checks with fallback penalties
+- Configurable coefficients for different behavioral profiles
+
 **Standalone Usage:**
 ```python
 from src.environment import RewardEngine
@@ -409,11 +419,15 @@ action = np.array([0.3, 0.5, 0.2])  # [invest, save, consume]
 state = np.array([3200, 1400, 700, 2000, 0.02, 0.5, 50])
 next_state = np.array([3200, 1400, 700, 1800, 0.02, 0.5, 49])
 reward = reward_engine.compute_low_level_reward(action, state, next_state)
+# Note: reward is automatically scaled by 1000.0 for training stability
 
 # Compute high-level reward over a strategic period
 episode_history = [...]  # List of Transition objects
 high_level_reward = reward_engine.compute_high_level_reward(episode_history)
 ```
+
+**Reward Scaling:**
+Low-level rewards are automatically scaled by dividing by 1000.0. This prevents numerical instability during neural network training. With typical income values (~$3200), raw rewards can exceed 10,000, which causes gradient explosion. The scaling brings rewards into the recommended range of [-10, 10] for stable training.
 
 ### BudgetExecutor - Low-Level Agent
 
@@ -1342,6 +1356,52 @@ pytest tests/test_sanity_checks.py -v
 3. Clear episode buffer more frequently (modify HRLTrainer)
 4. Use smaller neural networks (modify agent architectures)
 5. Run on a machine with more RAM
+
+### Debug Scripts
+
+The system includes debug scripts to help diagnose issues:
+
+#### debug_nan.py - NaN Detection
+
+A simplified debugging script that tests the environment and reward computation for NaN values:
+
+```bash
+python3 debug_nan.py
+```
+
+**What it does:**
+- Loads configuration from `configs/personal_eur.yaml`
+- Displays configuration parameters and available income after expenses
+- Runs a test episode with simple balanced actions (30% invest, 40% save, 30% consume)
+- Checks for NaN values in rewards and state observations
+- Displays step-by-step cash flow and reward information
+- Terminates early if NaN is detected with diagnostic information
+
+**When to use:**
+- Investigating NaN errors during training
+- Verifying environment and reward engine behavior
+- Testing configuration parameters for edge cases
+- Debugging cash flow issues
+
+**Output includes:**
+- Configuration summary (income, expenses, available funds)
+- Step-by-step execution details (cash before/after, rewards, investments)
+- NaN detection alerts with state and info dictionary details
+- Episode summary (total steps, total reward, final cash, total invested)
+
+#### debug_training.py - Training Diagnostics
+
+A more comprehensive debugging script for training issues (if available):
+
+```bash
+python3 debug_training.py
+```
+
+**Use these scripts when:**
+- Training produces unexpected results
+- Rewards contain NaN or infinite values
+- Cash balance calculations seem incorrect
+- You need to verify environment behavior before full training
 
 ### Frequently Asked Questions
 
