@@ -2102,6 +2102,54 @@ Contributions are welcome! Here's how you can help:
 - Update configuration documentation for new parameters
 - Keep CHANGELOG.md up to date
 
+## Web UI (In Development)
+
+A web-based user interface is being developed to make the HRL Finance System more accessible without requiring command-line expertise.
+
+### Backend API
+
+The FastAPI backend exposes the HRL system functionality through RESTful APIs:
+
+**Status:** 🚧 In Development
+
+**Current Implementation:**
+- ✅ FastAPI application initialized (`backend/main.py`)
+- ✅ Root endpoint (`GET /`) - API information
+- ✅ Health check endpoint (`GET /health`) - System monitoring
+- 🚧 Scenarios API - CRUD operations for financial scenarios
+- 🚧 Training API - Model training with real-time WebSocket updates
+- 🚧 Simulation API - Run evaluations and get results
+- 🚧 Models API - Manage trained models
+- 🚧 Reports API - Generate PDF/HTML reports
+
+**Quick Start:**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+Visit http://localhost:8000/docs for interactive API documentation.
+
+### Frontend App
+
+The React + TypeScript frontend provides an intuitive interface for:
+- Creating and managing financial scenarios
+- Training AI models with real-time progress monitoring
+- Running simulations and visualizing results
+- Comparing different scenarios
+- Generating comprehensive reports
+
+**Status:** 🚧 In Development
+
+For more details, see:
+- [Backend README](backend/README.md)
+- [Frontend README](frontend/README.md)
+- [Project Structure](PROJECT_STRUCTURE.md)
+- [UI Requirements](.kiro/specs/hrl-finance-ui/requirements.md)
+- [UI Design](.kiro/specs/hrl-finance-ui/design.md)
+- [Implementation Tasks](.kiro/specs/hrl-finance-ui/tasks.md)
+
 ## Future Enhancements
 
 Potential areas for future development:
