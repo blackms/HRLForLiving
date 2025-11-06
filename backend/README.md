@@ -91,13 +91,19 @@ This will show which lines of code are not covered by tests.
 **Current Coverage:** 
 - 41 API endpoint tests covering all major functionality
 - 26 service layer tests covering business logic and data processing
-- Total: 67+ comprehensive tests
+- 11 integration tests covering complete end-to-end workflows
+- Total: 78+ comprehensive tests
 
-**Recent Test Enhancements:**
-- Enhanced `test_list_scenarios` with response structure validation
-- Validates presence of required fields (name, description, timestamps)
-- Ensures API responses conform to documented schema
-- Handles timestamp field variations (created_at/updated_at)
+**Integration Tests:**
+- Complete user workflows as documented in API_QUICK_START.md
+- Template-based scenario creation workflow
+- Scenario to model to simulation workflow
+- Simulation to report generation workflow
+- Error recovery and system resilience testing
+- Data consistency validation across operations
+- Concurrent operations without conflicts
+
+See `backend/tests/INTEGRATION_TESTS_SUMMARY.md` for detailed workflow documentation.
 
 ## API Endpoints
 

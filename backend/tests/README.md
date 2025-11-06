@@ -6,15 +6,18 @@ This directory contains comprehensive tests for the HRL Finance UI backend API.
 
 ```
 tests/
-├── conftest.py              # Pytest configuration and fixtures
-├── test_api_scenarios.py    # Scenarios API endpoint tests
-├── test_api_models.py       # Models API endpoint tests
-├── test_api_training.py     # Training API endpoint tests
-├── test_api_simulation.py   # Simulation API endpoint tests
-├── test_api_reports.py      # Reports API endpoint tests
-├── test_services.py         # Service layer unit tests (comprehensive)
-├── test_file_manager.py     # File manager utility tests
-└── test_integration.py      # Integration tests for complete workflows
+├── conftest.py                        # Pytest configuration and fixtures
+├── test_api_scenarios.py              # Scenarios API endpoint tests
+├── test_api_models.py                 # Models API endpoint tests
+├── test_api_training.py               # Training API endpoint tests
+├── test_api_simulation.py             # Simulation API endpoint tests
+├── test_api_reports.py                # Reports API endpoint tests
+├── test_services.py                   # Service layer unit tests (comprehensive)
+├── test_file_manager.py               # File manager utility tests
+├── test_integration.py                # Integration tests for complete workflows
+├── README.md                          # This file - test suite overview
+├── INTEGRATION_TESTS_SUMMARY.md       # Detailed integration test documentation
+└── INTEGRATION_TEST_NOTES.md          # Known issues and recommendations
 ```
 
 ### Service Layer Tests (`test_services.py`)
@@ -87,10 +90,34 @@ python3 -m pytest tests/ --cov=backend --cov-report=html
 - **Service Layer**: Test business logic in service classes
 - **Utilities**: Test helper functions and utilities
 
-### Integration Tests
-- **Complete Workflows**: Test end-to-end user workflows
-- **API Interactions**: Test multiple API calls in sequence
-- **Data Persistence**: Test data storage and retrieval
+### Integration Tests (`test_integration.py`)
+
+**TestIntegrationWorkflows** (4 tests):
+- Scenario creation and retrieval workflow (CRUD operations)
+- Model listing and details workflow
+- Simulation history retrieval workflow
+- Training status check workflow
+- Report listing workflow
+
+**TestCompleteUserWorkflows** (7 tests):
+- Template to scenario creation workflow (5 steps)
+- Scenario to model workflow (4 steps)
+- Model to simulation workflow (5 steps)
+- Simulation to report workflow (7 steps)
+- Comparison workflow (4 steps)
+- Error recovery workflow (6 steps)
+- Data consistency workflow (6 steps)
+- Concurrent operations workflow (6 steps)
+
+**Total Integration Tests: 11**
+
+These tests validate:
+- Complete end-to-end user workflows as documented in API_QUICK_START.md
+- Multi-step operations with proper data flow
+- Error handling and recovery mechanisms
+- Data consistency across operations
+- Concurrent operations without conflicts
+- System resilience after errors
 
 ## Fixtures
 
@@ -112,7 +139,12 @@ The test suite covers:
 - ✅ Request validation and error handling
 - ✅ Service layer business logic (comprehensive)
 - ✅ File management utilities
-- ✅ Complete user workflows
+- ✅ Complete user workflows (11 integration tests)
+- ✅ End-to-end workflows as documented in API_QUICK_START.md
+- ✅ Multi-step operations with data flow validation
+- ✅ Error recovery and system resilience
+- ✅ Data consistency across operations
+- ✅ Concurrent operations without conflicts
 - ✅ Edge cases and error conditions
 - ✅ Data validation and sanitization
 - ✅ Statistics calculation and aggregation
@@ -171,3 +203,45 @@ async def test_list_scenarios():
         assert response.status_code == 200
         assert isinstance(response.json(), list)
 ```
+
+## Documentation
+
+### Test Documentation Files
+
+- **README.md** (this file) - Test suite overview and quick reference
+- **INTEGRATION_TESTS_SUMMARY.md** - Comprehensive documentation of all integration tests
+  - Detailed workflow descriptions
+  - Step-by-step test breakdowns
+  - Expected behaviors and validations
+  - API endpoints tested
+  - Test statistics and coverage
+- **INTEGRATION_TEST_NOTES.md** - Known issues and recommendations
+  - Status code mismatches
+  - Template structure verification needed
+  - Future enhancement suggestions
+  - Test improvement recommendations
+
+### Related Documentation
+
+- `backend/API_QUICK_START.md` - User workflows that integration tests validate
+- `backend/API_DOCUMENTATION.md` - Complete API reference
+- `backend/README.md` - Backend setup and overview
+
+## Continuous Integration
+
+When adding new features:
+1. Write unit tests for new functions/methods
+2. Write API tests for new endpoints
+3. Add integration tests for new workflows
+4. Update documentation to match
+5. Ensure all tests pass before merging
+
+## Test Maintenance
+
+### Regular Tasks
+
+- Review and update tests when API changes
+- Keep integration tests in sync with API_QUICK_START.md
+- Update documentation when adding new tests
+- Fix any known issues documented in INTEGRATION_TEST_NOTES.md
+- Monitor test coverage and add tests for uncovered code
