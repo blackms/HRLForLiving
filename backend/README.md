@@ -105,10 +105,31 @@ See [REPORTS_API.md](api/REPORTS_API.md) for detailed Reports API documentation.
 ### API Documentation
 
 Once running, visit:
-- API Root: http://localhost:8000
-- Health Check: http://localhost:8000/health
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- **API Root**: http://localhost:8000 - Overview with navigation links and endpoint listing
+- **Health Check**: http://localhost:8000/health - Service health status with timestamp
+- **Swagger UI**: http://localhost:8000/docs - Interactive API documentation with try-it-out functionality
+- **ReDoc**: http://localhost:8000/redoc - Alternative documentation view with better readability
+- **OpenAPI Schema**: http://localhost:8000/openapi.json - Machine-readable API specification
+
+### Enhanced OpenAPI Documentation ✅
+
+The API now includes comprehensive OpenAPI metadata:
+
+**API Tags:**
+- `scenarios` - Operations for managing financial scenarios
+- `training` - Operations for training AI models on scenarios
+- `simulation` - Operations for running simulations with trained models
+- `models` - Operations for managing trained models
+- `reports` - Operations for generating and downloading reports
+- `general` - Root and health check endpoints
+
+**Features:**
+- Detailed descriptions for each endpoint group
+- Complete request/response examples
+- WebSocket connection documentation
+- Getting started workflow guide
+- Authentication and rate limiting notes
+- Contact information and license details
 
 ## Data Models
 

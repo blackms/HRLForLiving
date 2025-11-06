@@ -28,6 +28,7 @@ npm run preview
 - React Router (navigation)
 - Axios (HTTP client)
 - Socket.IO Client (WebSocket)
+- React Context API (state management)
 
 ## Development
 
@@ -39,10 +40,17 @@ The app will be available at http://localhost:5173
 frontend/
 ├── src/
 │   ├── components/      # Reusable UI components
-│   │   ├── Layout.tsx   # Main layout with responsive navigation
-│   │   └── ReportModal.tsx  # Report generation modal dialog
+│   │   ├── ErrorBoundary.tsx    # Error boundary for React errors
+│   │   ├── ErrorMessage.tsx     # Error display with retry
+│   │   ├── Layout.tsx           # Main layout with responsive navigation
+│   │   ├── LoadingSpinner.tsx   # Loading states and spinners
+│   │   ├── ReportModal.tsx      # Report generation modal dialog
+│   │   └── ToastContainer.tsx   # Toast notification display
 │   ├── contexts/        # React contexts
-│   │   └── ThemeContext.tsx  # Theme provider (light/dark mode)
+│   │   ├── ThemeContext.tsx     # Theme provider (light/dark mode)
+│   │   └── ToastContext.tsx     # Toast notification state management
+│   ├── hooks/           # Custom React hooks
+│   │   └── useAsync.ts          # Async operation hook with retry
 │   ├── pages/           # Page components
 │   │   ├── Dashboard.tsx
 │   │   ├── ScenarioBuilder.tsx
@@ -56,6 +64,10 @@ frontend/
 │   ├── types/           # TypeScript type definitions
 │   │   └── index.ts     # Core types matching backend models
 │   ├── utils/           # Utility functions
+│   │   ├── accessibility.ts         # Accessibility helpers
+│   │   ├── apiWrapper.ts            # API error handling wrapper
+│   │   ├── errorLogger.ts           # Error logging service
+│   │   └── gracefulDegradation.ts   # Safe data formatting
 │   ├── App.tsx          # Main app component with routing
 │   └── main.tsx         # App entry point
 ├── public/              # Static assets
@@ -1002,6 +1014,112 @@ function MyPage() {
 - Constructs download URL: `http://localhost:8000/api/reports/{report_id}`
 
 **Location:** `src/components/ReportModal.tsx` (336 lines)
+
+## Context Providers
+
+The application uses React Context API for global state management:
+
+### ThemeContext
+
+Manages light/dark theme preference with persistence.
+
+**Location:** `src/contexts/ThemeContext.tsx`
+
+**Features:**
+- Toggle between light and dark themes
+- Persistent theme preference (localStorage)
+- Smooth transitions between themes
+- Applies theme class to document root
+
+**Usage:**
+```typescript
+import { useTheme } from '../contexts/ThemeContext';
+
+function MyComponent() {
+  const { theme, toggleTheme } = useTheme();
+  
+  return (
+    <button onClick={toggleTheme}>
+      Current theme: {theme}
+    </button>
+  );
+}
+```
+
+### ToastContext
+
+Manages toast notification state and display.
+
+**Location:** `src/contexts/ToastContext.tsx`
+
+**Features:**
+- Four toast types: success, error, warning, info
+- Auto-dismiss with configurable duration (default: 5000ms)
+- Manual dismiss capability
+- Queue management for multiple toasts
+- Unique ID generation for each toast
+- Automatic cleanup with setTimeout
+
+**Interface:**
+```typescript
+interface ToastContextType {
+  toasts: Toast[];
+  showToast: (type: ToastType, message: string, duration?: number) => void;
+  removeToast: (id: string) => void;
+  success: (message: string, duration?: number) => void;
+  error: (message: string, duration?: number) => void;
+  warning: (message: string, duration?: number) => void;
+  info: (message: string, duration?: number) => void;
+}
+```
+
+**Usage:**
+```typescript
+import { useToast } from '../contexts/ToastContext';
+
+function MyComponent() {
+  const { success, error, warning, info } = useToast();
+  
+  const handleSave = async () => {
+    try {
+      await api.save(data);
+      success('Saved successfully!');
+    } catch (err) {
+      error('Failed to save');
+    }
+  };
+  
+  return <button onClick={handleSave}>Save</button>;
+}
+```
+
+**Toast Types:**
+- `success`: Green background - for successful operations
+- `error`: Red background - for errors and failures
+- `warning`: Yellow background - for warnings and cautions
+- `info`: Blue background - for informational messages
+
+**Duration Options:**
+- Default: 5000ms (5 seconds)
+- Custom: Pass any number in milliseconds
+- Persistent: Pass 0 to disable auto-dismiss
+
+**Provider Setup:**
+
+Both providers are configured in `App.tsx`:
+
+```typescript
+<ErrorBoundary>
+  <ThemeProvider>
+    <ToastProvider>
+      <BrowserRouter>
+        <ToastContainer />
+        <Routes>...</Routes>
+      </BrowserRouter>
+    </ToastProvider>
+  </ThemeProvider>
+</ErrorBoundary>
+```
 
 ## Type Safety
 

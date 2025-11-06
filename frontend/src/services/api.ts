@@ -56,13 +56,7 @@ interface TemplateItem {
   reward: RewardConfig;
 }
 
-interface ReportRequest {
-  scenario_name: string;
-  model_name: string;
-  simulation_id: string;
-  format: 'pdf' | 'html';
-  sections?: string[];
-}
+
 
 // API Error type
 export interface ApiError {
