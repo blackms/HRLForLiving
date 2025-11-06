@@ -213,11 +213,47 @@ websocketService.disconnect();
 
 ## Pages
 
-### Dashboard
-- Overview of scenarios and models
-- Quick action buttons
-- Recent activity feed
-- Statistics summary cards
+### Dashboard ✅ **IMPLEMENTED**
+
+The Dashboard is the main landing page providing an overview of the entire system.
+
+**Features:**
+- **Statistics Summary Cards**: Display counts for scenarios, models, and simulations with icons
+- **Quick Actions**: Four action buttons for common workflows:
+  - New Scenario → Navigate to Scenario Builder
+  - Start Training → Navigate to Training Monitor
+  - Run Simulation → Navigate to Simulation Runner
+  - Compare Results → Navigate to Comparison View
+- **Recent Scenarios**: Shows up to 3 most recent scenarios with:
+  - Scenario name and description
+  - Income and available income percentage
+  - Risk tolerance badge (Low/Medium/High with color coding)
+  - Empty state with "Create your first scenario" CTA
+- **Recent Models**: Shows up to 3 most recent trained models with:
+  - Model name and associated scenario
+  - Episode count and training date (relative time)
+  - Final reward metric
+  - Empty state with "Train your first model" CTA
+- **Recent Activity Feed**: Timeline of recent actions including:
+  - Simulation runs with episode counts
+  - Model training completions
+  - Relative timestamps (e.g., "5 minutes ago", "2 hours ago")
+  - Activity type icons (🎯 training, 🔬 simulation, 📝 scenario, 🤖 model)
+- **Loading States**: Animated spinner during data fetch
+- **Error Handling**: Error banner with retry button
+- **Refresh Button**: Manual data reload capability
+- **Responsive Design**: Adapts from 1 to 4 columns based on screen size
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.listScenarios()` - Fetches all scenarios
+- `api.listModels()` - Fetches all trained models
+- `api.getSimulationHistory()` - Fetches simulation history
+
+**Navigation:**
+- Clicking scenario cards → Scenario Builder page
+- Clicking model cards → Simulation Runner page
+- Quick action buttons → Respective feature pages
 
 ### Scenario Builder
 - Create and edit financial scenarios
