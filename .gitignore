@@ -1,2 +1,24 @@
 models/*
 runs/*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+.dockerignore
+
+# Nginx
+nginx/ssl/*
+nginx/cache/*
+!nginx/ssl/.gitkeep
+!nginx/cache/.gitkeep
+
+# Logs
+logs/*
+*.log
+
+# Temporary files
+tmp/
+temp/
