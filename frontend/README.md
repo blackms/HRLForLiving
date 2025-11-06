@@ -411,11 +411,85 @@ The Training Monitor provides a comprehensive interface for training AI models o
 - Disabled states prevent duplicate training sessions
 - Clear visual feedback for all actions
 
-### Simulation Runner
-- Select model and scenario
-- Configure simulation parameters
-- Run evaluation episodes
-- View summary statistics
+### Simulation Runner ✅ **IMPLEMENTED**
+
+The Simulation Runner allows users to evaluate trained models on financial scenarios and view comprehensive results.
+
+**Features:**
+- **Configuration Form** (shown before running):
+  - **Trained Model Selector**: Dropdown showing all available models with scenario names
+    - Format: "model_name (scenario_name)"
+    - Empty state message if no models available
+    - Auto-selects first model on load
+  - **Scenario Selector**: Dropdown showing all available scenarios
+    - Auto-selects first scenario on load
+  - **Number of Episodes**: Input field (1-100 range)
+    - Default: 10 episodes
+    - Helper text: "Recommended: 10-50 episodes for reliable statistics"
+  - **Random Seed**: Optional input for reproducibility
+    - Placeholder: "Leave empty for random"
+    - Helper text: "Set a seed for reproducible results"
+  - **Run Simulation Button**: 
+    - Disabled when no model/scenario selected
+    - Shows spinner and "Running Simulation..." when active
+    - Disabled during simulation execution
+- **Progress Indicator** (shown during simulation):
+  - Animated spinner (blue, 8x8 size)
+  - Status text: "Running simulation..."
+  - Details: "Evaluating X episodes with model_name"
+  - Centered layout with white/dark background card
+- **Summary Statistics** (4 metric cards after completion):
+  - **Duration**: Mean ± std dev in months
+  - **Total Wealth**: Mean ± std dev in EUR
+  - **Investment Gains**: 
+    - Mean value in EUR with +/- prefix
+    - Color-coded (green for positive, red for negative)
+    - Return percentage calculated from invested amount
+  - **Final Portfolio**: 
+    - Mean portfolio value in EUR
+    - Cash breakdown displayed below
+- **Strategy Breakdown Section**:
+  - **Invest**: Horizontal progress bar showing percentage (blue)
+  - **Save**: Horizontal progress bar showing percentage (green)
+  - **Consume**: Horizontal progress bar showing percentage (purple)
+  - Each bar shows label, percentage value, and visual indicator
+- **Simulation Metadata Display**:
+  - Model name, scenario name, and episode count
+  - "Run Another" button to reset and configure new simulation
+- **Action Buttons** (after completion):
+  - **View Detailed Results**: Navigate to Results Viewer with simulation ID
+  - **Compare Scenarios**: Navigate to Comparison page
+- **Loading States**: Spinner and disabled states during API calls
+- **Error Handling**: Red error banner with descriptive messages
+- **Conditional Rendering**: Shows form → progress → results flow
+- **Responsive Design**: Grid layouts adapt from 1 to 4 columns
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.listModels()` - Loads available trained models on mount
+- `api.listScenarios()` - Loads available scenarios on mount
+- `api.runSimulation(request)` - Executes simulation and returns results
+- `api.getSimulationResults(id)` - Fetches detailed results by simulation ID
+
+**Navigation:**
+- "View Detailed Results" button → `/results?id={simulationId}`
+- "Compare Scenarios" button → `/comparison`
+
+**Data Flow:**
+1. User selects model and scenario from dropdowns
+2. User configures episodes and optional seed
+3. User clicks "Run Simulation"
+4. Progress indicator shows while simulation runs
+5. Results are fetched and displayed automatically
+6. User can view detailed results or run another simulation
+
+**Metrics Displayed:**
+- Duration statistics (mean, std dev)
+- Wealth statistics (total, portfolio, cash, invested)
+- Investment performance (gains, return percentage)
+- Strategy breakdown (invest/save/consume percentages)
+- All monetary values formatted with EUR symbol
+- All percentages formatted with 1 decimal place
 
 ### Results Viewer
 - Interactive charts (Recharts)

@@ -283,15 +283,35 @@
     - ✅ Conditional rendering: form when idle, charts when training
     - _Requirements: 3.3, 3.4, 3.5_
 
-- [ ] 12. Implement Simulation Runner page
-  - Create SimulationRunner.tsx component
-  - Implement model and scenario selector dropdowns
-  - Add configuration form for number of episodes and seed
-  - Implement run simulation button
-  - Add progress indicator during simulation
-  - Display summary statistics when complete
-  - Add navigation to Results Viewer
-  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
+- [x] 12. Implement Simulation Runner page ⭐ **COMPLETED**
+  - [x] 12.1 Create SimulationRunner component ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive simulation configuration form (387 lines)
+    - ✅ Added model selector dropdown with API integration (shows scenario name)
+    - ✅ Added scenario selector dropdown with API integration
+    - ✅ Implemented configuration inputs: episodes (1-100), seed (optional)
+    - ✅ Added run simulation button with loading states
+    - ✅ Implemented animated progress indicator with spinner during simulation
+    - ✅ Added "Run Another" reset functionality
+    - ✅ Full dark mode support throughout
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  
+  - [x] 12.2 Display summary statistics and results ⭐ **COMPLETED**
+    - ✅ Created 4 summary statistics cards (duration, total wealth, investment gains, final portfolio)
+    - ✅ Implemented strategy breakdown section with 3 progress bars (invest, save, consume)
+    - ✅ Added color-coded investment gains (green for positive, red for negative)
+    - ✅ Displayed mean and standard deviation for all metrics
+    - ✅ Calculated and displayed investment return percentage
+    - ✅ Added simulation metadata display (model, scenario, episodes)
+    - ✅ Implemented responsive grid layouts (1/2/4 columns)
+    - _Requirements: 4.4, 4.5, 4.6_
+  
+  - [x] 12.3 Add navigation and actions ⭐ **COMPLETED**
+    - ✅ Implemented "View Detailed Results" button with navigation to Results Viewer
+    - ✅ Added "Compare Scenarios" button with navigation to Comparison page
+    - ✅ Integrated React Router for page navigation
+    - ✅ Added error handling with retry capability
+    - ✅ Implemented loading states for all async operations
+    - _Requirements: 4.1, 4.6_
 
 - [ ] 13. Implement Results Viewer page
   - [ ] 13.1 Create ResultsViewer component

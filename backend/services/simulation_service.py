@@ -144,20 +144,16 @@ class SimulationService:
         if not os.path.exists(low_agent_path):
             raise FileNotFoundError(f"Low-level agent model not found: {low_agent_path}")
         
-        # Initialize agents with dummy dimensions (will be set by load)
+        # Initialize agents with config
         high_agent = FinancialStrategist(
-            state_dim=10,  # Will be overridden by loaded model
-            goal_dim=3,
-            gamma=training_config.gamma_high,
-            lr=training_config.learning_rate_high
+            config=training_config,
+            aggregated_state_dim=5
         )
         
         low_agent = BudgetExecutor(
-            state_dim=10,  # Will be overridden by loaded model
-            goal_dim=3,
-            action_dim=3,
-            gamma=training_config.gamma_low,
-            lr=training_config.learning_rate_low
+            config=training_config,
+            state_dim=7,
+            goal_dim=3
         )
         
         # Load model weights
