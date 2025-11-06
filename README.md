@@ -54,13 +54,31 @@ The system implements a two-level hierarchical architecture:
 │   ├── test_hrl_trainer.py     # ✅ HRLTrainer tests (30+ cases)
 │   ├── test_reward_engine.py   # ✅ RewardEngine tests
 │   └── test_sanity_checks.py   # ✅ Sanity check tests (7 cases)
+├── backend/                     # FastAPI backend (Web UI)
+│   ├── api/                    # API endpoint handlers
+│   ├── models/                 # ✅ Pydantic request/response models
+│   │   ├── requests.py         # ✅ Request validation models
+│   │   ├── responses.py        # ✅ Response serialization models
+│   │   └── API_MODELS.md       # ✅ API models documentation
+│   ├── services/               # Business logic layer
+│   ├── utils/                  # Utility functions
+│   ├── websocket/              # WebSocket handlers
+│   ├── main.py                 # ✅ FastAPI application entry
+│   └── README.md               # ✅ Backend documentation
+├── frontend/                    # React frontend (Web UI)
+│   ├── src/                    # React application source
+│   └── package.json            # Node dependencies
 ├── Requirements/                # Design documentation
 │   └── HRL_Finance_System_Design.md
 ├── .kiro/specs/                 # Specification documents
-│   └── hrl-finance-system/
-│       ├── requirements.md      # System requirements
-│       ├── design.md           # Detailed design
-│       └── tasks.md            # Implementation tasks
+│   ├── hrl-finance-system/
+│   │   ├── requirements.md      # System requirements
+│   │   ├── design.md           # Detailed design
+│   │   └── tasks.md            # Implementation tasks
+│   └── hrl-finance-ui/
+│       ├── requirements.md      # UI requirements
+│       ├── design.md           # UI design
+│       └── tasks.md            # UI implementation tasks
 ├── train.py                     # ✅ Main training script
 ├── evaluate.py                  # ✅ Model evaluation script
 ├── visualize_results.py         # ✅ Results visualization script
@@ -2063,6 +2081,69 @@ class BudgetEnv(gym.Env):
         return super().step(action)
 ```
 
+## Web UI (In Development)
+
+The HRL Finance System includes a web-based user interface for easier interaction with the system. The UI is built with FastAPI (backend) and React (frontend).
+
+### Backend API
+
+The backend exposes the HRL system through RESTful APIs with comprehensive request/response validation using Pydantic models.
+
+**Status:** 🚧 In Development
+- ✅ FastAPI application initialized
+- ✅ Pydantic request models (EnvironmentConfig, TrainingConfig, RewardConfig, ScenarioConfig, TrainingRequest, SimulationRequest, ReportRequest)
+- ✅ Pydantic response models (TrainingProgress, SimulationResults, ScenarioSummary, ModelSummary, ErrorResponse, etc.)
+- ✅ File management utilities with security features (YAML, PyTorch models, JSON results)
+- ✅ Health check endpoint
+- 🚧 API endpoints (scenarios, training, simulation, models, reports)
+- 🚧 WebSocket support for real-time training updates
+- 🚧 Service layer business logic
+
+**Quick Start:**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+Visit http://localhost:8000/docs for interactive API documentation.
+
+**API Models Documentation:**
+See `backend/models/API_MODELS.md` for comprehensive documentation of all request and response models, including:
+- Field validation rules and constraints
+- Example JSON payloads
+- Usage in FastAPI endpoints
+- Best practices
+
+### Frontend App
+
+React + TypeScript application with Tailwind CSS for styling and Recharts for data visualization.
+
+**Status:** 🚧 In Development
+- ✅ Project structure initialized
+- ✅ React + TypeScript + Vite setup
+- ✅ Tailwind CSS configuration
+- 🚧 Page components (Dashboard, Scenario Builder, Training Monitor, Results Viewer)
+- 🚧 API client integration
+- 🚧 WebSocket client for real-time updates
+
+**Quick Start:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit http://localhost:5173 to access the UI.
+
+**Documentation:**
+- [Backend README](backend/README.md) - Backend setup and API documentation
+- [Frontend README](frontend/README.md) - Frontend setup and development guide
+- [Project Structure](PROJECT_STRUCTURE.md) - Overall project organization
+- [UI Requirements](.kiro/specs/hrl-finance-ui/requirements.md) - UI feature requirements
+- [UI Design](.kiro/specs/hrl-finance-ui/design.md) - UI architecture and design
+- [UI Tasks](.kiro/specs/hrl-finance-ui/tasks.md) - Implementation progress
+
 ## Contributing
 
 Contributions are welcome! Here's how you can help:
@@ -2116,6 +2197,7 @@ The FastAPI backend exposes the HRL system functionality through RESTful APIs:
 - ✅ FastAPI application initialized (`backend/main.py`)
 - ✅ Root endpoint (`GET /`) - API information
 - ✅ Health check endpoint (`GET /health`) - System monitoring
+- ✅ File management utilities (`backend/utils/file_manager.py`) - YAML, PyTorch models, JSON results with security
 - 🚧 Scenarios API - CRUD operations for financial scenarios
 - 🚧 Training API - Model training with real-time WebSocket updates
 - 🚧 Simulation API - Run evaluations and get results

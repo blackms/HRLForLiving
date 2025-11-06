@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Backend API Pydantic Models** (`backend/models/`)
+  - Request models (`backend/models/requests.py`):
+    - `EnvironmentConfig`: Financial simulation environment configuration with comprehensive validation
+    - `TrainingConfig`: HRL system training parameters with defaults
+    - `RewardConfig`: Reward function coefficients with lambda_ alias support
+    - `ScenarioConfig`: Complete scenario configuration combining environment, training, and reward configs
+    - `TrainingRequest`: Training initiation request with episode count, save interval, and seed
+    - `SimulationRequest`: Simulation execution request with model and scenario selection
+    - `ReportRequest`: Report generation request with format and section customization
+  - Response models (`backend/models/responses.py`):
+    - `TrainingProgress`: Real-time training progress updates for WebSocket streaming
+    - `TrainingStatus`: Current training status with episode tracking
+    - `EpisodeResult`: Single simulation episode results with complete time-series data
+    - `SimulationResults`: Aggregated multi-episode simulation results with statistics
+    - `ScenarioSummary`, `ModelSummary`: Summary information for list endpoints
+    - `ScenarioListResponse`, `ModelListResponse`, `SimulationHistoryResponse`: List response wrappers
+    - `ReportResponse`: Report generation response with file metadata
+    - `HealthCheckResponse`, `ErrorResponse`: System status and error responses
+  - All models include comprehensive Field validation with constraints (gt, ge, le, pattern)
+  - Proper Pydantic v2 configuration (protected_namespaces, populate_by_name)
+  - Complete docstrings for all models and fields
+  - Ready for FastAPI endpoint integration
 - Results visualization script (`visualize_results.py`)
   - Generates publication-quality visualizations for technical papers and presentations
   - Three comprehensive charts: Portfolio Evolution, Strategy Comparison, Returns Distribution
