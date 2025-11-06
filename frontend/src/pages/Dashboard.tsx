@@ -156,64 +156,77 @@ export default function Dashboard() {
   const recentActivity = getRecentActivity();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Welcome to HRL Finance System
           </p>
         </div>
         <button
           onClick={loadDashboardData}
-          className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 self-start sm:self-auto"
+          aria-label="Refresh dashboard data"
         >
-          🔄 Refresh
+          <span role="img" aria-hidden="true">🔄</span> Refresh
         </button>
       </div>
 
       {/* Statistics Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6"
+          role="region"
+          aria-label="Scenarios statistics"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Scenarios</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {scenarios.length}
               </p>
             </div>
-            <div className="text-4xl">📝</div>
+            <div className="text-3xl sm:text-4xl" role="img" aria-label="Scenarios icon">📝</div>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
             Financial configurations
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6"
+          role="region"
+          aria-label="Models statistics"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Models</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {models.length}
               </p>
             </div>
-            <div className="text-4xl">🤖</div>
+            <div className="text-3xl sm:text-4xl" role="img" aria-label="Models icon">🤖</div>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
             Trained AI agents
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 sm:col-span-2 lg:col-span-1"
+          role="region"
+          aria-label="Simulations statistics"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Simulations</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {simulations.length}
               </p>
             </div>
-            <div className="text-4xl">🔬</div>
+            <div className="text-3xl sm:text-4xl" role="img" aria-label="Simulations icon">🔬</div>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
             Evaluation runs
@@ -222,16 +235,20 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <section
+        className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-4 sm:p-6"
+        aria-labelledby="quick-actions-heading"
+      >
+        <h2 id="quick-actions-heading" className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/scenarios')}
-            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all"
+            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            aria-label="Create new scenario"
           >
-            <span className="text-2xl">➕</span>
+            <span className="text-xl sm:text-2xl" role="img" aria-hidden="true">➕</span>
             <span className="text-sm font-medium text-gray-900 dark:text-white">
               New Scenario
             </span>
@@ -239,9 +256,10 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/training')}
-            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all"
+            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            aria-label="Start training a model"
           >
-            <span className="text-2xl">🎯</span>
+            <span className="text-xl sm:text-2xl" role="img" aria-hidden="true">🎯</span>
             <span className="text-sm font-medium text-gray-900 dark:text-white">
               Start Training
             </span>
@@ -249,9 +267,10 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/simulation')}
-            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all"
+            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            aria-label="Run a simulation"
           >
-            <span className="text-2xl">▶️</span>
+            <span className="text-xl sm:text-2xl" role="img" aria-hidden="true">▶️</span>
             <span className="text-sm font-medium text-gray-900 dark:text-white">
               Run Simulation
             </span>
@@ -259,33 +278,38 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/comparison')}
-            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all"
+            className="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            aria-label="Compare simulation results"
           >
-            <span className="text-2xl">⚖️</span>
+            <span className="text-xl sm:text-2xl" role="img" aria-hidden="true">⚖️</span>
             <span className="text-sm font-medium text-gray-900 dark:text-white">
               Compare Results
             </span>
           </button>
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Scenarios */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <section
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+          aria-labelledby="recent-scenarios-heading"
+        >
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 id="recent-scenarios-heading" className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 Recent Scenarios
               </h2>
               <button
                 onClick={() => navigate('/scenarios')}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded"
+                aria-label="View all scenarios"
               >
                 View all →
               </button>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {scenarios.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -293,7 +317,8 @@ export default function Dashboard() {
                 </p>
                 <button
                   onClick={() => navigate('/scenarios')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                  aria-label="Create your first scenario"
                 >
                   Create your first scenario
                 </button>
@@ -301,10 +326,11 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {scenarios.slice(0, 3).map((scenario) => (
-                  <div
+                  <button
                     key={scenario.name}
-                    className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors cursor-pointer"
+                    className="w-full text-left p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
                     onClick={() => navigate('/scenarios')}
+                    aria-label={`View scenario: ${scenario.name}`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -323,29 +349,33 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* Recent Models */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <section
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+          aria-labelledby="recent-models-heading"
+        >
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 id="recent-models-heading" className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 Recent Models
               </h2>
               <button
                 onClick={() => navigate('/training')}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded"
+                aria-label="View all models"
               >
                 View all →
               </button>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {models.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -353,7 +383,8 @@ export default function Dashboard() {
                 </p>
                 <button
                   onClick={() => navigate('/training')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                  aria-label="Train your first model"
                 >
                   Train your first model
                 </button>
@@ -361,10 +392,11 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {models.slice(0, 3).map((model) => (
-                  <div
+                  <button
                     key={model.name}
-                    className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors cursor-pointer"
+                    className="w-full text-left p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
                     onClick={() => navigate('/simulation')}
+                    aria-label={`View model: ${model.name}`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -374,17 +406,17 @@ export default function Dashboard() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           Scenario: {model.scenario_name}
                         </p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-500">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-500 dark:text-gray-500">
                           {model.episodes && (
-                            <span>📊 {model.episodes} episodes</span>
+                            <span><span role="img" aria-hidden="true">📊</span> {model.episodes} episodes</span>
                           )}
                           {model.trained_at && (
-                            <span>🕒 {formatDate(model.trained_at)}</span>
+                            <span><span role="img" aria-hidden="true">🕒</span> {formatDate(model.trained_at)}</span>
                           )}
                         </div>
                       </div>
                       {model.final_reward !== undefined && (
-                        <div className="ml-4 text-right">
+                        <div className="ml-4 text-right flex-shrink-0">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {model.final_reward.toFixed(1)}
                           </div>
@@ -394,42 +426,45 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Recent Activity Feed */}
       {recentActivity.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <section
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+          aria-labelledby="recent-activity-heading"
+        >
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 id="recent-activity-heading" className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
               Recent Activity
             </h2>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
+          <div className="p-4 sm:p-6">
+            <div className="space-y-4" role="list">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 text-2xl">
+                <div key={index} className="flex items-start space-x-3" role="listitem">
+                  <div className="flex-shrink-0 text-xl sm:text-2xl" role="img" aria-label={`${activity.type} activity`}>
                     {getActivityIcon(activity.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 dark:text-white">
+                    <p className="text-sm text-gray-900 dark:text-white break-words">
                       {activity.message}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      {formatDate(activity.timestamp)}
+                      <time dateTime={activity.timestamp}>{formatDate(activity.timestamp)}</time>
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

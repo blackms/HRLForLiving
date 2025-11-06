@@ -12,6 +12,9 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />

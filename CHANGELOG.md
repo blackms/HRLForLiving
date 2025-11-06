@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Frontend Responsive Navigation** (`frontend/src/components/Layout.tsx`)
+  - Fully responsive navigation system with mobile hamburger menu and desktop sidebar (148 lines)
+  - Mobile menu: Collapsible dropdown with hamburger icon (☰/X animation), auto-closes on navigation
+  - Desktop sidebar: Fixed 256px width, always visible on screens ≥ 1024px
+  - Sticky header with z-index layering for persistent access to navigation
+  - Comprehensive ARIA labels: aria-expanded, aria-controls, aria-current="page", aria-label
+  - Keyboard navigation support with visible focus indicators (focus:ring-2)
+  - Theme toggle button with dynamic aria-label based on current theme
+  - Responsive breakpoints: Mobile (< 1024px), Desktop (≥ 1024px)
+  - Touch-friendly button sizes (minimum 44x44px) for mobile devices
+  - Semantic HTML: role="navigation", role="main", role="img" with aria-hidden on decorative icons
+  - WCAG 2.1 AA compliant color contrast in both light and dark modes
+  - Smooth transitions and animations without causing motion sickness
+  - Logical tab order: Logo → Theme toggle → Menu button → Navigation links
+  - Full dark mode support with appropriate contrast adjustments
 - **Frontend Report Generation Modal** (`frontend/src/components/ReportModal.tsx`)
   - Reusable modal dialog component for generating reports from simulation results (336 lines)
   - Report configuration form with customizable title and format selection (HTML/PDF)

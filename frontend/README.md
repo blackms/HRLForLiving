@@ -39,7 +39,7 @@ The app will be available at http://localhost:5173
 frontend/
 ├── src/
 │   ├── components/      # Reusable UI components
-│   │   ├── Layout.tsx   # Main layout with navigation
+│   │   ├── Layout.tsx   # Main layout with responsive navigation
 │   │   └── ReportModal.tsx  # Report generation modal dialog
 │   ├── contexts/        # React contexts
 │   │   └── ThemeContext.tsx  # Theme provider (light/dark mode)
@@ -733,13 +733,64 @@ The Comparison view enables side-by-side analysis of multiple simulation results
 - Percentage difference calculations relative to first simulation
 - Browser-based file downloads for exports
 
+## Components
+
+### Layout ✅ **IMPLEMENTED**
+
+The Layout component provides the main application structure with responsive navigation and theme switching.
+
+**Features:**
+- **Responsive Navigation**:
+  - Desktop: Fixed sidebar navigation (visible on lg+ screens, 1024px+)
+  - Mobile: Collapsible hamburger menu (visible on < lg screens)
+  - Sticky header with z-index layering
+  - Auto-close mobile menu on navigation
+- **Theme Switching**:
+  - Toggle button for light/dark mode
+  - Persistent theme preference via ThemeContext
+  - Smooth transitions between themes
+- **Navigation Items**:
+  - Dashboard (📊)
+  - Scenarios (📝)
+  - Training (🎯)
+  - Simulation (🔬)
+  - Results (📈)
+  - Comparison (⚖️)
+- **Active State Indicators**:
+  - Blue background and text for active page
+  - Font weight change for emphasis
+  - aria-current="page" for screen readers
+- **Accessibility Features**:
+  - ARIA labels on all interactive elements
+  - aria-expanded state on mobile menu button
+  - aria-controls linking button to menu
+  - role="navigation" on nav elements
+  - Focus indicators (ring-2) on all focusable elements
+  - Keyboard navigation support (Tab, Enter, Space)
+  - Descriptive aria-labels for icon-only buttons
+  - role="img" and aria-hidden on decorative icons
+- **Responsive Breakpoints**:
+  - Mobile: < 1024px (hamburger menu, full-width content)
+  - Desktop: ≥ 1024px (sidebar navigation, max-width container)
+  - Header title: text-lg (mobile), text-xl (sm+)
+  - Main padding: p-4 (mobile), p-6 (sm), p-8 (lg)
+- **Dark Mode**: Full support throughout with smooth transitions
+
+**Implementation Details:**
+- 148 lines of TypeScript React code
+- Uses React Router for navigation
+- State management with useState for mobile menu
+- Conditional rendering based on screen size
+- CSS classes: Tailwind utility classes with responsive variants
+
 ## Styling
 
 The app uses Tailwind CSS for styling with:
-- Responsive design (mobile-first)
+- Responsive design (mobile-first approach)
 - Dark/light theme support via ThemeContext
-- Consistent color palette
-- Accessible components (ARIA labels, keyboard navigation)
+- Consistent color palette (blue primary, gray neutrals)
+- Accessible components (ARIA labels, keyboard navigation, focus indicators)
+- Responsive breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
 
 ## Backend API
 
