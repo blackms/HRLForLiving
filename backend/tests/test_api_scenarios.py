@@ -10,7 +10,16 @@ class TestScenariosAPI:
         """Test listing all scenarios"""
         response = client.get("/api/scenarios")
         assert response.status_code == status.HTTP_200_OK
-        assert isinstance(response.json(), list)
+        data = response.json()
+        assert isinstance(data, list)
+        
+        # Verify structure if scenarios exist
+        if len(data) > 0:
+            scenario = data[0]
+            assert "name" in scenario
+            assert "description" in scenario
+            # Check for either created_at or updated_at
+            assert "updated_at" in scenario or "created_at" in scenario
     
     def test_get_templates(self, client):
         """Test getting scenario templates"""
@@ -54,6 +63,27 @@ class TestScenariosAPI:
         response = client.post("/api/scenarios", json=invalid_config)
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     
+    def test_create_scenario_missing_required_fields(self, client):
+        """Test creating scenario with missing required fields"""
+        incomplete_config = {
+            "name": "incomplete"
+            # Missing environment and other required fields
+        }
+        response = client.post("/api/scenarios", json=incomplete_config)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    def test_create_scenario_duplicate_name(self, client, sample_scenario_config):
+        """Test creating scenario with duplicate name"""
+        # Create first scenario
+        first_response = client.post("/api/scenarios", json=sample_scenario_config)
+        
+        # Try to create again with same name
+        second_response = client.post("/api/scenarios", json=sample_scenario_config)
+        
+        # Should get conflict if first was successful
+        if first_response.status_code == status.HTTP_201_CREATED:
+            assert second_response.status_code == status.HTTP_409_CONFLICT
+    
     def test_get_scenario(self, client):
         """Test getting a specific scenario"""
         # First, list scenarios to get a valid name
@@ -95,6 +125,25 @@ class TestScenariosAPI:
             data = response.json()
             assert "updated_at" in data
     
+    def test_update_nonexistent_scenario(self, client, sample_scenario_config):
+        """Test updating a scenario that doesn't exist"""
+        response = client.put(
+            "/api/scenarios/nonexistent_scenario_xyz",
+            json=sample_scenario_config
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+    
+    def test_update_scenario_invalid_data(self, client):
+        """Test updating scenario with invalid data"""
+        invalid_config = {
+            "name": "test_scenario",
+            "environment": {
+                "income": -500.0  # Invalid: negative income
+            }
+        }
+        response = client.put("/api/scenarios/test_scenario", json=invalid_config)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
     def test_delete_scenario(self, client):
         """Test deleting a scenario"""
         # Create a test scenario first
@@ -130,3 +179,8 @@ class TestScenariosAPI:
             # Verify it's deleted
             get_response = client.get(f"/api/scenarios/{test_config['name']}")
             assert get_response.status_code == status.HTTP_404_NOT_FOUND
+    
+    def test_delete_nonexistent_scenario(self, client):
+        """Test deleting a scenario that doesn't exist"""
+        response = client.delete("/api/scenarios/nonexistent_scenario_xyz")
+        assert response.status_code == status.HTTP_404_NOT_FOUND

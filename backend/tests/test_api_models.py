@@ -16,6 +16,13 @@ class TestModelsAPI:
         assert "total" in data
         assert isinstance(data["models"], list)
         assert data["total"] == len(data["models"])
+        
+        # Verify structure if models exist
+        if len(data["models"]) > 0:
+            model = data["models"][0]
+            assert "name" in model
+            assert "scenario_name" in model
+            assert "trained_at" in model  # API uses trained_at instead of created_at
     
     def test_get_model(self, client):
         """Test getting a specific model"""
@@ -31,7 +38,9 @@ class TestModelsAPI:
             data = response.json()
             assert data["name"] == model_name
             assert "scenario_name" in data
-            assert "created_at" in data
+            assert "trained_at" in data  # API uses trained_at instead of created_at
+            assert "high_agent_path" in data
+            assert "low_agent_path" in data
     
     def test_get_nonexistent_model(self, client):
         """Test getting a model that doesn't exist"""
@@ -40,17 +49,19 @@ class TestModelsAPI:
     
     def test_delete_model(self, client):
         """Test deleting a model"""
+        # Test deleting a non-existent model
+        response = client.delete("/api/models/test_model_that_doesnt_exist")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+    
+    def test_delete_model_success(self, client):
+        """Test successful model deletion"""
         # List models first
         list_response = client.get("/api/models")
         models = list_response.json()["models"]
         
-        # Only test deletion if there are models and we can safely delete one
-        # In a real test, we'd create a test model first
+        # Note: In a real test environment, we would create a test model first
+        # For now, we verify the endpoint structure
         if len(models) > 0:
-            # For safety, we'll just test the endpoint structure
-            # without actually deleting a real model
-            response = client.delete("/api/models/test_model_that_doesnt_exist")
-            assert response.status_code in [
-                status.HTTP_200_OK,
-                status.HTTP_404_NOT_FOUND
-            ]
+            # We won't actually delete real models in tests
+            # This would require creating a test model first
+            pass

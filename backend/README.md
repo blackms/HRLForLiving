@@ -88,6 +88,14 @@ pytest --cov=backend --cov-report=term-missing
 
 This will show which lines of code are not covered by tests.
 
+**Current Coverage:** 41 API endpoint tests covering all major functionality
+
+**Recent Test Enhancements:**
+- Enhanced `test_list_scenarios` with response structure validation
+- Validates presence of required fields (name, description, timestamps)
+- Ensures API responses conform to documented schema
+- Handles timestamp field variations (created_at/updated_at)
+
 ## API Endpoints
 
 ### Core Endpoints

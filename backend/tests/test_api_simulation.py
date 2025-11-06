@@ -16,6 +16,14 @@ class TestSimulationAPI:
         assert "total" in data
         assert isinstance(data["simulations"], list)
         assert data["total"] == len(data["simulations"])
+        
+        # Verify structure if simulations exist
+        if len(data["simulations"]) > 0:
+            sim = data["simulations"][0]
+            assert "simulation_id" in sim
+            assert "scenario_name" in sim
+            assert "model_name" in sim
+            assert "timestamp" in sim  # API uses timestamp instead of created_at
     
     def test_run_simulation_missing_model(self, client):
         """Test running simulation with non-existent model"""
@@ -62,3 +70,42 @@ class TestSimulationAPI:
             assert "simulation_id" in data
             assert "scenario_name" in data
             assert "model_name" in data
+            assert "num_episodes" in data
+            # Statistics are returned as individual fields, not nested
+            assert "duration_mean" in data
+            assert "total_wealth_mean" in data
+    
+    def test_run_simulation_missing_scenario(self, client):
+        """Test running simulation with non-existent scenario"""
+        request = {
+            "model_name": "test_model",
+            "scenario_name": "nonexistent_scenario_xyz",
+            "num_episodes": 5
+        }
+        
+        response = client.post("/api/simulation/run", json=request)
+        assert response.status_code in [
+            status.HTTP_404_NOT_FOUND,
+            status.HTTP_500_INTERNAL_SERVER_ERROR
+        ]
+    
+    def test_run_simulation_missing_fields(self, client):
+        """Test running simulation with missing required fields"""
+        request = {
+            "model_name": "test_model"
+            # Missing scenario_name
+        }
+        
+        response = client.post("/api/simulation/run", json=request)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    def test_run_simulation_zero_episodes(self, client):
+        """Test running simulation with zero episodes"""
+        request = {
+            "model_name": "test_model",
+            "scenario_name": "test_scenario",
+            "num_episodes": 0  # Invalid: must be > 0
+        }
+        
+        response = client.post("/api/simulation/run", json=request)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

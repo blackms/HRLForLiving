@@ -17,6 +17,14 @@ class TestTrainingAPI:
         assert "current_episode" in data
         assert "total_episodes" in data
         assert isinstance(data["is_training"], bool)
+        
+        # Verify additional fields
+        if data["is_training"]:
+            assert data["scenario_name"] is not None
+            assert data["total_episodes"] > 0
+        else:
+            assert data["current_episode"] == 0
+            assert data["total_episodes"] == 0
     
     def test_start_training_missing_scenario(self, client):
         """Test starting training with non-existent scenario"""
@@ -52,3 +60,51 @@ class TestTrainingAPI:
             status.HTTP_200_OK,
             status.HTTP_400_BAD_REQUEST
         ]
+    
+    def test_start_training_with_valid_scenario(self, client, sample_scenario_config):
+        """Test starting training with a valid scenario"""
+        # First create a scenario
+        create_response = client.post("/api/scenarios", json=sample_scenario_config)
+        
+        if create_response.status_code == status.HTTP_201_CREATED:
+            # Start training with minimal episodes for testing
+            request = {
+                "scenario_name": sample_scenario_config["name"],
+                "num_episodes": 2,
+                "save_interval": 1,
+                "eval_episodes": 1,
+                "seed": 42
+            }
+            
+            response = client.post("/api/training/start", json=request)
+            # Should accept the request
+            assert response.status_code in [
+                status.HTTP_202_ACCEPTED,
+                status.HTTP_400_BAD_REQUEST  # If training already in progress
+            ]
+            
+            if response.status_code == status.HTTP_202_ACCEPTED:
+                data = response.json()
+                assert "message" in data
+                assert "scenario_name" in data
+    
+    def test_start_training_missing_fields(self, client):
+        """Test starting training with missing required fields"""
+        request = {
+            "num_episodes": 10
+            # Missing scenario_name
+        }
+        
+        response = client.post("/api/training/start", json=request)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    
+    def test_start_training_zero_episodes(self, client):
+        """Test starting training with zero episodes"""
+        request = {
+            "scenario_name": "test_scenario",
+            "num_episodes": 0,  # Invalid: must be > 0
+            "save_interval": 5
+        }
+        
+        response = client.post("/api/training/start", json=request)
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

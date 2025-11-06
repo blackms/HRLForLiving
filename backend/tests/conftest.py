@@ -7,10 +7,34 @@ import shutil
 from pathlib import Path
 
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+backend_parent = Path(__file__).parent.parent.parent
+if str(backend_parent) not in sys.path:
+    sys.path.insert(0, str(backend_parent))
+
+# Remove backend directory from sys.path to avoid websocket conflict
+backend_dir = Path(__file__).parent.parent
+if str(backend_dir) in sys.path:
+    sys.path.remove(str(backend_dir))
 
 from fastapi.testclient import TestClient
-from backend.main import app
+
+# Create a minimal test app to avoid import issues
+from fastapi import FastAPI
+from backend.api.scenarios import router as scenarios_router
+from backend.api.training import router as training_router
+from backend.api.simulation import router as simulation_router
+from backend.api.models import router as models_router
+from backend.api.reports import router as reports_router
+
+# Create test app without WebSocket to avoid circular import
+test_app = FastAPI()
+test_app.include_router(scenarios_router)
+test_app.include_router(training_router)
+test_app.include_router(simulation_router)
+test_app.include_router(models_router)
+test_app.include_router(reports_router)
+
+app = test_app
 
 
 @pytest.fixture
