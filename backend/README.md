@@ -46,6 +46,21 @@ uvicorn backend.main:socket_app --reload --port 8000
 
 See [TRAINING_API.md](api/TRAINING_API.md) for detailed Training API documentation.
 
+### Simulation API ✅ **IMPLEMENTED**
+
+- `POST /api/simulation/run` - Run a simulation with a trained model
+- `GET /api/simulation/results/{id}` - Get results for a specific simulation
+- `GET /api/simulation/history` - List all past simulations
+
+See [SIMULATION_API.md](api/SIMULATION_API.md) for detailed Simulation API documentation.
+
+**Key Features:**
+- Deterministic policy evaluation (no exploration)
+- Comprehensive trajectory data collection
+- Aggregate statistics calculation
+- Results persistence to JSON files
+- Simulation history management
+
 ### API Documentation
 
 Once running, visit:
@@ -409,6 +424,127 @@ socket.on('training_completed', (data) => {
 });
 ```
 
+## Simulation API Usage
+
+### Run Simulation
+
+```bash
+curl -X POST http://localhost:8000/api/simulation/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model_name": "bologna_coppia",
+    "scenario_name": "bologna_coppia",
+    "num_episodes": 10,
+    "seed": 42
+  }'
+```
+
+**Response (202 Accepted):**
+```json
+{
+  "status": "completed",
+  "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+  "message": "Simulation completed with 10 episodes",
+  "results": {
+    "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+    "scenario_name": "bologna_coppia",
+    "model_name": "bologna_coppia",
+    "num_episodes": 10,
+    "timestamp": "2025-11-06T12:00:00",
+    "seed": 42,
+    "duration_mean": 27.3,
+    "total_wealth_mean": 20020.8,
+    "avg_invest_pct": 0.333,
+    "avg_save_pct": 0.333,
+    "avg_consume_pct": 0.334,
+    "episodes": [...]
+  }
+}
+```
+
+### Get Simulation Results
+
+```bash
+curl http://localhost:8000/api/simulation/results/bologna_coppia_bologna_coppia_1730901234
+```
+
+**Response:**
+```json
+{
+  "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+  "scenario_name": "bologna_coppia",
+  "model_name": "bologna_coppia",
+  "num_episodes": 10,
+  "duration_mean": 27.3,
+  "total_wealth_mean": 20020.8,
+  "episodes": [
+    {
+      "episode_id": 0,
+      "duration": 27,
+      "final_cash": 842.5,
+      "total_wealth": 20020.8,
+      "months": [1, 2, 3, ...],
+      "cash_history": [10000, 9500, ...],
+      "actions": [[0.33, 0.33, 0.34], ...]
+    }
+  ]
+}
+```
+
+### List Simulation History
+
+```bash
+curl http://localhost:8000/api/simulation/history
+```
+
+**Response:**
+```json
+{
+  "simulations": [
+    {
+      "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+      "scenario_name": "bologna_coppia",
+      "model_name": "bologna_coppia",
+      "num_episodes": 10,
+      "timestamp": "2025-11-06T12:00:00",
+      "total_wealth_mean": 20020.8,
+      "duration_mean": 27.3
+    }
+  ],
+  "total": 1
+}
+```
+
+### Python Client
+
+```python
+import requests
+
+# Run simulation
+response = requests.post('http://localhost:8000/api/simulation/run', json={
+    'model_name': 'bologna_coppia',
+    'scenario_name': 'bologna_coppia',
+    'num_episodes': 10,
+    'seed': 42
+})
+
+results = response.json()
+simulation_id = results['simulation_id']
+print(f"Mean wealth: ${results['results']['total_wealth_mean']:.2f}")
+print(f"Investment strategy: {results['results']['avg_invest_pct']:.1%}")
+
+# Get results later
+response = requests.get(
+    f'http://localhost:8000/api/simulation/results/{simulation_id}'
+)
+results = response.json()
+
+# List all simulations
+response = requests.get('http://localhost:8000/api/simulation/history')
+history = response.json()
+print(f"Total simulations: {history['total']}")
+```
+
 ## File Management Utilities
 
 The `backend/utils/file_manager.py` module provides comprehensive file management for the HRL Finance System. See [FILE_MANAGER_README.md](utils/FILE_MANAGER_README.md) for detailed documentation.
@@ -444,16 +580,18 @@ for model in models:
 - **Pydantic request models with comprehensive validation**
 - **Pydantic response models for all API endpoints**
 - **File management utilities with security features**
-- **Scenarios API (complete CRUD operations)**
-- **Scenario service layer with business logic**
-- **Scenario templates (5 preset profiles)**
+- **Scenarios API (complete CRUD operations)** ⭐
+- **Scenario service layer with business logic** ⭐
+- **Scenario templates (5 preset profiles)** ⭐
 - **Training API with WebSocket support** ⭐
 - **Training service layer with HRL orchestration** ⭐
 - **Real-time training progress updates via WebSocket** ⭐
 - **Asynchronous training execution with progress callbacks** ⭐
 - **Automatic model checkpointing and persistence** ⭐
+- **Simulation API (complete evaluation system)** ⭐
+- **Simulation service layer with deterministic policy** ⭐
+- **Simulation results storage and retrieval** ⭐
 
 🚧 **In Progress:**
-- Simulation API
 - Models API
 - Reports API

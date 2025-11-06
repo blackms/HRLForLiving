@@ -193,11 +193,92 @@ See [TRAINING_API.md](TRAINING_API.md) for detailed usage examples with Python a
 
 ### Simulation API (`simulation.py`)
 
-🚧 **In Development**
+Complete simulation execution with trained models.
 
-- POST `/api/simulation/run` - Run simulation
-- GET `/api/simulation/results/{id}` - Get simulation results
-- GET `/api/simulation/history` - List past simulations
+**Status:** ✅ **FULLY IMPLEMENTED**
+
+#### Endpoints
+
+| Method | Path | Description | Status Code |
+|--------|------|-------------|-------------|
+| POST | `/api/simulation/run` | Run simulation | 202 |
+| GET | `/api/simulation/results/{id}` | Get simulation results | 200, 404 |
+| GET | `/api/simulation/history` | List past simulations | 200 |
+
+#### Request/Response Models
+
+**SimulationRequest:**
+- `model_name` (str, required): Trained model name
+- `scenario_name` (str, required): Scenario name
+- `num_episodes` (int, default=10): Number of episodes
+- `seed` (int, optional): Random seed
+
+**SimulationResults:**
+- `simulation_id` (str): Unique identifier
+- `scenario_name` (str): Scenario used
+- `model_name` (str): Model used
+- `num_episodes` (int): Episodes run
+- `timestamp` (datetime): Completion time
+- `seed` (int, optional): Random seed
+- Statistics: duration, cash, invested, portfolio, wealth (mean/std)
+- Strategy: avg_invest_pct, avg_save_pct, avg_consume_pct
+- `episodes` (list): Episode results with trajectory data
+
+**EpisodeResult:**
+- `episode_id` (int): Episode identifier
+- `duration` (int): Duration in months
+- Final metrics: cash, invested, portfolio_value, total_wealth, investment_gains
+- Trajectory data: months, cash_history, invested_history, portfolio_history, actions
+
+**SimulationHistoryResponse:**
+- `simulations` (list): Simulation summaries
+- `total` (int): Total count
+
+#### Integration
+
+The Simulation API integrates with:
+- `backend/services/simulation_service.py` - Simulation orchestration
+- `src/environment/budget_env.py` - Financial environment
+- `src/agents/` - High-level and low-level agents
+- `src/utils/analytics.py` - Performance metrics
+- `backend/utils/file_manager.py` - Results storage
+
+#### Simulation Process
+
+1. Load scenario configuration from YAML
+2. Load trained agent models from PyTorch files
+3. Create environment with scenario configuration
+4. Execute evaluation episodes with deterministic policy
+5. Collect trajectory data (cash, invested, portfolio, actions)
+6. Calculate aggregate statistics across episodes
+7. Save results to JSON file
+8. Return results to client
+
+#### Deterministic Policy
+
+Simulations use deterministic policy for consistent evaluation:
+- Low-level agent: `act(state, goal, deterministic=True)`
+- High-level agent: `select_goal(aggregated_state)`
+- No exploration noise
+- Reproducible results with same seed
+
+#### Results Storage
+
+**Location:** `results/simulations/` directory
+
+**Filename:** `{model_name}_{scenario_name}_{timestamp}.json`
+
+**Format:** JSON with complete episode data
+
+**Contents:**
+- Simulation metadata (ID, scenario, model, timestamp, seed)
+- Aggregate statistics (mean/std for all metrics)
+- Strategy learned (average action percentages)
+- Complete episode data (trajectory, actions, metrics)
+
+#### Usage Examples
+
+See [SIMULATION_API.md](SIMULATION_API.md) for detailed usage examples with Python and JavaScript clients.
 
 ### Models API (`models.py`)
 

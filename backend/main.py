@@ -5,6 +5,7 @@ import socketio
 
 from backend.api.scenarios import router as scenarios_router
 from backend.api.training import router as training_router
+from backend.api.simulation import router as simulation_router
 from backend.websocket import sio
 
 app = FastAPI(
@@ -25,6 +26,7 @@ app.add_middleware(
 # Include routers
 app.include_router(scenarios_router)
 app.include_router(training_router)
+app.include_router(simulation_router)
 
 # Mount Socket.IO
 socket_app = socketio.ASGIApp(

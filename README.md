@@ -2101,14 +2101,16 @@ The backend exposes the HRL system through RESTful APIs with comprehensive reque
 - ✅ Pydantic response models (TrainingProgress, SimulationResults, ScenarioSummary, ModelSummary, ErrorResponse, etc.)
 - ✅ File management utilities with security features (YAML, PyTorch models, JSON results)
 - ✅ Health check endpoint
-- ✅ **Scenarios API (complete CRUD operations)**
-- ✅ **Scenario service layer with business logic**
-- ✅ **5 preset scenario templates (conservative, balanced, aggressive, young_professional, young_couple)**
+- ✅ **Scenarios API (complete CRUD operations)** ⭐
+- ✅ **Scenario service layer with business logic** ⭐
+- ✅ **5 preset scenario templates (conservative, balanced, aggressive, young_professional, young_couple)** ⭐
 - ✅ **Training API with WebSocket support for real-time updates** ⭐
 - ✅ **Training service layer with HRL orchestration** ⭐
 - ✅ **Asynchronous training execution with progress callbacks** ⭐
 - ✅ **Automatic model checkpointing and persistence** ⭐
-- 🚧 Simulation API
+- ✅ **Simulation API (complete evaluation system)** ⭐
+- ✅ **Simulation service layer with deterministic policy** ⭐
+- ✅ **Simulation results storage and retrieval** ⭐
 - 🚧 Models API
 - 🚧 Reports API
 
@@ -2127,6 +2129,11 @@ The backend exposes the HRL system through RESTful APIs with comprehensive reque
 - `POST /api/training/stop` - Stop training
 - `GET /api/training/status` - Get training status
 - `WS /socket.io` - WebSocket for real-time training updates
+
+*Simulation API:* ⭐
+- `POST /api/simulation/run` - Run simulation with trained model
+- `GET /api/simulation/results/{id}` - Get simulation results
+- `GET /api/simulation/history` - List past simulations
 
 **Quick Start:**
 ```bash

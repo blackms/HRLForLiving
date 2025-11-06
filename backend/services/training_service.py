@@ -14,7 +14,6 @@ from src.training.hrl_trainer import HRLTrainer
 from src.utils.config import EnvironmentConfig, TrainingConfig, RewardConfig
 from backend.utils.file_manager import (
     read_yaml_config,
-    save_model,
     ensure_directories
 )
 

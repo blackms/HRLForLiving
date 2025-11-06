@@ -101,20 +101,28 @@
     - ✅ Updated main.py to mount Socket.IO with FastAPI
     - _Requirements: 3.1, 3.2, 3.6, 3.7, 3.8, 9.2_
 
-- [ ] 5. Implement Simulation API
-  - [ ] 5.1 Create simulation service layer
-    - Implement simulation_service.py with evaluation logic
-    - Add run_simulation function that loads model and scenario
-    - Implement evaluation loop collecting episode data
-    - Add calculate_statistics function for aggregating results
-    - Implement results saving to JSON files
+- [x] 5. Implement Simulation API ⭐ **COMPLETED**
+  - [x] 5.1 Create simulation service layer ⭐ **COMPLETED**
+    - ✅ Implemented simulation_service.py with evaluation logic (392 lines)
+    - ✅ Added run_simulation function that loads model and scenario
+    - ✅ Implemented evaluation loop collecting episode data with deterministic policy
+    - ✅ Added _calculate_statistics function for aggregating results
+    - ✅ Implemented results saving to JSON files in results/simulations/
+    - ✅ Added get_simulation_results function for retrieving saved results
+    - ✅ Added list_simulations function for listing all past simulations
+    - ✅ Integrated with existing HRL components (BudgetEnv, Agents, Analytics)
+    - ✅ Model loading with proper agent initialization
+    - ✅ Comprehensive error handling with descriptive messages
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 10.3_
   
-  - [ ] 5.2 Create simulation API endpoints
-    - Implement POST /api/simulation/run endpoint
-    - Implement GET /api/simulation/results/{id} endpoint
-    - Implement GET /api/simulation/history endpoint
-    - Add progress tracking for long-running simulations
+  - [x] 5.2 Create simulation API endpoints ⭐ **COMPLETED**
+    - ✅ Implemented POST /api/simulation/run endpoint (202 Accepted)
+    - ✅ Implemented GET /api/simulation/results/{id} endpoint
+    - ✅ Implemented GET /api/simulation/history endpoint with SimulationHistoryResponse
+    - ✅ Added comprehensive error handling (404, 500)
+    - ✅ Integration with simulation_service layer
+    - ✅ Response models (SimulationResults, SimulationHistoryResponse)
+    - ✅ Proper HTTP status codes and error responses
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 9.2, 9.3_
 
 - [ ] 6. Implement Models API
