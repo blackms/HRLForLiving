@@ -255,11 +255,83 @@ The Dashboard is the main landing page providing an overview of the entire syste
 - Clicking model cards → Simulation Runner page
 - Quick action buttons → Respective feature pages
 
-### Scenario Builder
-- Create and edit financial scenarios
-- Template selector with presets
-- Form validation
-- Preview panel with monthly cash flow
+### Scenario Builder ✅ **IMPLEMENTED**
+
+The Scenario Builder allows users to create and edit financial scenarios with comprehensive configuration options.
+
+**Features:**
+- **Basic Information Section**:
+  - Scenario name input (required, min 3 characters)
+  - Description textarea (optional)
+  - Template selector dropdown with 5 presets (conservative, balanced, aggressive, young_professional, young_couple)
+  - Name field disabled in edit mode (immutable identifier)
+- **Environment Configuration** (9 parameters):
+  - Monthly income (EUR)
+  - Fixed expenses (EUR)
+  - Variable expense mean and std dev (EUR)
+  - Inflation rate (%)
+  - Safety threshold (EUR)
+  - Max months (simulation horizon)
+  - Initial cash (EUR)
+  - Risk tolerance (0-1 scale)
+- **Investment Returns Configuration**:
+  - Return type selector (stochastic/fixed)
+  - Mean return (% per month)
+  - Standard deviation (% per month)
+- **Training Configuration**:
+  - Number of episodes
+  - High-level period (months)
+  - Batch size
+  - Learning rate (low-level agent)
+- **Preview Panel** (sticky sidebar):
+  - Monthly cash flow breakdown (income, expenses, available)
+  - Available income percentage
+  - Risk profile badge (Conservative/Balanced/Aggressive with color coding)
+  - Key metrics summary (safety buffer, initial cash, time horizon, inflation)
+  - Investment returns summary (type, expected return, volatility)
+  - Updates in real-time as form values change
+- **Form Validation**:
+  - 15+ validation rules for all required fields
+  - Field-level error messages (red text below inputs)
+  - Red borders on invalid fields
+  - Submit-level error banner for API errors
+  - Prevents invalid data submission
+- **Edit Mode Support**:
+  - Load existing scenario via `?edit=scenario_name` query parameter
+  - Pre-populate all form fields
+  - Update instead of create on save
+  - Different page title and button text
+- **User Experience**:
+  - Loading spinner when loading scenario
+  - Save button shows "Saving..." with spinner
+  - Cancel button returns to scenarios list
+  - Back button in header
+  - Auto-redirect to scenarios list on successful save
+- **Responsive Design**: 3-column layout on desktop (2 cols form + 1 col preview), adapts to mobile
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.getScenarioTemplates()` - Loads preset templates on mount
+- `api.getScenario(name)` - Loads scenario for editing
+- `api.createScenario(scenario)` - Creates new scenario
+- `api.updateScenario(name, scenario)` - Updates existing scenario
+
+**Navigation:**
+- Back button → Previous page
+- Cancel button → `/scenarios` list
+- Save success → `/scenarios` list
+
+**Validation Rules:**
+- Name: Required, min 3 characters
+- Income: Must be positive
+- Fixed expenses: Cannot be negative
+- Variable expenses: Cannot be negative
+- Variable expense std dev: Cannot be negative
+- Inflation: Must be between -100% and 100%
+- Safety threshold: Cannot be negative
+- Max months: Must be positive
+- Initial cash: Cannot be negative
+- Risk tolerance: Must be between 0 and 1
 
 ### Training Monitor
 - Start/stop training

@@ -47,8 +47,13 @@ interface SimulationHistoryItem {
   created_at: string;
 }
 
-interface TemplateResponse {
-  templates: Record<string, Partial<Scenario>>;
+interface TemplateItem {
+  name: string;
+  display_name: string;
+  description: string;
+  environment: EnvironmentConfig;
+  training: TrainingConfig;
+  reward: RewardConfig;
 }
 
 interface ReportRequest {
@@ -174,8 +179,19 @@ class ApiClient {
   }
 
   async getScenarioTemplates(): Promise<Record<string, Partial<Scenario>>> {
-    const response = await this.client.get<TemplateResponse>('/api/scenarios/templates');
-    return response.data.templates;
+    const response = await this.client.get<TemplateItem[]>('/api/scenarios/templates');
+    // Convert array to dictionary keyed by name
+    const templates: Record<string, Partial<Scenario>> = {};
+    response.data.forEach((template) => {
+      templates[template.name] = {
+        name: template.name,
+        description: template.description,
+        environment: template.environment,
+        training: template.training,
+        reward: template.reward,
+      };
+    });
+    return templates;
   }
 
   // Training API
