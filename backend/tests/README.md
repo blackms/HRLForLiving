@@ -59,34 +59,43 @@ Comprehensive tests for all service layer components:
 
 ### WebSocket Communication Tests (`test_websocket.py`)
 
+**File:** 450 lines of comprehensive WebSocket testing
+
 Comprehensive tests for real-time training updates via WebSocket:
 
 **TestTrainingSocketManager** (6 tests):
-- Progress update emission
+- Progress update emission with 9 fields
 - Training started event emission
-- Training completed event emission
-- Training stopped event emission
-- Training error event emission
-- Multiple sequential progress updates
+- Training completed event emission with final metrics
+- Training stopped event emission (early stop)
+- Training error event emission with details
+- Multiple sequential progress updates (5 consecutive)
 
 **TestWebSocketIntegration** (4 tests):
 - Training service progress callback mechanism
-- Complete training lifecycle event sequence
+- Complete training lifecycle event sequence (12 events: 1 started + 10 progress + 1 completed)
 - Error handling and error event emission
-- Early stop scenario with stopped event
+- Early stop scenario with stopped event (7 events: 1 started + 5 progress + 1 stopped)
 
 **TestWebSocketConnectionHandlers** (2 tests):
-- Connection handler setup verification
-- Progress data structure and type validation
+- Connection handler setup verification (connect, disconnect, subscribe_training)
+- Progress data structure and type validation (9 required fields with type checking)
 
 **TestWebSocketEventPayloads** (3 tests):
-- Training started payload structure
-- Training completed payload structure
-- Training error payload structure
+- Training started payload structure (scenario_name, num_episodes, start_time)
+- Training completed payload structure (scenario_name, episodes_completed, final_metrics)
+- Training error payload structure (message, details)
 
 **Total WebSocket Tests: 15**
 
-All tests use mocking to avoid actual WebSocket connections, ensuring fast and reliable test execution.
+**Event Coverage:**
+- ✅ training_progress (4 tests)
+- ✅ training_started (3 tests)
+- ✅ training_completed (3 tests)
+- ✅ training_stopped (2 tests)
+- ✅ training_error (3 tests)
+
+All tests use AsyncMock to avoid actual WebSocket connections, ensuring fast and reliable test execution. See `WEBSOCKET_TESTS_SUMMARY.md` for detailed documentation.
 
 ## Running Tests
 

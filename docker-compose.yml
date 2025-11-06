@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # HRL Finance System - Full Stack Application
+  hrl-finance:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrl-finance-app
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      # Mount directories for persistent data
+      - ./configs:/app/configs
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./results:/app/results
+      - ./runs:/app/runs
+      - ./logs:/app/logs
+    environment:
+      # Application settings
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - PORT=8000
+      - HOST=0.0.0.0
+      
+      # CORS settings
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      
+      # File paths
+      - CONFIGS_DIR=/app/configs
+      - MODELS_DIR=/app/models
+      - REPORTS_DIR=/app/reports
+      - RESULTS_DIR=/app/results
+      - RUNS_DIR=/app/runs
+      - LOGS_DIR=/app/logs
+      
+      # Training settings
+      - MAX_TRAINING_EPISODES=${MAX_TRAINING_EPISODES:-10000}
+      - DEFAULT_SAVE_INTERVAL=${DEFAULT_SAVE_INTERVAL:-100}
+      
+      # Simulation settings
+      - MAX_SIMULATION_EPISODES=${MAX_SIMULATION_EPISODES:-100}
+      
+      # WebSocket settings
+      - WEBSOCKET_PING_TIMEOUT=${WEBSOCKET_PING_TIMEOUT:-60}
+      - WEBSOCKET_PING_INTERVAL=${WEBSOCKET_PING_INTERVAL:-25}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - hrl-network
+
+  # Development service with hot-reload
+  hrl-finance-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: hrl-finance-dev
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      # Mount source code for hot-reload
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./src:/app/src
+      - ./configs:/app/configs
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./results:/app/results
+      - ./runs:/app/runs
+      - ./logs:/app/logs
+      # Exclude node_modules
+      - /app/frontend/node_modules
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - PORT=8000
+      - HOST=0.0.0.0
+      - CORS_ORIGINS=http://localhost:5173
+      - VITE_API_URL=http://localhost:8000
+    command: >
+      sh -c "
+        cd /app/backend && uvicorn main:socket_app --host 0.0.0.0 --port 8000 --reload &
+        cd /app/frontend && npm run dev -- --host 0.0.0.0 --port 5173
+      "
+    restart: unless-stopped
+    networks:
+      - hrl-network
+    profiles:
+      - dev
+
+networks:
+  hrl-network:
+    driver: bridge
+
+volumes:
+  configs:
+  models:
+  reports:
+  results:
+  runs:
+  logs:

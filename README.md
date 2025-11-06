@@ -1157,6 +1157,37 @@ pip install -r requirements.txt
 pytest tests/ -v
 ```
 
+### Docker Deployment (Recommended)
+
+For production deployment or containerized development, see the [Deployment Guide](DEPLOYMENT.md).
+
+**Quick Docker Start:**
+
+```bash
+# Copy environment configuration
+cp .env.example .env
+
+# Build and start with Docker Compose
+./scripts/build.sh
+docker-compose up -d
+
+# Access the application
+# Frontend & API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+```
+
+**Development Mode:**
+
+```bash
+# Start development environment with hot-reload
+./scripts/dev.sh start
+
+# Backend: http://localhost:8000
+# Frontend: http://localhost:5173
+```
+
+For detailed deployment options including Kubernetes, Nginx reverse proxy, and production configurations, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ### 2. Training the HRL System
 
 Train the system using the main training script with either YAML configuration files or predefined behavioral profiles:

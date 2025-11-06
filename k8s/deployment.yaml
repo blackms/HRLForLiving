@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hrl-finance
+  labels:
+    app: hrl-finance
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hrl-finance
+  template:
+    metadata:
+      labels:
+        app: hrl-finance
+        version: v1
+    spec:
+      containers:
+      - name: hrl-finance
+        image: hrl-finance:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8000"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: CORS_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: hrl-finance-config
+              key: cors_origins
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: hrl-finance-config
+              key: log_level
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: configs
+          mountPath: /app/configs
+        - name: models
+          mountPath: /app/models
+        - name: reports
+          mountPath: /app/reports
+        - name: results
+          mountPath: /app/results
+      volumes:
+      - name: configs
+        persistentVolumeClaim:
+          claimName: hrl-finance-configs-pvc
+      - name: models
+        persistentVolumeClaim:
+          claimName: hrl-finance-models-pvc
+      - name: reports
+        persistentVolumeClaim:
+          claimName: hrl-finance-reports-pvc
+      - name: results
+        persistentVolumeClaim:
+          claimName: hrl-finance-results-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hrl-finance-service
+  labels:
+    app: hrl-finance
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: hrl-finance
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hrl-finance-config
+data:
+  cors_origins: "*"
+  log_level: "INFO"
+  max_training_episodes: "10000"
+  default_save_interval: "100"
+  websocket_ping_timeout: "60"
+  websocket_ping_interval: "25"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrl-finance-configs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrl-finance-models-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrl-finance-reports-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hrl-finance-results-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
