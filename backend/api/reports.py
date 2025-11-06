@@ -97,6 +97,36 @@ async def generate_report(
         )
 
 
+@router.get("/list", response_model=ReportListResponse)
+async def list_reports() -> ReportListResponse:
+    """
+    List all generated reports
+    
+    Returns:
+        ReportListResponse: List of report metadata
+        
+    Raises:
+        HTTPException 500: If error listing reports
+    """
+    try:
+        reports = report_service.list_reports()
+        
+        return ReportListResponse(
+            reports=reports,
+            total=len(reports)
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "ListError",
+                "message": f"Failed to list reports: {str(e)}",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+
 @router.get("/{report_id}")
 async def download_report(report_id: str) -> FileResponse:
     """
@@ -149,36 +179,6 @@ async def download_report(report_id: str) -> FileResponse:
             detail={
                 "error": "RetrievalError",
                 "message": f"Failed to retrieve report: {str(e)}",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
-
-
-@router.get("/list", response_model=ReportListResponse)
-async def list_reports() -> ReportListResponse:
-    """
-    List all generated reports
-    
-    Returns:
-        ReportListResponse: List of report metadata
-        
-    Raises:
-        HTTPException 500: If error listing reports
-    """
-    try:
-        reports = report_service.list_reports()
-        
-        return ReportListResponse(
-            reports=reports,
-            total=len(reports)
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "ListError",
-                "message": f"Failed to list reports: {str(e)}",
                 "timestamp": datetime.now().isoformat()
             }
         )

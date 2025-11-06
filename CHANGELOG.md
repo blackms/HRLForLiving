@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Frontend Report Generation Modal** (`frontend/src/components/ReportModal.tsx`)
+  - Reusable modal dialog component for generating reports from simulation results (336 lines)
+  - Report configuration form with customizable title and format selection (HTML/PDF)
+  - Section customization with 6 checkboxes: Summary Statistics, Scenario Configuration, Training Configuration, Detailed Results, Strategy Learned, Charts & Visualizations
+  - Real-time generation workflow with loading states and progress feedback
+  - Success state with download button that opens report in new browser tab
+  - Error handling with descriptive messages and retry capability
+  - Integration with Results Viewer and Simulation Runner pages
+  - Props: isOpen, onClose, simulationId, scenarioName, modelName
+  - API integration with `api.generateReport()` endpoint
+  - Download URL construction: `http://localhost:8000/api/reports/{report_id}`
+  - Form validation (generate button disabled if no sections selected)
+  - Responsive design (max-width: 2xl, max-height: 90vh with scroll)
+  - Full dark mode support throughout
+  - Modal overlay with backdrop click handling
 - **Backend API Pydantic Models** (`backend/models/`)
   - Request models (`backend/models/requests.py`):
     - `EnvironmentConfig`: Financial simulation environment configuration with comprehensive validation

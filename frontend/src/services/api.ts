@@ -254,7 +254,12 @@ class ApiClient {
   }
 
   // Reports API
-  async generateReport(request: ReportRequest): Promise<{ report_id: string; message: string }> {
+  async generateReport(request: {
+    simulation_id: string;
+    report_type: 'pdf' | 'html';
+    include_sections?: string[];
+    title?: string;
+  }): Promise<{ report_id: string; message: string }> {
     const response = await this.client.post<{ report_id: string; message: string }>('/api/reports/generate', request);
     return response.data;
   }

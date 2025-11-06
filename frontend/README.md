@@ -39,7 +39,8 @@ The app will be available at http://localhost:5173
 frontend/
 ├── src/
 │   ├── components/      # Reusable UI components
-│   │   └── Layout.tsx   # Main layout with navigation
+│   │   ├── Layout.tsx   # Main layout with navigation
+│   │   └── ReportModal.tsx  # Report generation modal dialog
 │   ├── contexts/        # React contexts
 │   │   └── ThemeContext.tsx  # Theme provider (light/dark mode)
 │   ├── pages/           # Page components
@@ -745,6 +746,211 @@ The app uses Tailwind CSS for styling with:
 The frontend expects the backend API to be running at `http://localhost:8000` by default.
 
 See [backend/README.md](../backend/README.md) for backend setup and API documentation.
+
+### Report Generation ✅ **IMPLEMENTED**
+
+The Report Generation feature allows users to create comprehensive PDF or HTML reports from simulation results.
+
+**Features:**
+- **ReportModal Component**: Modal dialog for configuring and generating reports
+  - Triggered from Results Viewer and Simulation Runner pages
+  - "Generate Report" button (green) on both pages
+- **Report Configuration**:
+  - **Report Title**: Customizable title (default: "Financial Report: {scenario_name}")
+  - **Report Format**: Radio buttons for HTML or PDF selection
+    - HTML: Can be viewed in any browser
+    - PDF: Requires WeasyPrint (falls back to HTML if not installed)
+  - **Section Selection**: 6 customizable sections with checkboxes:
+    - ✅ **Summary Statistics**: Duration, wealth, investment gains, key metrics
+    - ✅ **Scenario Configuration**: Income, expenses, inflation, investment parameters
+    - ✅ **Training Configuration**: Episodes, learning rates, training parameters
+    - ✅ **Detailed Results**: Wealth breakdown and portfolio analysis
+    - ✅ **Strategy Learned**: Investment, saving, and consumption patterns
+    - ✅ **Charts & Visualizations**: Episode data tables and visual summaries
+  - Each section has a description explaining what it includes
+  - All sections selected by default
+  - Generate button disabled if no sections selected
+- **Simulation Info Display**:
+  - Shows scenario name, model name, and simulation ID
+  - Gray background card for easy reference
+- **Generation Process**:
+  - "Generate Report" button shows spinner and "Generating..." text
+  - Form fields disabled during generation
+  - API call to backend report service
+- **Success State**:
+  - Green success banner with "Report generated successfully!" message
+  - "Download Report" button (green) to open report in new tab
+  - Form remains visible for reference
+  - "Close" button to dismiss modal
+- **Error Handling**:
+  - Red error banner with descriptive message
+  - Handles missing simulation results
+  - Handles WeasyPrint dependency errors (shows HTML fallback message)
+  - Retry capability by closing and reopening modal
+- **Report Content** (Backend Generated):
+  - Professional HTML template with responsive CSS
+  - Print-friendly styling for PDF conversion
+  - Metadata header (generated date, simulation ID, scenario, model, episodes)
+  - Summary statistics cards with key metrics
+  - Scenario configuration tables (financial and investment parameters)
+  - Training configuration table
+  - Detailed results with wealth breakdown
+  - Strategy learned section with progress bars
+  - Episode data tables (first 10 episodes shown)
+  - Footer with system name and generation timestamp
+- **Download Functionality**:
+  - Opens report in new browser tab
+  - Browser handles download/view based on file type
+  - Filename format: `report_{simulation_id}_{timestamp}.{html|pdf}`
+- **Modal Interactions**:
+  - Click outside modal or X button to close
+  - Cancel button to close without generating
+  - Close button after generation
+  - Escape key to close (standard modal behavior)
+- **Responsive Design**: Modal adapts to screen size (max-width: 2xl, max-height: 90vh)
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.generateReport(request)` - Generates report and returns report ID
+  - Request includes: simulation_id, report_type, include_sections, title
+  - Returns: report_id, message, file_path, file_size_kb
+- Download URL: `http://localhost:8000/api/reports/{report_id}`
+  - Opens in new tab for viewing/downloading
+
+**Integration Points:**
+- **Results Viewer**: "Generate Report" button in action buttons section
+- **Simulation Runner**: "Generate Report" button after simulation completes
+- Both pages pass simulation ID, scenario name, and model name to modal
+
+**Report Types:**
+- **HTML Report**:
+  - Always available
+  - Can be viewed directly in browser
+  - Responsive design for web viewing
+  - Print-friendly CSS for printing
+  - File size: ~7-8 KB
+- **PDF Report**:
+  - Requires WeasyPrint Python package
+  - Falls back to HTML if WeasyPrint not installed
+  - Error message provides installation instructions
+  - Professional document format
+  - Suitable for sharing and archiving
+
+**User Experience:**
+- One-click report generation from results pages
+- Clear visual feedback during generation
+- Immediate download capability after generation
+- Customizable report content via section selection
+- Helpful error messages with recovery options
+- Modal can be closed and reopened without losing simulation context
+
+**Implementation Details:**
+- ReportModal component: 336 lines of TypeScript React
+- Props: isOpen, onClose, simulationId, scenarioName, modelName
+- State management with React hooks (useState)
+- API integration with error handling
+- Conditional rendering based on generation state
+- Form validation (at least one section required)
+- Modal overlay with backdrop click handling
+- Responsive design (max-width: 2xl, max-height: 90vh with scroll)
+
+**Backend Report Service:**
+- Aggregates data from simulation results and scenario configuration
+- Generates professional HTML with embedded CSS
+- Supports PDF generation via WeasyPrint (optional)
+- Saves report metadata as JSON
+- Provides download endpoint for generated reports
+- Lists all generated reports via `/api/reports/list` endpoint
+
+## Components
+
+### Layout Component
+
+The Layout component provides the main application structure with navigation.
+
+**Features:**
+- Top navigation bar with app title
+- Navigation links to all pages (Dashboard, Scenarios, Training, Simulation, Results, Comparison)
+- Active route highlighting
+- Theme toggle button (light/dark mode)
+- Responsive design with mobile menu support
+- Outlet for nested routes
+
+**Location:** `src/components/Layout.tsx`
+
+### ReportModal Component
+
+The ReportModal component is a reusable modal dialog for generating reports from simulation results.
+
+**Props:**
+```typescript
+interface ReportModalProps {
+  isOpen: boolean;           // Controls modal visibility
+  onClose: () => void;       // Callback when modal is closed
+  simulationId: string;      // ID of simulation to generate report for
+  scenarioName: string;      // Name of scenario (for display)
+  modelName: string;         // Name of model (for display)
+}
+```
+
+**Features:**
+- **Modal Dialog**: Fixed overlay with centered content, backdrop click to close
+- **Simulation Info Display**: Shows scenario name, model name, and simulation ID
+- **Report Title Input**: Customizable title with default value
+- **Format Selection**: Radio buttons for HTML or PDF format
+- **Section Customization**: 6 checkboxes for including/excluding report sections:
+  - Summary Statistics
+  - Scenario Configuration
+  - Training Configuration
+  - Detailed Results
+  - Strategy Learned
+  - Charts & Visualizations
+- **Generation Workflow**:
+  - Generate button with loading state
+  - Form fields disabled during generation
+  - Success banner with download button
+  - Error banner with descriptive messages
+- **Download Functionality**: Opens report in new browser tab
+- **State Management**: Internal state for form values, loading, errors, and report ID
+- **Validation**: Generate button disabled if no sections selected
+- **Responsive Design**: Max-width 2xl, max-height 90vh with scroll
+- **Dark Mode**: Full support for light/dark themes
+
+**Usage Example:**
+```typescript
+import ReportModal from '../components/ReportModal';
+
+function MyPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  return (
+    <>
+      <button onClick={() => setIsModalOpen(true)}>
+        Generate Report
+      </button>
+      
+      <ReportModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        simulationId="simulation_123"
+        scenarioName="Bologna Coppia"
+        modelName="bologna_coppia"
+      />
+    </>
+  );
+}
+```
+
+**Integration Points:**
+- Results Viewer page: "Generate Report" button in action buttons section
+- Simulation Runner page: "Generate Report" button after simulation completes
+
+**API Integration:**
+- Calls `api.generateReport(request)` with ReportRequest payload
+- Receives ReportResponse with report_id and file metadata
+- Constructs download URL: `http://localhost:8000/api/reports/{report_id}`
+
+**Location:** `src/components/ReportModal.tsx` (336 lines)
 
 ## Type Safety
 

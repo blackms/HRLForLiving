@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import ReportModal from '../components/ReportModal';
 import type { SimulationResult } from '../types';
 
 interface ModelOption {
@@ -33,6 +34,7 @@ export default function SimulationRunner() {
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Load models and scenarios on mount
   useEffect(() => {
@@ -379,12 +381,29 @@ export default function SimulationRunner() {
               View Detailed Results
             </button>
             <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Generate Report
+            </button>
+            <button
               onClick={() => navigate('/comparison')}
               className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
             >
               Compare Scenarios
             </button>
           </div>
+
+          {/* Report Modal */}
+          {results && simulationId && (
+            <ReportModal
+              isOpen={isReportModalOpen}
+              onClose={() => setIsReportModalOpen(false)}
+              simulationId={simulationId}
+              scenarioName={results.scenario_name}
+              modelName={results.model_name}
+            />
+          )}
         </>
       )}
     </div>

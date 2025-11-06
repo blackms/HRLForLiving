@@ -304,6 +304,83 @@ Common error types:
 
 ---
 
+## Frontend Integration
+
+The frontend provides a `ReportModal` component for easy report generation from the UI.
+
+### ReportModal Component
+
+**Location:** `frontend/src/components/ReportModal.tsx`
+
+**Props:**
+```typescript
+interface ReportModalProps {
+  isOpen: boolean;           // Controls modal visibility
+  onClose: () => void;       // Callback when modal is closed
+  simulationId: string;      // ID of simulation to generate report for
+  scenarioName: string;      // Name of scenario (for display)
+  modelName: string;         // Name of model (for display)
+}
+```
+
+**Features:**
+- Modal dialog with report configuration form
+- Report title input (default: "Financial Report: {scenarioName}")
+- Format selection (HTML/PDF radio buttons)
+- Section customization (6 checkboxes for including/excluding sections)
+- Generate button with loading state
+- Success state with download button
+- Error handling with descriptive messages
+- Full dark mode support
+
+**Usage Example:**
+```typescript
+import ReportModal from '../components/ReportModal';
+
+function ResultsViewer() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  return (
+    <>
+      <button onClick={() => setIsModalOpen(true)}>
+        Generate Report
+      </button>
+      
+      <ReportModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        simulationId="simulation_123"
+        scenarioName="Bologna Coppia"
+        modelName="bologna_coppia"
+      />
+    </>
+  );
+}
+```
+
+**Integration Points:**
+- Results Viewer page (`frontend/src/pages/ResultsViewer.tsx`)
+- Simulation Runner page (`frontend/src/pages/SimulationRunner.tsx`)
+
+**API Client:**
+The frontend uses the `api.generateReport()` function from `frontend/src/services/api.ts`:
+
+```typescript
+// Generate report
+const response = await api.generateReport({
+  simulation_id: simulationId,
+  report_type: 'html',
+  include_sections: ['summary', 'scenario', 'results'],
+  title: 'My Financial Report'
+});
+
+// Download URL
+const downloadUrl = `http://localhost:8000/api/reports/${response.report_id}`;
+window.open(downloadUrl, '_blank');
+```
+
+---
+
 ## File Storage
 
 Reports are stored in the `reports/` directory at the project root:

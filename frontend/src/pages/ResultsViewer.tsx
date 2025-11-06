@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
+import ReportModal from '../components/ReportModal';
 import type { SimulationResult } from '../types';
 
 type ChartView = 'cash' | 'portfolio' | 'wealth' | 'actions';
@@ -19,6 +20,7 @@ export default function ResultsViewer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ChartView>('cash');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Load simulation results
   useEffect(() => {
@@ -496,12 +498,29 @@ export default function ResultsViewer() {
           Compare Scenarios
         </button>
         <button
+          onClick={() => setIsReportModalOpen(true)}
+          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+        >
+          Generate Report
+        </button>
+        <button
           onClick={handleExport}
           className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
         >
           Export Data
         </button>
       </div>
+
+      {/* Report Modal */}
+      {results && simulationId && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          simulationId={simulationId}
+          scenarioName={results.scenario_name}
+          modelName={results.model_name}
+        />
+      )}
     </div>
   );
 }

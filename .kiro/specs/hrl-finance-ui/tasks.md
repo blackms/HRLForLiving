@@ -435,14 +435,56 @@
     - ✅ Navigation integration (back to dashboard, go to simulation runner)
     - _Requirements: 7.1, 7.2_
 
-- [ ] 15. Implement Report Generation
-  - Create ReportModal component
-  - Implement report configuration form
-  - Add report type selector (PDF/HTML)
-  - Implement section customization checkboxes
-  - Add generate button with API integration
-  - Implement download link when report is ready
-  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+- [x] 15. Implement Report Generation ⭐ **COMPLETED**
+  - [x] 15.1 Create ReportModal component ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive modal dialog (336 lines)
+    - ✅ Created report configuration form with all options
+    - ✅ Added simulation info display (scenario, model, simulation ID)
+    - ✅ Implemented report title input with default value
+    - ✅ Added report format selector (HTML/PDF radio buttons)
+    - ✅ Created section customization with 6 checkboxes:
+      - Summary Statistics
+      - Scenario Configuration
+      - Training Configuration
+      - Detailed Results
+      - Strategy Learned
+      - Charts & Visualizations
+    - ✅ Each section has descriptive text explaining contents
+    - ✅ All sections selected by default
+    - ✅ Generate button disabled if no sections selected
+    - ✅ Full dark mode support throughout
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+  
+  - [x] 15.2 Implement report generation workflow ⭐ **COMPLETED**
+    - ✅ Generate button with loading state (spinner + "Generating..." text)
+    - ✅ Form fields disabled during generation
+    - ✅ API integration with `api.generateReport(request)`
+    - ✅ Request includes: simulation_id, report_type, include_sections, title
+    - ✅ Success state with green banner and "Download Report" button
+    - ✅ Download opens report in new browser tab
+    - ✅ Error handling with red error banner
+    - ✅ Close button to dismiss modal
+    - ✅ Modal state reset on close
+    - _Requirements: 6.1, 6.2, 6.5, 6.6_
+  
+  - [x] 15.3 Integrate with Results Viewer and Simulation Runner ⭐ **COMPLETED**
+    - ✅ Added "Generate Report" button (green) to Results Viewer action buttons
+    - ✅ Added "Generate Report" button (green) to Simulation Runner after completion
+    - ✅ Both pages pass simulationId, scenarioName, modelName to modal
+    - ✅ Modal state management with isOpen/onClose props
+    - ✅ Conditional rendering based on simulation completion
+    - ✅ Proper prop passing and type safety
+    - _Requirements: 6.1, 6.5, 6.6_
+  
+  - [x] 15.4 Report format and download functionality ⭐ **COMPLETED**
+    - ✅ HTML format always available
+    - ✅ PDF format with WeasyPrint dependency handling
+    - ✅ Helper text explaining format differences
+    - ✅ Download URL: `http://localhost:8000/api/reports/{report_id}`
+    - ✅ Opens in new tab for viewing/downloading
+    - ✅ Browser handles download/view based on file type
+    - ✅ Filename format: `report_{simulation_id}_{timestamp}.{html|pdf}`
+    - _Requirements: 6.2, 6.5, 6.6_
 
 - [ ] 16. Implement responsive design and accessibility
   - Add responsive breakpoints for all components
