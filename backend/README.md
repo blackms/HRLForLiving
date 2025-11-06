@@ -85,6 +85,23 @@ See [SIMULATION_API.md](api/SIMULATION_API.md) for detailed Simulation API docum
 - Results persistence to JSON files
 - Simulation history management
 
+### Reports API ✅ **IMPLEMENTED**
+
+- `POST /api/reports/generate` - Generate PDF or HTML report from simulation results
+- `GET /api/reports/{report_id}` - Download a generated report file
+- `GET /api/reports/list` - List all generated reports
+- `GET /api/reports/{report_id}/metadata` - Get report metadata
+
+See [REPORTS_API.md](api/REPORTS_API.md) for detailed Reports API documentation.
+
+**Key Features:**
+- HTML and PDF report generation
+- Customizable report sections (summary, scenario, training, results, strategy, charts)
+- Professional styled HTML templates
+- Responsive design for web viewing
+- Report metadata storage and retrieval
+- File download support
+
 ### API Documentation
 
 Once running, visit:
@@ -569,6 +586,120 @@ history = response.json()
 print(f"Total simulations: {history['total']}")
 ```
 
+## Reports API Usage
+
+### Generate Report
+
+```bash
+curl -X POST http://localhost:8000/api/reports/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+    "report_type": "html",
+    "include_sections": ["summary", "scenario", "results", "strategy"],
+    "title": "Financial Analysis Report - Bologna Couple"
+  }'
+```
+
+**Response (202 Accepted):**
+```json
+{
+  "report_id": "report_bologna_coppia_bologna_coppia_1730901234_1730901300",
+  "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+  "report_type": "html",
+  "title": "Financial Analysis Report - Bologna Couple",
+  "generated_at": "2025-11-06T12:05:00",
+  "file_path": "reports/report_bologna_coppia_bologna_coppia_1730901234_1730901300.html",
+  "file_size_kb": 125.5,
+  "sections": ["summary", "scenario", "results", "strategy"],
+  "status": "completed",
+  "message": "Report generated successfully: report_bologna_coppia_bologna_coppia_1730901234_1730901300"
+}
+```
+
+**Available Sections:**
+- `summary` - Summary statistics (duration, wealth, gains)
+- `scenario` - Scenario configuration details
+- `training` - Training configuration
+- `results` - Detailed results breakdown
+- `strategy` - Strategy learned visualization
+- `charts` - Episode data and visualizations
+
+### Download Report
+
+```bash
+curl -X GET http://localhost:8000/api/reports/report_bologna_coppia_bologna_coppia_1730901234_1730901300 \
+  -o financial_report.html
+```
+
+### List All Reports
+
+```bash
+curl http://localhost:8000/api/reports/list
+```
+
+**Response:**
+```json
+{
+  "reports": [
+    {
+      "report_id": "report_bologna_coppia_bologna_coppia_1730901234_1730901300",
+      "simulation_id": "bologna_coppia_bologna_coppia_1730901234",
+      "report_type": "html",
+      "title": "Financial Analysis Report - Bologna Couple",
+      "generated_at": "2025-11-06T12:05:00",
+      "file_path": "reports/report_bologna_coppia_bologna_coppia_1730901234_1730901300.html",
+      "file_size_kb": 125.5,
+      "sections": ["summary", "scenario", "results", "strategy"]
+    }
+  ],
+  "total": 1
+}
+```
+
+### Get Report Metadata
+
+```bash
+curl http://localhost:8000/api/reports/report_bologna_coppia_bologna_coppia_1730901234_1730901300/metadata
+```
+
+### Python Client
+
+```python
+import requests
+
+# Generate HTML report
+response = requests.post('http://localhost:8000/api/reports/generate', json={
+    'simulation_id': 'bologna_coppia_bologna_coppia_1730901234',
+    'report_type': 'html',
+    'title': 'My Financial Report'
+})
+
+report_data = response.json()
+report_id = report_data['report_id']
+
+# Download the report
+report_file = requests.get(
+    f'http://localhost:8000/api/reports/{report_id}'
+)
+
+with open('my_report.html', 'wb') as f:
+    f.write(report_file.content)
+
+print(f"Report saved: my_report.html ({report_data['file_size_kb']} KB)")
+
+# List all reports
+response = requests.get('http://localhost:8000/api/reports/list')
+reports = response.json()
+print(f"Total reports: {reports['total']}")
+```
+
+**Note:** PDF generation requires the WeasyPrint library. If not installed, the API will generate an HTML report instead and return an error message with installation instructions:
+
+```bash
+pip install weasyprint
+```
+
 ## File Management Utilities
 
 The `backend/utils/file_manager.py` module provides comprehensive file management for the HRL Finance System. See [FILE_MANAGER_README.md](utils/FILE_MANAGER_README.md) for detailed documentation.
@@ -619,5 +750,9 @@ for model in models:
 - **Model service layer with metadata extraction** ⭐
 - **Training history processing and statistics** ⭐
 
-🚧 **In Progress:**
-- Reports API
+✅ **Completed:**
+- **Reports API (PDF and HTML report generation)** ⭐
+- **Report service layer with comprehensive formatting** ⭐
+- **HTML report generation with styled templates** ⭐
+- **PDF report generation (requires WeasyPrint)** ⭐
+- **Report metadata storage and retrieval** ⭐

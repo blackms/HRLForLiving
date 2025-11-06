@@ -1,0 +1,17 @@
+{
+  "report_id": "report_test_simulation_123_1762423087",
+  "simulation_id": "test_simulation_123",
+  "report_type": "html",
+  "title": "Test Financial Report",
+  "generated_at": "2025-11-06T10:58:07.384106",
+  "file_path": "reports/report_test_simulation_123_1762423087.html",
+  "file_size_kb": 7.65,
+  "sections": [
+    "summary",
+    "scenario",
+    "training",
+    "results",
+    "charts",
+    "strategy"
+  ]
+}

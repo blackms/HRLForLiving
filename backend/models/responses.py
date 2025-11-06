@@ -148,10 +148,21 @@ class SimulationHistoryResponse(BaseModel):
 class ReportResponse(BaseModel):
     """Response for report generation"""
     report_id: str = Field(description="Unique report identifier")
+    simulation_id: str = Field(description="Simulation ID used for report")
     report_type: str = Field(description="Report format (pdf or html)")
+    title: str = Field(description="Report title")
+    generated_at: str = Field(description="Report generation timestamp")
     file_path: str = Field(description="Path to generated report file")
-    file_size_mb: float = Field(description="Report file size in MB")
-    generated_at: datetime = Field(description="Report generation timestamp")
+    file_size_kb: float = Field(description="Report file size in KB")
+    sections: List[str] = Field(description="Sections included in report")
+    status: str = Field(description="Report generation status")
+    message: str = Field(description="Status message")
+
+
+class ReportListResponse(BaseModel):
+    """List of generated reports"""
+    reports: List[Dict[str, Any]] = Field(description="List of report metadata")
+    total: int = Field(description="Total number of reports")
 
 
 class HealthCheckResponse(BaseModel):

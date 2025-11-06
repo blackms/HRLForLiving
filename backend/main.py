@@ -7,6 +7,7 @@ from backend.api.scenarios import router as scenarios_router
 from backend.api.training import router as training_router
 from backend.api.simulation import router as simulation_router
 from backend.api.models import router as models_router
+from backend.api.reports import router as reports_router
 from backend.websocket import sio
 
 app = FastAPI(
@@ -29,6 +30,7 @@ app.include_router(scenarios_router)
 app.include_router(training_router)
 app.include_router(simulation_router)
 app.include_router(models_router)
+app.include_router(reports_router)
 
 # Mount Socket.IO
 socket_app = socketio.ASGIApp(
