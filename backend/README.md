@@ -12,8 +12,8 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run development server
-uvicorn main:app --reload --port 8000
+# Run development server (with WebSocket support)
+uvicorn backend.main:socket_app --reload --port 8000
 ```
 
 ## API Endpoints
@@ -31,6 +31,20 @@ uvicorn main:app --reload --port 8000
 - `PUT /api/scenarios/{name}` - Update an existing scenario
 - `DELETE /api/scenarios/{name}` - Delete a scenario
 - `GET /api/scenarios/templates` - Get preset scenario templates
+
+### Training API ✅ **IMPLEMENTED**
+
+- `POST /api/training/start` - Start training a model on a scenario
+- `POST /api/training/stop` - Stop the current training process
+- `GET /api/training/status` - Get current training status
+
+### WebSocket ✅ **IMPLEMENTED**
+
+- `ws://localhost:8000/socket.io` - WebSocket endpoint for real-time training updates
+- Real-time progress updates during training
+- Events: `training_started`, `training_progress`, `training_completed`, `training_stopped`, `training_error`
+
+See [TRAINING_API.md](api/TRAINING_API.md) for detailed Training API documentation.
 
 ### API Documentation
 
@@ -278,6 +292,123 @@ curl http://localhost:8000/api/scenarios/templates
 - `young_professional` - Single professional with owned home
 - `young_couple` - Dual income couple with rental
 
+## Training API Usage
+
+### Start Training
+
+```bash
+curl -X POST http://localhost:8000/api/training/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "scenario_name": "bologna_coppia",
+    "num_episodes": 1000,
+    "save_interval": 100,
+    "eval_episodes": 10,
+    "seed": 42
+  }'
+```
+
+**Response (202 Accepted):**
+```json
+{
+  "message": "Training started successfully",
+  "data": {
+    "status": "started",
+    "scenario_name": "bologna_coppia",
+    "num_episodes": 1000,
+    "start_time": "2025-11-06T10:30:00"
+  }
+}
+```
+
+### Get Training Status
+
+```bash
+curl http://localhost:8000/api/training/status
+```
+
+**Response:**
+```json
+{
+  "is_training": true,
+  "scenario_name": "bologna_coppia",
+  "current_episode": 450,
+  "total_episodes": 1000,
+  "start_time": "2025-11-06T10:30:00",
+  "latest_progress": {
+    "episode": 450,
+    "total_episodes": 1000,
+    "avg_reward": 168.5,
+    "avg_duration": 118.2,
+    "avg_cash": 5234.67,
+    "avg_invested": 12500.00,
+    "stability": 0.985,
+    "goal_adherence": 0.0234,
+    "elapsed_time": 323.45
+  }
+}
+```
+
+### Stop Training
+
+```bash
+curl -X POST http://localhost:8000/api/training/stop
+```
+
+**Response:**
+```json
+{
+  "message": "Training stopped successfully",
+  "data": {
+    "status": "stopped",
+    "scenario_name": "bologna_coppia",
+    "episodes_completed": 450,
+    "total_episodes": 1000
+  }
+}
+```
+
+### WebSocket Connection (Python)
+
+```python
+import socketio
+
+sio = socketio.Client()
+
+@sio.on('training_progress')
+def on_progress(data):
+    print(f"Episode {data['episode']}/{data['total_episodes']}")
+    print(f"Reward: {data['avg_reward']:.2f}, Stability: {data['stability']:.2%}")
+
+@sio.on('training_completed')
+def on_complete(data):
+    print(f"Training completed: {data['scenario_name']}")
+
+sio.connect('http://localhost:8000', socketio_path='/socket.io')
+sio.wait()
+```
+
+### WebSocket Connection (JavaScript)
+
+```javascript
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:8000', { path: '/socket.io' });
+
+socket.on('connect', () => {
+  console.log('Connected to training updates');
+});
+
+socket.on('training_progress', (data) => {
+  console.log(`Episode ${data.episode}/${data.total_episodes}`);
+  console.log(`Reward: ${data.avg_reward.toFixed(2)}`);
+});
+
+socket.on('training_completed', (data) => {
+  console.log(`Training completed: ${data.scenario_name}`);
+});
+```
+
 ## File Management Utilities
 
 The `backend/utils/file_manager.py` module provides comprehensive file management for the HRL Finance System. See [FILE_MANAGER_README.md](utils/FILE_MANAGER_README.md) for detailed documentation.
@@ -316,9 +447,13 @@ for model in models:
 - **Scenarios API (complete CRUD operations)**
 - **Scenario service layer with business logic**
 - **Scenario templates (5 preset profiles)**
+- **Training API with WebSocket support** ⭐
+- **Training service layer with HRL orchestration** ⭐
+- **Real-time training progress updates via WebSocket** ⭐
+- **Asynchronous training execution with progress callbacks** ⭐
+- **Automatic model checkpointing and persistence** ⭐
 
 🚧 **In Progress:**
-- Training API and WebSocket support
 - Simulation API
 - Models API
 - Reports API

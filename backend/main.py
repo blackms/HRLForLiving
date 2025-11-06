@@ -1,8 +1,11 @@
 # FastAPI application entry point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import socketio
 
 from backend.api.scenarios import router as scenarios_router
+from backend.api.training import router as training_router
+from backend.websocket import sio
 
 app = FastAPI(
     title="HRL Finance System API",
@@ -21,6 +24,14 @@ app.add_middleware(
 
 # Include routers
 app.include_router(scenarios_router)
+app.include_router(training_router)
+
+# Mount Socket.IO
+socket_app = socketio.ASGIApp(
+    socketio_server=sio,
+    other_asgi_app=app,
+    socketio_path='/socket.io'
+)
 
 @app.get("/")
 async def root():

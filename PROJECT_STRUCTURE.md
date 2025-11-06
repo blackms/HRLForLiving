@@ -91,8 +91,14 @@ The API will be available at:
 - ✅ Pydantic request models (EnvironmentConfig, TrainingConfig, RewardConfig, ScenarioConfig, TrainingRequest, SimulationRequest, ReportRequest)
 - ✅ Pydantic response models (TrainingProgress, SimulationResults, ScenarioSummary, ModelSummary, ErrorResponse, etc.)
 - ✅ File management utilities (YAML, PyTorch models, JSON results) with security features
-- 🚧 API endpoint implementations in development
-- 🚧 Service layer business logic in development
+- ✅ **Scenarios API (complete CRUD operations)**
+- ✅ **Scenario service layer with business logic**
+- ✅ **Training API with WebSocket support** ⭐
+- ✅ **Training service layer with HRL orchestration** ⭐
+- ✅ **Real-time training progress updates via WebSocket** ⭐
+- 🚧 Simulation API in development
+- 🚧 Models API in development
+- 🚧 Reports API in development
 
 ### Frontend Setup
 

@@ -56,12 +56,18 @@ The system implements a two-level hierarchical architecture:
 │   └── test_sanity_checks.py   # ✅ Sanity check tests (7 cases)
 ├── backend/                     # FastAPI backend (Web UI)
 │   ├── api/                    # API endpoint handlers
+│   │   ├── scenarios.py        # ✅ Scenarios CRUD API
+│   │   └── README.md           # ✅ API documentation
 │   ├── models/                 # ✅ Pydantic request/response models
 │   │   ├── requests.py         # ✅ Request validation models
 │   │   ├── responses.py        # ✅ Response serialization models
 │   │   └── API_MODELS.md       # ✅ API models documentation
 │   ├── services/               # Business logic layer
+│   │   ├── scenario_service.py # ✅ Scenario management service
+│   │   └── __init__.py         # ✅ Service exports
 │   ├── utils/                  # Utility functions
+│   │   ├── file_manager.py     # ✅ File operations with security
+│   │   └── FILE_MANAGER_README.md # ✅ File manager documentation
 │   ├── websocket/              # WebSocket handlers
 │   ├── main.py                 # ✅ FastAPI application entry
 │   └── README.md               # ✅ Backend documentation
@@ -2095,18 +2101,59 @@ The backend exposes the HRL system through RESTful APIs with comprehensive reque
 - ✅ Pydantic response models (TrainingProgress, SimulationResults, ScenarioSummary, ModelSummary, ErrorResponse, etc.)
 - ✅ File management utilities with security features (YAML, PyTorch models, JSON results)
 - ✅ Health check endpoint
-- 🚧 API endpoints (scenarios, training, simulation, models, reports)
-- 🚧 WebSocket support for real-time training updates
-- 🚧 Service layer business logic
+- ✅ **Scenarios API (complete CRUD operations)**
+- ✅ **Scenario service layer with business logic**
+- ✅ **5 preset scenario templates (conservative, balanced, aggressive, young_professional, young_couple)**
+- ✅ **Training API with WebSocket support for real-time updates** ⭐
+- ✅ **Training service layer with HRL orchestration** ⭐
+- ✅ **Asynchronous training execution with progress callbacks** ⭐
+- ✅ **Automatic model checkpointing and persistence** ⭐
+- 🚧 Simulation API
+- 🚧 Models API
+- 🚧 Reports API
+
+**Implemented Endpoints:**
+
+*Scenarios API:*
+- `GET /api/scenarios` - List all scenarios
+- `GET /api/scenarios/{name}` - Get scenario details
+- `POST /api/scenarios` - Create new scenario
+- `PUT /api/scenarios/{name}` - Update scenario
+- `DELETE /api/scenarios/{name}` - Delete scenario
+- `GET /api/scenarios/templates` - Get preset templates
+
+*Training API:* ⭐
+- `POST /api/training/start` - Start model training
+- `POST /api/training/stop` - Stop training
+- `GET /api/training/status` - Get training status
+- `WS /socket.io` - WebSocket for real-time training updates
 
 **Quick Start:**
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+
+# Start server with WebSocket support
+uvicorn backend.main:socket_app --reload --port 8000
 ```
 
 Visit http://localhost:8000/docs for interactive API documentation.
+
+**Training API Example:**
+```bash
+# Start training
+curl -X POST http://localhost:8000/api/training/start \
+  -H "Content-Type: application/json" \
+  -d '{"scenario_name": "bologna_coppia", "num_episodes": 1000}'
+
+# Check status
+curl http://localhost:8000/api/training/status
+
+# Connect to WebSocket for real-time updates (Python)
+import socketio
+sio = socketio.Client()
+sio.connect('http://localhost:8000', socketio_path='/socket.io')
+```
 
 **API Models Documentation:**
 See `backend/models/API_MODELS.md` for comprehensive documentation of all request and response models, including:
@@ -2183,48 +2230,7 @@ Contributions are welcome! Here's how you can help:
 - Update configuration documentation for new parameters
 - Keep CHANGELOG.md up to date
 
-## Web UI (In Development)
-
-A web-based user interface is being developed to make the HRL Finance System more accessible without requiring command-line expertise.
-
-### Backend API
-
-The FastAPI backend exposes the HRL system functionality through RESTful APIs:
-
-**Status:** 🚧 In Development
-
-**Current Implementation:**
-- ✅ FastAPI application initialized (`backend/main.py`)
-- ✅ Root endpoint (`GET /`) - API information
-- ✅ Health check endpoint (`GET /health`) - System monitoring
-- ✅ File management utilities (`backend/utils/file_manager.py`) - YAML, PyTorch models, JSON results with security
-- 🚧 Scenarios API - CRUD operations for financial scenarios
-- 🚧 Training API - Model training with real-time WebSocket updates
-- 🚧 Simulation API - Run evaluations and get results
-- 🚧 Models API - Manage trained models
-- 🚧 Reports API - Generate PDF/HTML reports
-
-**Quick Start:**
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-Visit http://localhost:8000/docs for interactive API documentation.
-
-### Frontend App
-
-The React + TypeScript frontend provides an intuitive interface for:
-- Creating and managing financial scenarios
-- Training AI models with real-time progress monitoring
-- Running simulations and visualizing results
-- Comparing different scenarios
-- Generating comprehensive reports
-
-**Status:** 🚧 In Development
-
-For more details, see:
+For more details on the Web UI, see the earlier section in this README or:
 - [Backend README](backend/README.md)
 - [Frontend README](frontend/README.md)
 - [Project Structure](PROJECT_STRUCTURE.md)
