@@ -73,6 +73,20 @@ Complete guide to all documentation in the Personal Finance Optimization HRL Sys
 
 ## Testing Documentation
 
+### Backend API Tests
+
+| Document | Description | Run Command |
+|----------|-------------|-------------|
+| [Backend Tests README](backend/tests/README.md) | Complete testing guide | - |
+| [API Tests Summary](backend/tests/API_TESTS_SUMMARY.md) | 67+ tests overview | `pytest backend/tests/ -v` |
+| [Service Tests Enhancement](backend/tests/SERVICE_TESTS_ENHANCEMENT_SUMMARY.md) | Service layer tests (26 tests) | `pytest backend/tests/test_services.py -v` |
+| [Testing Setup Summary](backend/TESTING_SETUP_SUMMARY.md) | Testing infrastructure | - |
+| [API Endpoint Tests](backend/tests/) | REST API tests (41 tests) | `pytest backend/tests/test_api_*.py -v` |
+| [Service Layer Tests](backend/tests/test_services.py) | Business logic tests | `pytest backend/tests/test_services.py -v` |
+| [Integration Tests](backend/tests/test_integration.py) | End-to-end workflows | `pytest backend/tests/test_integration.py -v` |
+
+### Core System Tests
+
 | Document | Description | Run Command |
 |----------|-------------|-------------|
 | [Test Coverage](tests/TEST_COVERAGE.md) | Coverage summary | - |

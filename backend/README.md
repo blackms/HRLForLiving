@@ -88,7 +88,10 @@ pytest --cov=backend --cov-report=term-missing
 
 This will show which lines of code are not covered by tests.
 
-**Current Coverage:** 41 API endpoint tests covering all major functionality
+**Current Coverage:** 
+- 41 API endpoint tests covering all major functionality
+- 26 service layer tests covering business logic and data processing
+- Total: 67+ comprehensive tests
 
 **Recent Test Enhancements:**
 - Enhanced `test_list_scenarios` with response structure validation

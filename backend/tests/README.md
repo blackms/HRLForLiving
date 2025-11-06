@@ -12,10 +12,45 @@ tests/
 ├── test_api_training.py     # Training API endpoint tests
 ├── test_api_simulation.py   # Simulation API endpoint tests
 ├── test_api_reports.py      # Reports API endpoint tests
-├── test_services.py         # Service layer unit tests
+├── test_services.py         # Service layer unit tests (comprehensive)
 ├── test_file_manager.py     # File manager utility tests
 └── test_integration.py      # Integration tests for complete workflows
 ```
+
+### Service Layer Tests (`test_services.py`)
+
+Comprehensive tests for all service layer components:
+
+**TestScenarioService** (10 tests):
+- Template retrieval and validation (5 templates)
+- Template environment config validation
+- Scenario listing with structure validation
+- Scenario retrieval (existing and non-existent)
+- Scenario name extraction from model names
+
+**TestModelService** (7 tests):
+- Model listing with metadata
+- Model retrieval (existing and non-existent)
+- Model deletion (existing and non-existent)
+- Final metrics extraction from training history
+- NaN/Infinity filtering in metrics
+- Empty history handling
+
+**TestSimulationService** (4 tests):
+- Service initialization
+- Simulation listing with required fields
+- Simulation results retrieval
+- Statistics calculation from episodes
+
+**TestReportService** (5 tests):
+- Service initialization
+- Report listing with metadata
+- Report retrieval (existing and non-existent)
+- Report file path retrieval
+- Report data aggregation
+- HTML content generation
+
+**Total Service Tests: 26**
 
 ## Running Tests
 
@@ -75,10 +110,15 @@ The test suite covers:
 
 - ✅ All API endpoints (scenarios, training, simulation, models, reports)
 - ✅ Request validation and error handling
-- ✅ Service layer business logic
+- ✅ Service layer business logic (comprehensive)
 - ✅ File management utilities
 - ✅ Complete user workflows
 - ✅ Edge cases and error conditions
+- ✅ Data validation and sanitization
+- ✅ Statistics calculation and aggregation
+- ✅ Error handling with invalid data (NaN, Infinity)
+- ✅ Template validation and structure
+- ✅ Report generation and formatting
 
 ## Writing New Tests
 

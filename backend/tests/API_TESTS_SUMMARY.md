@@ -2,18 +2,31 @@
 
 ## Overview
 
-Comprehensive unit tests have been implemented for all backend API endpoints, covering the five main API modules: Scenarios, Models, Training, Simulation, and Reports.
+Comprehensive test suite for the HRL Finance System backend, covering API endpoints, service layer business logic, and utilities.
 
 ## Test Coverage
 
-### Total Tests: 41
-- **Scenarios API**: 13 tests
-- **Models API**: 5 tests  
-- **Training API**: 7 tests
-- **Simulation API**: 8 tests
-- **Reports API**: 8 tests
+### Total Tests: 67+
+- **API Endpoint Tests**: 41 tests
+  - **Scenarios API**: 13 tests
+  - **Models API**: 5 tests  
+  - **Training API**: 7 tests
+  - **Simulation API**: 8 tests
+  - **Reports API**: 8 tests
+- **Service Layer Tests**: 26 tests
+  - **ScenarioService**: 10 tests
+  - **ModelService**: 7 tests
+  - **SimulationService**: 4 tests
+  - **ReportService**: 5 tests
+- **Utility Tests**: File manager, integration tests
 
 All tests are passing ✅
+
+### Service Layer Tests
+
+For detailed information about service layer tests, see:
+- [SERVICE_TESTS_ENHANCEMENT_SUMMARY.md](SERVICE_TESTS_ENHANCEMENT_SUMMARY.md) - Comprehensive service layer test documentation
+- `test_services.py` - Service layer test implementation
 
 ## Test Structure
 

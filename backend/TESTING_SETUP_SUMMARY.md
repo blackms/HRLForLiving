@@ -187,7 +187,60 @@ The test suite aims to cover:
 
 ## Recent Test Enhancements
 
-### test_api_scenarios.py - Enhanced Response Validation (Latest)
+### test_services.py - Comprehensive Service Layer Testing (Latest)
+
+**Enhancement:** Massively expanded service layer tests from 6 to 26 tests covering all services
+
+**New Test Classes:**
+1. **TestScenarioService** (10 tests)
+   - Template validation (5 preset templates)
+   - Template environment config validation
+   - Scenario listing with structure checks
+   - Scenario retrieval and error handling
+   - Scenario name extraction logic
+
+2. **TestModelService** (7 tests)
+   - Model listing with metadata validation
+   - Model retrieval and deletion
+   - Final metrics extraction from training history
+   - NaN/Infinity filtering in metrics calculation
+   - Empty history edge case handling
+
+3. **TestSimulationService** (4 tests)
+   - Service initialization
+   - Simulation listing with required fields
+   - Simulation results retrieval
+   - Statistics calculation from episode data
+
+4. **TestReportService** (5 tests)
+   - Service initialization
+   - Report listing and metadata
+   - Report retrieval and file path handling
+   - Report data aggregation logic
+   - HTML content generation validation
+
+**Key Improvements:**
+- **Template Validation**: Ensures all 5 templates (conservative, balanced, aggressive, young_professional, young_couple) are present and valid
+- **Data Sanitization**: Tests NaN and Infinity filtering in metrics
+- **Edge Cases**: Tests empty data, missing files, invalid inputs
+- **Structure Validation**: Validates nested objects and required fields
+- **Business Logic**: Tests calculation methods and data transformations
+- **Error Handling**: Tests FileNotFoundError for non-existent resources
+
+**Benefits:**
+- Comprehensive coverage of service layer business logic
+- Validates data processing and transformation
+- Ensures robust error handling
+- Documents expected behavior in test code
+- Catches regressions in calculations and aggregations
+
+**Impact:**
+- Service layer test count increased from 6 to 26 (333% increase)
+- Covers all four service classes comprehensively
+- Validates critical business logic and calculations
+- Provides confidence in service layer reliability
+
+### test_api_scenarios.py - Enhanced Response Validation
 
 **Enhancement:** Added comprehensive response structure validation to `test_list_scenarios`
 
