@@ -491,20 +491,246 @@ The Simulation Runner allows users to evaluate trained models on financial scena
 - All monetary values formatted with EUR symbol
 - All percentages formatted with 1 decimal place
 
-### Results Viewer
-- Interactive charts (Recharts)
-- Cash balance over time
-- Portfolio evolution
-- Wealth accumulation
-- Action distribution
-- Strategy learned visualization
+### Results Viewer ✅ **IMPLEMENTED**
 
-### Comparison
-- Compare multiple scenarios/models
-- Side-by-side metrics
-- Comparative charts
-- Difference highlighting
-- Export to CSV/JSON
+The Results Viewer provides detailed analysis and visualization of simulation results with interactive charts and episode-level data exploration.
+
+**Features:**
+- **Header Section**:
+  - Back button to Simulation Runner
+  - Results title with scenario name
+  - Metadata: Model name and episode count
+- **Summary Statistics** (4 metric cards):
+  - **Duration**: Mean ± std dev in months
+  - **Total Wealth**: Mean ± std dev in EUR
+  - **Investment Gains**: 
+    - Mean value in EUR with +/- prefix
+    - Color-coded (green for positive, red for negative)
+    - Return percentage calculated from invested amount
+  - **Final Portfolio**: 
+    - Mean portfolio value in EUR
+    - Cash breakdown displayed below
+- **Episode Selector**:
+  - Dropdown to select individual episodes for detailed view
+  - Shows episode number and duration for each episode
+  - Updates all charts when episode changes
+- **Tab Navigation** (4 chart views):
+  - **Cash Balance**: Line chart showing cash over time
+  - **Portfolio Evolution**: Dual-line chart (invested amount vs portfolio value)
+  - **Wealth Accumulation**: Triple-line chart (cash, portfolio, total wealth)
+  - **Action Distribution**: Pie chart showing invest/save/consume percentages
+- **Interactive Charts** (Recharts):
+  - **Cash Balance Over Time**:
+    - Blue line showing cash balance progression
+    - X-axis: Month, Y-axis: Cash (EUR)
+    - Tooltip with formatted EUR values
+  - **Portfolio Evolution**:
+    - Green line: Amount invested
+    - Purple line: Portfolio value (with returns)
+    - Shows investment performance over time
+  - **Wealth Accumulation**:
+    - Blue line: Cash balance
+    - Green line: Portfolio value
+    - Orange line: Total wealth (cash + portfolio)
+    - Comprehensive view of wealth building
+  - **Action Distribution**:
+    - Pie chart with 3 segments (Invest, Save, Consume)
+    - Color-coded: Blue (Invest), Green (Save), Purple (Consume)
+    - Labels show name and percentage
+    - Custom tooltips with percentage formatting
+  - All charts feature:
+    - Responsive containers (100% width, 400px height)
+    - Dark-themed tooltips with custom styling
+    - Grid lines for readability
+    - Axis labels and legends
+    - Smooth lines without data points
+    - Hover interactions
+- **Strategy Learned Section**:
+  - **Invest**: Horizontal progress bar showing percentage (blue)
+  - **Save**: Horizontal progress bar showing percentage (green)
+  - **Consume**: Horizontal progress bar showing percentage (purple)
+  - Each bar shows label, percentage value, and visual indicator
+  - Aggregated across all episodes
+- **Action Buttons**:
+  - **Compare Scenarios**: Navigate to Comparison page
+  - **Export Data**: Download simulation results as JSON file
+    - Filename format: `simulation_{id}_results.json`
+    - Includes all episode data and statistics
+- **Loading States**: 
+  - Full-screen spinner with "Loading results..." message
+  - Centered layout with animation
+- **Error Handling**: 
+  - Red error banner with descriptive message
+  - "Back to Simulation Runner" button for recovery
+  - Handles missing simulation ID
+  - Handles API errors gracefully
+- **Responsive Design**: Grid layouts adapt from 1 to 4 columns
+- **Dark Mode**: Full support for light/dark themes throughout
+
+**API Integration:**
+- `api.getSimulationResults(id)` - Loads simulation results by ID from URL query parameter
+
+**Navigation:**
+- Back button → `/simulation` (Simulation Runner)
+- "Compare Scenarios" button → `/comparison`
+- URL parameter: `?id={simulationId}` (required)
+
+**Data Visualization:**
+- Episode-level time series data for all metrics
+- Aggregated statistics across all episodes
+- Strategy breakdown showing learned behavior
+- Investment performance analysis
+- Wealth accumulation tracking
+
+**Chart Interactions:**
+- Tab switching between different chart views
+- Episode selector to explore individual runs
+- Hover tooltips showing exact values
+- Responsive resizing based on screen size
+- Smooth animations and transitions
+
+**Export Functionality:**
+- JSON export includes:
+  - All episode data (cash, invested, portfolio, actions)
+  - Summary statistics (means, std devs)
+  - Strategy metrics (invest/save/consume percentages)
+  - Metadata (model name, scenario name, episode count)
+- Browser download with descriptive filename
+- Formatted JSON with 2-space indentation
+
+### Comparison ✅ **IMPLEMENTED**
+
+The Comparison view enables side-by-side analysis of multiple simulation results to identify the best performing scenarios and strategies.
+
+**Features:**
+- **Simulation Selector Section**:
+  - Grid of selectable simulation cards (up to 4 at once)
+  - Each card shows:
+    - Scenario name (bold header)
+    - Model name
+    - Episode count and creation date
+    - Checkbox indicator
+  - Visual feedback: Blue border and background when selected
+  - Selection counter: "X / 4 selected"
+  - "Clear All" button to deselect all simulations
+  - Empty state with "Go to Simulation Runner" CTA
+  - Maximum 4 simulations can be compared simultaneously
+  - Click anywhere on card to toggle selection
+- **Metrics Comparison Table**:
+  - Side-by-side comparison of 8 key metrics:
+    - Duration (months)
+    - Total Wealth (EUR)
+    - Investment Gains (EUR)
+    - Final Cash (EUR)
+    - Final Portfolio (EUR)
+    - Invest %
+    - Save %
+    - Consume %
+  - **Column Headers**:
+    - Color-coded dots matching chart colors
+    - Scenario name (bold)
+    - Model name (smaller text below)
+  - **Difference Highlighting**:
+    - Shows percentage change from first simulation
+    - Green text for positive differences (+X%)
+    - Red text for negative differences (-X%)
+    - Displayed below main value
+  - **Export Buttons**:
+    - "Export CSV" button (green) - Downloads comparison as CSV file
+    - "Export JSON" button (blue) - Downloads comparison as JSON file
+  - Responsive table with horizontal scroll on mobile
+- **Comparative Bar Charts** (4 visualizations):
+  - **Total Wealth Comparison**: Bar chart comparing final wealth across scenarios
+  - **Duration Comparison**: Bar chart comparing simulation duration in months
+  - **Investment Gains Comparison**: Bar chart comparing investment returns
+  - **Strategy Distribution Comparison**: Grouped bar chart showing invest/save/consume percentages
+  - All charts feature:
+    - Color-coded bars matching scenario colors (blue, green, orange, purple)
+    - Dark-themed tooltips with formatted values
+    - Axis labels and legends
+    - Grid lines for readability
+    - Responsive containers (100% width, 300px height)
+- **Wealth Over Time Comparison**:
+  - Line chart showing wealth accumulation for all selected scenarios
+  - Multiple colored lines (one per scenario)
+  - X-axis: Month, Y-axis: Total Wealth (EUR)
+  - Allows visual comparison of wealth trajectories
+  - Smooth lines without data points
+  - Responsive container (100% width, 400px height)
+- **Key Insights Section**:
+  - Automatically calculated insights with emoji icons:
+    - 🏆 **Highest Total Wealth**: Shows which scenario achieved best wealth
+    - 📈 **Best Investment Returns**: Highlights scenario with highest gains
+    - ⚡ **Shortest Duration**: Identifies fastest completion
+  - Color-coded insight cards (green, blue, purple backgrounds)
+  - Only shown when 2+ simulations selected
+- **Loading States**:
+  - Full-screen spinner when loading simulation list
+  - Inline spinner when loading selected simulation results
+  - "Loading simulation results..." message
+- **Error Handling**:
+  - Yellow warning banner for errors
+  - Maximum selection limit warning
+  - API error messages
+  - Graceful handling of missing data
+- **Export Functionality**:
+  - **CSV Export**:
+    - Rows: Metrics (Duration, Wealth, Gains, etc.)
+    - Columns: Selected scenarios
+    - Filename: `comparison_{timestamp}.csv`
+    - Comma-separated format
+  - **JSON Export**:
+    - Array of objects with simulation metadata and full results
+    - Filename: `comparison_{timestamp}.json`
+    - Formatted with 2-space indentation
+    - Includes all episode data
+- **Responsive Design**: 
+  - Grid layouts adapt from 1 to 3 columns
+  - Table scrolls horizontally on mobile
+  - Charts resize based on screen width
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.getSimulationHistory()` - Loads list of available simulations on mount
+- `api.getSimulationResults(id)` - Loads detailed results for each selected simulation
+- Efficient result caching using Map-based storage
+- Automatic result loading when selections change
+
+**Navigation:**
+- Back button → `/dashboard`
+- "Go to Simulation Runner" button (empty state) → `/simulation`
+
+**Data Analysis:**
+- Automatic calculation of percentage differences
+- Identification of best performing scenarios
+- Visual comparison across multiple dimensions
+- Strategy pattern analysis
+- Wealth trajectory comparison
+
+**Color Scheme:**
+- Scenario 1: Blue (#3B82F6)
+- Scenario 2: Green (#10B981)
+- Scenario 3: Orange (#F59E0B)
+- Scenario 4: Purple (#8B5CF6)
+
+**User Experience:**
+- Click-to-select interface for simulations
+- Real-time chart updates as selections change
+- Clear visual feedback for all interactions
+- Automatic insights generation
+- One-click export to CSV or JSON
+- Maximum 4 simulations to prevent overcrowding
+- Responsive tooltips on all charts
+- Smooth animations and transitions
+
+**Implementation Details:**
+- 783 lines of TypeScript React code
+- Uses Recharts for all visualizations (BarChart, LineChart)
+- State management with React hooks (useState, useEffect)
+- Efficient data transformation for chart rendering
+- Dynamic color assignment based on selection order
+- Percentage difference calculations relative to first simulation
+- Browser-based file downloads for exports
 
 ## Styling
 

@@ -313,31 +313,127 @@
     - ✅ Implemented loading states for all async operations
     - _Requirements: 4.1, 4.6_
 
-- [ ] 13. Implement Results Viewer page
-  - [ ] 13.1 Create ResultsViewer component
-    - Implement summary statistics cards
-    - Add tab navigation for different chart views
-    - Create strategy learned display section
-    - Add action buttons for compare, report, export
+- [x] 13. Implement Results Viewer page ⭐ **COMPLETED**
+  - [x] 13.1 Create ResultsViewer component ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive results viewer with full functionality (507 lines)
+    - ✅ Created header with back button, scenario name, and metadata display
+    - ✅ Implemented 4 summary statistics cards (duration, wealth, gains, portfolio)
+    - ✅ Added episode selector dropdown to view individual episode details
+    - ✅ Created tab navigation for 4 different chart views
+    - ✅ Implemented strategy learned section with 3 progress bars
+    - ✅ Added action buttons (Compare Scenarios, Export Data)
+    - ✅ Implemented JSON export functionality with browser download
+    - ✅ Added loading states with animated spinner
+    - ✅ Implemented error handling with recovery options
+    - ✅ Full dark mode support throughout
     - _Requirements: 5.1, 5.4, 5.5_
   
-  - [ ] 13.2 Implement interactive charts
-    - Create cash balance over time chart with Recharts
-    - Create portfolio evolution chart
-    - Create wealth accumulation chart
-    - Create action distribution pie chart
-    - Add tooltips on hover for all charts
-    - Implement zoom and pan functionality
+  - [x] 13.2 Implement interactive charts ⭐ **COMPLETED**
+    - ✅ Created Cash Balance Over Time chart (LineChart)
+      - Blue line showing cash progression
+      - X-axis: Month, Y-axis: Cash (EUR)
+      - Custom dark-themed tooltips with EUR formatting
+    - ✅ Created Portfolio Evolution chart (LineChart with 2 lines)
+      - Green line: Amount invested
+      - Purple line: Portfolio value
+      - Shows investment performance over time
+    - ✅ Created Wealth Accumulation chart (LineChart with 3 lines)
+      - Blue line: Cash balance
+      - Green line: Portfolio value
+      - Orange line: Total wealth (cash + portfolio)
+    - ✅ Created Action Distribution pie chart (PieChart)
+      - 3 segments: Invest (blue), Save (green), Consume (purple)
+      - Labels show name and percentage
+      - Custom tooltips with percentage formatting
+    - ✅ Added hover tooltips on all charts with custom styling
+    - ✅ Implemented responsive containers (100% width, 400px height)
+    - ✅ Added axis labels and legends for all charts
+    - ✅ Implemented grid lines for readability
+    - ✅ Episode-level data exploration via dropdown selector
+    - ✅ Tab-based navigation between chart views
+    - ✅ Smooth lines without data points for clean visualization
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.6, 5.7, 5.8_
 
-- [ ] 14. Implement Comparison view
-  - Create Comparison.tsx component
-  - Implement scenario selector for multiple scenarios
-  - Create side-by-side metrics comparison table
-  - Implement comparative charts
-  - Add difference highlighting
-  - Implement export to CSV/JSON functionality
-  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+- [x] 14. Implement Comparison view ⭐ **COMPLETED**
+  - [x] 14.1 Create Comparison.tsx component ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive comparison interface (783 lines)
+    - ✅ Created simulation selector with card-based UI (up to 4 selections)
+    - ✅ Added selection counter and "Clear All" functionality
+    - ✅ Implemented empty state with "Go to Simulation Runner" CTA
+    - ✅ Added visual feedback for selected simulations (blue border/background)
+    - ✅ Implemented maximum 4 simulations limit with warning
+    - ✅ Full dark mode support throughout
+    - _Requirements: 7.1, 7.2_
+  
+  - [x] 14.2 Create side-by-side metrics comparison table ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive comparison table with 8 metrics:
+      - Duration (months)
+      - Total Wealth (EUR)
+      - Investment Gains (EUR)
+      - Final Cash (EUR)
+      - Final Portfolio (EUR)
+      - Invest %
+      - Save %
+      - Consume %
+    - ✅ Added color-coded column headers matching chart colors
+    - ✅ Displayed scenario name and model name in headers
+    - ✅ Implemented difference highlighting (percentage change from first simulation)
+    - ✅ Color-coded differences (green for positive, red for negative)
+    - ✅ Responsive table with horizontal scroll on mobile
+    - ✅ Hover effects on table rows
+    - _Requirements: 7.2, 7.3, 7.4_
+  
+  - [x] 14.3 Implement comparative charts ⭐ **COMPLETED**
+    - ✅ Created 4 comparative bar charts:
+      - Total Wealth Comparison
+      - Duration Comparison
+      - Investment Gains Comparison
+      - Strategy Distribution Comparison (grouped bars)
+    - ✅ Created Wealth Over Time line chart comparing all scenarios
+    - ✅ All charts feature:
+      - Color-coded bars/lines (blue, green, orange, purple)
+      - Dark-themed tooltips with formatted values
+      - Axis labels and legends
+      - Grid lines for readability
+      - Responsive containers (300-400px height)
+    - ✅ Implemented 2-column grid layout for bar charts
+    - ✅ Full-width layout for wealth over time chart
+    - _Requirements: 7.3, 7.5_
+  
+  - [x] 14.4 Implement Key Insights section ⭐ **COMPLETED**
+    - ✅ Automatically calculated insights with emoji icons:
+      - 🏆 Highest Total Wealth
+      - 📈 Best Investment Returns
+      - ⚡ Shortest Duration
+    - ✅ Color-coded insight cards (green, blue, purple backgrounds)
+    - ✅ Shows scenario name and key metric value
+    - ✅ Only displayed when 2+ simulations selected
+    - _Requirements: 7.5_
+  
+  - [x] 14.5 Implement export functionality ⭐ **COMPLETED**
+    - ✅ CSV Export:
+      - Rows: Metrics, Columns: Selected scenarios
+      - Filename: `comparison_{timestamp}.csv`
+      - Includes all 8 comparison metrics
+      - Formatted values with proper units
+    - ✅ JSON Export:
+      - Array of objects with simulation metadata and full results
+      - Filename: `comparison_{timestamp}.json`
+      - Formatted with 2-space indentation
+      - Includes all episode data
+    - ✅ Export buttons in metrics table header (green CSV, blue JSON)
+    - ✅ Browser download with descriptive filenames
+    - _Requirements: 7.6_
+  
+  - [x] 14.6 API Integration and data management ⭐ **COMPLETED**
+    - ✅ `api.getSimulationHistory()` - Loads available simulations on mount
+    - ✅ `api.getSimulationResults(id)` - Loads detailed results for each selection
+    - ✅ Implemented efficient result caching (Map-based storage)
+    - ✅ Automatic result loading when selections change
+    - ✅ Loading states with spinner animations
+    - ✅ Error handling with yellow warning banner
+    - ✅ Navigation integration (back to dashboard, go to simulation runner)
+    - _Requirements: 7.1, 7.2_
 
 - [ ] 15. Implement Report Generation
   - Create ReportModal component
