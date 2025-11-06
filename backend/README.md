@@ -120,6 +120,164 @@ See `backend/models/responses.py` for complete response model definitions includ
 - `ScenarioSummary`, `ModelSummary`: Summary information
 - `HealthCheckResponse`, `ErrorResponse`: System responses
 
+## Scenarios API Usage
+
+### List All Scenarios
+
+```bash
+curl http://localhost:8000/api/scenarios
+```
+
+**Response:**
+```json
+[
+  {
+    "name": "bologna_coppia",
+    "description": "Young couple in Bologna with rental expenses",
+    "income": 3200,
+    "fixed_expenses": 1800,
+    "variable_expenses": 800,
+    "available_monthly": 600,
+    "available_pct": 18.8,
+    "risk_tolerance": 0.55,
+    "updated_at": "2025-11-06T10:30:00",
+    "size": 1234
+  }
+]
+```
+
+### Get Scenario Details
+
+```bash
+curl http://localhost:8000/api/scenarios/bologna_coppia
+```
+
+**Response:**
+```json
+{
+  "name": "bologna_coppia",
+  "description": "Young couple in Bologna with rental expenses",
+  "environment": {
+    "income": 3200,
+    "fixed_expenses": 1800,
+    "variable_expense_mean": 800,
+    "variable_expense_std": 150,
+    "inflation": 0.02,
+    "safety_threshold": 3500,
+    "max_months": 120,
+    "initial_cash": 10000,
+    "risk_tolerance": 0.55,
+    "investment_return_mean": 0.005,
+    "investment_return_std": 0.02,
+    "investment_return_type": "stochastic"
+  },
+  "training": { ... },
+  "reward": { ... },
+  "created_at": "2025-11-05T15:20:00",
+  "updated_at": "2025-11-06T10:30:00",
+  "size": 1234
+}
+```
+
+### Create New Scenario
+
+```bash
+curl -X POST http://localhost:8000/api/scenarios \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my_scenario",
+    "description": "My custom financial scenario",
+    "environment": {
+      "income": 3000,
+      "fixed_expenses": 1400,
+      "variable_expense_mean": 700,
+      "variable_expense_std": 100,
+      "inflation": 0.02,
+      "safety_threshold": 1000,
+      "max_months": 60,
+      "initial_cash": 0,
+      "risk_tolerance": 0.5,
+      "investment_return_mean": 0.005,
+      "investment_return_std": 0.02,
+      "investment_return_type": "stochastic"
+    }
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "name": "my_scenario",
+  "description": "My custom financial scenario",
+  "path": "configs/scenarios/my_scenario.yaml",
+  "created_at": "2025-11-06T12:00:00",
+  "updated_at": "2025-11-06T12:00:00",
+  "message": "Scenario created successfully"
+}
+```
+
+### Update Scenario
+
+```bash
+curl -X PUT http://localhost:8000/api/scenarios/my_scenario \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my_scenario",
+    "description": "Updated description",
+    "environment": { ... }
+  }'
+```
+
+### Delete Scenario
+
+```bash
+curl -X DELETE http://localhost:8000/api/scenarios/my_scenario
+```
+
+**Response:**
+```json
+{
+  "name": "my_scenario",
+  "message": "Scenario deleted successfully"
+}
+```
+
+### Get Templates
+
+```bash
+curl http://localhost:8000/api/scenarios/templates
+```
+
+**Response:**
+```json
+[
+  {
+    "name": "conservative",
+    "display_name": "Conservative Profile",
+    "description": "Low-risk profile with high savings buffer",
+    "environment": { ... },
+    "training": { ... },
+    "reward": { ... }
+  },
+  {
+    "name": "balanced",
+    "display_name": "Balanced Profile",
+    "description": "Moderate risk with balanced savings and investment",
+    "environment": { ... },
+    "training": { ... },
+    "reward": { ... }
+  },
+  ...
+]
+```
+
+**Available Templates:**
+- `conservative` - Low-risk profile with high savings buffer
+- `balanced` - Moderate risk with balanced savings and investment
+- `aggressive` - High-risk profile focused on investment growth
+- `young_professional` - Single professional with owned home
+- `young_couple` - Dual income couple with rental
+
 ## File Management Utilities
 
 The `backend/utils/file_manager.py` module provides comprehensive file management for the HRL Finance System. See [FILE_MANAGER_README.md](utils/FILE_MANAGER_README.md) for detailed documentation.
