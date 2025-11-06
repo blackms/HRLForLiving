@@ -252,21 +252,35 @@
     - ✅ Added error handling and loading states
     - _Requirements: 2.2, 2.3, 2.4, 2.6, 2.7_
 
-- [ ] 11. Implement Training Monitor page
-  - [ ] 11.1 Create TrainingMonitor component
-    - Implement training configuration form
-    - Add start/pause/stop training buttons
-    - Create progress bar component
-    - Implement current metrics display cards
-    - Add training status indicator
+- [x] 11. Implement Training Monitor page ⭐ **COMPLETED**
+  - [x] 11.1 Create TrainingMonitor component ⭐ **COMPLETED**
+    - ✅ Implemented comprehensive training configuration form (741 lines)
+    - ✅ Added scenario selector dropdown with API integration
+    - ✅ Implemented training parameters: episodes, save interval, eval episodes, seed
+    - ✅ Added start/stop training buttons with loading states
+    - ✅ Created animated progress bar with percentage display
+    - ✅ Implemented 6 current metrics display cards (reward, duration, stability, cash, invested, goal adherence)
+    - ✅ Added training status indicator with pulsing animation
+    - ✅ Implemented WebSocket connection status indicator (green/red dot)
+    - ✅ Added elapsed time formatting (hours/minutes/seconds)
+    - ✅ Full dark mode support throughout
     - _Requirements: 3.1, 3.2, 3.6, 3.7, 3.8_
   
-  - [ ] 11.2 Implement real-time chart updates
-    - Create MetricChart component with Recharts
-    - Implement WebSocket connection for training updates
-    - Add chart data state management
-    - Implement live chart updates as data arrives
-    - Add multiple metric charts (reward, duration, stability)
+  - [x] 11.2 Implement real-time chart updates ⭐ **COMPLETED**
+    - ✅ Created 4 interactive charts using Recharts library
+    - ✅ Implemented WebSocket connection for real-time training updates
+    - ✅ Added chart data state management with episode-by-episode tracking
+    - ✅ Implemented live chart updates as training progresses
+    - ✅ Created Average Reward Over Time chart
+    - ✅ Created Average Duration Over Time chart
+    - ✅ Created Stability Over Time chart
+    - ✅ Created Cash vs Investment Over Time chart (dual-line)
+    - ✅ Added responsive chart containers (100% width, 300px height)
+    - ✅ Implemented custom tooltips with dark theme styling
+    - ✅ Added axis labels and legends for all charts
+    - ✅ Implemented training event handlers (started, progress, completed, stopped, error)
+    - ✅ Added status polling every 5 seconds as fallback
+    - ✅ Conditional rendering: form when idle, charts when training
     - _Requirements: 3.3, 3.4, 3.5_
 
 - [ ] 12. Implement Simulation Runner page

@@ -333,11 +333,83 @@ The Scenario Builder allows users to create and edit financial scenarios with co
 - Initial cash: Cannot be negative
 - Risk tolerance: Must be between 0 and 1
 
-### Training Monitor
-- Start/stop training
-- Real-time progress updates via WebSocket
-- Live charts for metrics (reward, duration, stability)
-- Current episode statistics
+### Training Monitor ✅ **IMPLEMENTED**
+
+The Training Monitor provides a comprehensive interface for training AI models on financial scenarios with real-time progress tracking.
+
+**Features:**
+- **WebSocket Connection Status**: Visual indicator (green/red dot) showing connection state
+- **Training Configuration Form** (shown when not training):
+  - Scenario selector dropdown (loads from API)
+  - Number of episodes input (default: 1000)
+  - Save interval input (default: 100 episodes)
+  - Evaluation episodes input (default: 10)
+  - Random seed input (optional, for reproducibility)
+  - Start Training button (disabled if no scenario selected)
+  - Form validation with error messages
+- **Training Status Bar** (shown during training):
+  - Current scenario name
+  - Episode progress (e.g., "Episode 45 / 1000")
+  - Elapsed time formatted (hours/minutes/seconds)
+  - Animated pulsing indicator
+  - Animated progress bar with percentage
+  - Stop Training button
+- **Current Metrics Cards** (6 real-time metrics):
+  - Average Reward (2 decimal places)
+  - Duration (months with 1 decimal)
+  - Stability (percentage with 1 decimal)
+  - Average Cash (EUR, no decimals)
+  - Average Invested (EUR, no decimals)
+  - Goal Adherence (percentage with 1 decimal)
+- **Real-Time Charts** (4 interactive visualizations):
+  - **Average Reward Over Time**: Line chart tracking reward progression
+  - **Average Duration Over Time**: Line chart showing episode duration in months
+  - **Stability Over Time**: Line chart displaying stability percentage (0-100%)
+  - **Cash vs Investment Over Time**: Dual-line chart comparing cash and invested amounts
+  - All charts feature:
+    - Responsive containers (100% width, 300px height)
+    - Custom dark-themed tooltips
+    - Axis labels and legends
+    - Grid lines for readability
+    - No data points (smooth lines)
+    - Color-coded lines (blue, green, purple, orange, red)
+- **WebSocket Event Handling**:
+  - `training_started`: Resets UI, clears previous data
+  - `training_progress`: Updates metrics and appends to charts
+  - `training_completed`: Shows completion state
+  - `training_stopped`: Handles manual stop
+  - `training_error`: Displays error message
+- **Status Polling**: Fallback polling every 5 seconds for status updates
+- **Loading States**: Spinner and "Starting..." / "Stopping..." button text
+- **Error Handling**: Red error banner with descriptive messages
+- **Conditional Rendering**: Shows form when idle, metrics/charts when training
+- **Responsive Design**: Grid layouts adapt from 1 to 3 columns
+- **Dark Mode**: Full support for light/dark themes
+
+**API Integration:**
+- `api.listScenarios()` - Loads available scenarios on mount
+- `api.startTraining(request)` - Initiates training session
+- `api.stopTraining()` - Stops active training
+- `api.getTrainingStatus()` - Polls current training state every 5 seconds
+
+**WebSocket Integration:**
+- `websocket.connect()` - Establishes WebSocket connection
+- `websocket.onConnect()` - Handles connection events
+- `websocket.onDisconnect()` - Handles disconnection events
+- `websocket.on('training_started')` - Listens for training start
+- `websocket.on('training_progress')` - Receives real-time updates
+- `websocket.on('training_completed')` - Handles completion
+- `websocket.on('training_stopped')` - Handles manual stop
+- `websocket.on('training_error')` - Handles errors
+
+**User Experience:**
+- Real-time chart updates as training progresses (no page refresh needed)
+- Smooth progress bar animation
+- Time formatting (e.g., "2h 15m 30s", "45m 12s", "30s")
+- Percentage formatting with 1 decimal place
+- Currency formatting with EUR symbol
+- Disabled states prevent duplicate training sessions
+- Clear visual feedback for all actions
 
 ### Simulation Runner
 - Select model and scenario
