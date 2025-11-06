@@ -282,11 +282,92 @@ See [SIMULATION_API.md](SIMULATION_API.md) for detailed usage examples with Pyth
 
 ### Models API (`models.py`)
 
-🚧 **In Development**
+Complete model management with metadata extraction and training history.
 
-- GET `/api/models` - List all trained models
-- GET `/api/models/{name}` - Get model details
-- DELETE `/api/models/{name}` - Delete model
+**Status:** ✅ **FULLY IMPLEMENTED**
+
+#### Endpoints
+
+| Method | Path | Description | Status Code |
+|--------|------|-------------|-------------|
+| GET | `/api/models` | List all trained models | 200, 500 |
+| GET | `/api/models/{name}` | Get model details | 200, 404, 500 |
+| DELETE | `/api/models/{name}` | Delete model | 200, 404, 500 |
+
+#### Request/Response Models
+
+**ModelSummary:**
+- `name` (str): Model identifier
+- `scenario_name` (str): Scenario used for training
+- `size_mb` (float): Total model file size in MB
+- `trained_at` (str): Training completion timestamp
+- `has_metadata` (bool): Whether metadata file exists
+- `episodes` (int, optional): Number of training episodes
+- `income` (float, optional): Income from environment config
+- `risk_tolerance` (float, optional): Risk tolerance from environment config
+- `final_reward` (float, optional): Final average reward
+- `avg_reward` (float, optional): Average reward across training
+- `max_reward` (float, optional): Maximum reward achieved
+- `final_duration` (float, optional): Final episode duration
+- `final_cash` (float, optional): Final cash balance
+- `final_invested` (float, optional): Final invested amount
+
+**ModelDetail:**
+- `name` (str): Model identifier
+- `scenario_name` (str): Scenario used for training
+- `high_agent_path` (str): Path to high-level agent file
+- `low_agent_path` (str): Path to low-level agent file
+- `size_mb` (float): Total model file size in MB
+- `trained_at` (str): Training completion timestamp
+- `has_metadata` (bool): Whether metadata file exists
+- `has_history` (bool): Whether training history file exists
+- `episodes` (int, optional): Number of training episodes
+- `metadata` (dict, optional): Full metadata object
+- `environment_config` (dict, optional): Environment configuration
+- `training_config` (dict, optional): Training hyperparameters
+- `reward_config` (dict, optional): Reward function configuration
+- `training_history` (dict, optional): Processed training history
+- `final_metrics` (dict, optional): Final training metrics
+
+**ModelListResponse:**
+- `models` (list): List of model summaries
+- `total` (int): Total count
+
+#### Integration
+
+The Models API integrates with:
+- `backend/services/model_service.py` - Model management service
+- `backend/utils/file_manager.py` - File operations
+- `backend/models/responses.py` - Response serialization
+
+#### Model File Structure
+
+Models are stored in `models/` directory:
+- `{model_name}_high_agent.pt` - High-level agent weights
+- `{model_name}_low_agent.pt` - Low-level agent weights
+- `{model_name}_metadata.json` - Training metadata (optional)
+- `{model_name}_history.json` - Training history (optional)
+
+#### Training History Metrics
+
+The training history includes:
+- `episode_rewards`: Total reward per episode
+- `episode_lengths`: Duration in months
+- `cash_balances`: Final cash balance
+- `total_invested`: Total invested amount
+- `cumulative_wealth_growth`: Wealth growth over time
+- `cash_stability_index`: Cash stability metric
+- `sharpe_ratio`: Risk-adjusted return
+- `goal_adherence`: Goal following metric
+- `policy_stability`: Policy consistency metric
+- `high_level_losses`: High-level agent losses
+- `low_level_losses`: Low-level agent losses
+
+Each metric includes: count, first, last, mean, min, max
+
+#### Usage Examples
+
+See [MODELS_API.md](MODELS_API.md) for detailed usage examples with Python, cURL, and JavaScript clients.
 
 ### Reports API (`reports.py`)
 

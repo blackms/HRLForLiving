@@ -49,6 +49,30 @@ See [TRAINING_API.md](api/TRAINING_API.md) for detailed Training API documentati
 ### Simulation API ✅ **IMPLEMENTED**
 
 - `POST /api/simulation/run` - Run a simulation with a trained model
+- `GET /api/simulation/results/{simulation_id}` - Get simulation results
+- `GET /api/simulation/history` - List all past simulations
+
+See [SIMULATION_API.md](api/SIMULATION_API.md) for detailed Simulation API documentation.
+
+### Models API ✅ **IMPLEMENTED**
+
+- `GET /api/models` - List all trained models with summary information
+- `GET /api/models/{name}` - Get detailed model information including training history
+- `DELETE /api/models/{name}` - Delete a trained model
+
+See [MODELS_API.md](api/MODELS_API.md) for detailed Models API documentation.
+
+**Key Features:**
+- Automatic metadata extraction from training history
+- Training metrics aggregation (rewards, duration, cash, invested)
+- Processed history with statistics (count, mean, min, max)
+- Graceful handling of missing metadata/history files
+- NaN/Infinity filtering for robust metrics
+- Complete model file deletion (weights, metadata, history)
+
+### Simulation API ✅ **IMPLEMENTED**
+
+- `POST /api/simulation/run` - Run a simulation with a trained model
 - `GET /api/simulation/results/{id}` - Get results for a specific simulation
 - `GET /api/simulation/history` - List all past simulations
 
@@ -591,7 +615,9 @@ for model in models:
 - **Simulation API (complete evaluation system)** ⭐
 - **Simulation service layer with deterministic policy** ⭐
 - **Simulation results storage and retrieval** ⭐
+- **Models API (complete model management)** ⭐
+- **Model service layer with metadata extraction** ⭐
+- **Training history processing and statistics** ⭐
 
 🚧 **In Progress:**
-- Models API
 - Reports API

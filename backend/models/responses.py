@@ -92,11 +92,39 @@ class ModelSummary(BaseModel):
     
     name: str = Field(description="Model name")
     scenario_name: str = Field(description="Scenario used for training")
-    episodes: int = Field(description="Number of training episodes")
-    final_reward: float = Field(description="Final average reward")
-    final_stability: float = Field(description="Final stability metric")
-    trained_at: datetime = Field(description="Training completion timestamp")
-    file_size_mb: Optional[float] = Field(None, description="Model file size in MB")
+    size_mb: float = Field(description="Model file size in MB")
+    trained_at: str = Field(description="Training completion timestamp")
+    has_metadata: bool = Field(description="Whether metadata file exists")
+    episodes: Optional[int] = Field(None, description="Number of training episodes")
+    income: Optional[float] = Field(None, description="Income from environment config")
+    risk_tolerance: Optional[float] = Field(None, description="Risk tolerance from environment config")
+    final_reward: Optional[float] = Field(None, description="Final average reward")
+    avg_reward: Optional[float] = Field(None, description="Average reward across training")
+    max_reward: Optional[float] = Field(None, description="Maximum reward achieved")
+    final_duration: Optional[float] = Field(None, description="Final episode duration")
+    final_cash: Optional[float] = Field(None, description="Final cash balance")
+    final_invested: Optional[float] = Field(None, description="Final invested amount")
+
+
+class ModelDetail(BaseModel):
+    """Detailed information about a trained model"""
+    model_config = {"protected_namespaces": ()}
+    
+    name: str = Field(description="Model name")
+    scenario_name: str = Field(description="Scenario used for training")
+    high_agent_path: str = Field(description="Path to high-level agent file")
+    low_agent_path: str = Field(description="Path to low-level agent file")
+    size_mb: float = Field(description="Total model file size in MB")
+    trained_at: str = Field(description="Training completion timestamp")
+    has_metadata: bool = Field(description="Whether metadata file exists")
+    has_history: bool = Field(description="Whether training history file exists")
+    episodes: Optional[int] = Field(None, description="Number of training episodes")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Full metadata")
+    environment_config: Optional[Dict[str, Any]] = Field(None, description="Environment configuration")
+    training_config: Optional[Dict[str, Any]] = Field(None, description="Training configuration")
+    reward_config: Optional[Dict[str, Any]] = Field(None, description="Reward configuration")
+    training_history: Optional[Dict[str, Any]] = Field(None, description="Processed training history")
+    final_metrics: Optional[Dict[str, Any]] = Field(None, description="Final training metrics")
 
 
 class ScenarioListResponse(BaseModel):
