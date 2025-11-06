@@ -16,6 +16,78 @@ pip install -r requirements.txt
 uvicorn backend.main:socket_app --reload --port 8000
 ```
 
+## Testing
+
+The backend includes a comprehensive test suite using pytest.
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=backend --cov-report=html
+
+# Run specific test file
+pytest backend/tests/test_api_scenarios.py
+
+# Run tests with verbose output
+pytest -v
+
+# Run tests matching a pattern
+pytest -k "test_create_scenario"
+```
+
+### Test Dependencies
+
+The following testing libraries are included:
+- **pytest** (7.4.3) - Testing framework
+- **pytest-asyncio** (0.21.1) - Async test support for FastAPI
+- **httpx** (0.25.2) - HTTP client for testing API endpoints
+
+### Test Structure
+
+```
+backend/tests/
+├── conftest.py              # Shared fixtures and configuration
+├── test_api_scenarios.py    # Scenarios API tests
+├── test_api_training.py     # Training API tests
+├── test_api_simulation.py   # Simulation API tests
+├── test_api_models.py       # Models API tests
+├── test_api_reports.py      # Reports API tests
+├── test_services.py         # Service layer tests
+├── test_file_manager.py     # File management tests
+└── test_integration.py      # End-to-end integration tests
+```
+
+### Writing Tests
+
+Example test for API endpoint:
+
+```python
+import pytest
+from httpx import AsyncClient
+from backend.main import app
+
+@pytest.mark.asyncio
+async def test_list_scenarios():
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.get("/api/scenarios")
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
+```
+
+### Test Coverage
+
+Run tests with coverage to ensure code quality:
+
+```bash
+pytest --cov=backend --cov-report=term-missing
+```
+
+This will show which lines of code are not covered by tests.
+
 ## API Endpoints
 
 ### Core Endpoints
