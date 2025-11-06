@@ -58,6 +58,7 @@ backend/tests/
 ├── test_api_reports.py      # Reports API tests
 ├── test_services.py         # Service layer tests
 ├── test_file_manager.py     # File management tests
+├── test_websocket.py        # WebSocket communication tests
 └── test_integration.py      # End-to-end integration tests
 ```
 
@@ -91,8 +92,16 @@ This will show which lines of code are not covered by tests.
 **Current Coverage:** 
 - 41 API endpoint tests covering all major functionality
 - 26 service layer tests covering business logic and data processing
+- 15 WebSocket communication tests covering real-time training updates
 - 11 integration tests covering complete end-to-end workflows
-- Total: 78+ comprehensive tests
+- Total: 93+ comprehensive tests
+
+**WebSocket Tests:**
+- TrainingSocketManager event emission (progress, started, completed, stopped, error)
+- Training service progress callback integration
+- Complete training lifecycle event sequences
+- Event payload structure validation
+- Connection handler setup verification
 
 **Integration Tests:**
 - Complete user workflows as documented in API_QUICK_START.md

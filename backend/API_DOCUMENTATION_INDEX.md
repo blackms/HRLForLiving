@@ -362,6 +362,8 @@ When adding new features:
 - **Frontend Documentation:** `../frontend/README.md`
 - **Project README:** `../README.md`
 - **Technical Paper:** `../TECHNICAL_PAPER.md`
+- **Backend Tests:** `tests/README.md`
+- **Integration Tests:** `tests/INTEGRATION_TESTS_SUMMARY.md`
 
 ## 📄 License
 

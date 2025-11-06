@@ -14,10 +14,12 @@ tests/
 ├── test_api_reports.py                # Reports API endpoint tests
 ├── test_services.py                   # Service layer unit tests (comprehensive)
 ├── test_file_manager.py               # File manager utility tests
+├── test_websocket.py                  # WebSocket communication tests
 ├── test_integration.py                # Integration tests for complete workflows
 ├── README.md                          # This file - test suite overview
 ├── INTEGRATION_TESTS_SUMMARY.md       # Detailed integration test documentation
-└── INTEGRATION_TEST_NOTES.md          # Known issues and recommendations
+├── INTEGRATION_TEST_NOTES.md          # Known issues and recommendations
+└── WEBSOCKET_TESTS_SUMMARY.md         # WebSocket tests documentation
 ```
 
 ### Service Layer Tests (`test_services.py`)
@@ -54,6 +56,37 @@ Comprehensive tests for all service layer components:
 - HTML content generation
 
 **Total Service Tests: 26**
+
+### WebSocket Communication Tests (`test_websocket.py`)
+
+Comprehensive tests for real-time training updates via WebSocket:
+
+**TestTrainingSocketManager** (6 tests):
+- Progress update emission
+- Training started event emission
+- Training completed event emission
+- Training stopped event emission
+- Training error event emission
+- Multiple sequential progress updates
+
+**TestWebSocketIntegration** (4 tests):
+- Training service progress callback mechanism
+- Complete training lifecycle event sequence
+- Error handling and error event emission
+- Early stop scenario with stopped event
+
+**TestWebSocketConnectionHandlers** (2 tests):
+- Connection handler setup verification
+- Progress data structure and type validation
+
+**TestWebSocketEventPayloads** (3 tests):
+- Training started payload structure
+- Training completed payload structure
+- Training error payload structure
+
+**Total WebSocket Tests: 15**
+
+All tests use mocking to avoid actual WebSocket connections, ensuring fast and reliable test execution.
 
 ## Running Tests
 
@@ -139,6 +172,7 @@ The test suite covers:
 - ✅ Request validation and error handling
 - ✅ Service layer business logic (comprehensive)
 - ✅ File management utilities
+- ✅ WebSocket communication and real-time updates (15 tests)
 - ✅ Complete user workflows (11 integration tests)
 - ✅ End-to-end workflows as documented in API_QUICK_START.md
 - ✅ Multi-step operations with data flow validation
@@ -151,6 +185,8 @@ The test suite covers:
 - ✅ Error handling with invalid data (NaN, Infinity)
 - ✅ Template validation and structure
 - ✅ Report generation and formatting
+- ✅ Training lifecycle event broadcasting
+- ✅ WebSocket event payload structures
 
 ## Writing New Tests
 
@@ -220,6 +256,12 @@ async def test_list_scenarios():
   - Template structure verification needed
   - Future enhancement suggestions
   - Test improvement recommendations
+- **WEBSOCKET_TESTS_SUMMARY.md** - WebSocket communication tests documentation
+  - Test coverage breakdown (15 tests)
+  - Event types tested (progress, started, completed, stopped, error)
+  - Integration points with training service
+  - Mocking strategy and approach
+  - Event payload structures
 
 ### Related Documentation
 
