@@ -40,8 +40,8 @@
     - ✅ Security features: sanitization, validation, safe YAML/JSON parsing
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 3. Implement Scenarios API
-  - [ ] 3.1 Create scenarios service layer
+- [x] 3. Implement Scenarios API
+  - [x] 3.1 Create scenarios service layer
     - Implement scenario_service.py with business logic
     - Add create_scenario function that validates and saves YAML
     - Add get_scenario function that loads and parses YAML
@@ -49,7 +49,7 @@
     - Add update_scenario and delete_scenario functions
     - _Requirements: 2.1, 2.2, 2.3, 2.6, 10.1_
   
-  - [ ] 3.2 Create scenarios API endpoints
+  - [x] 3.2 Create scenarios API endpoints
     - Implement GET /api/scenarios endpoint to list all scenarios
     - Implement GET /api/scenarios/{name} endpoint to get scenario details
     - Implement POST /api/scenarios endpoint to create new scenario

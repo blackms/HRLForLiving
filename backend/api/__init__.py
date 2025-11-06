@@ -1,1 +1,1 @@
-# API package
+"""API endpoints for HRL Finance System"""

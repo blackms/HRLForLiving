@@ -23,6 +23,15 @@ uvicorn main:app --reload --port 8000
 - `GET /` - Root endpoint returning API information
 - `GET /health` - Health check endpoint for monitoring
 
+### Scenarios API
+
+- `GET /api/scenarios` - List all scenarios with summary information
+- `GET /api/scenarios/{name}` - Get detailed scenario configuration
+- `POST /api/scenarios` - Create a new scenario
+- `PUT /api/scenarios/{name}` - Update an existing scenario
+- `DELETE /api/scenarios/{name}` - Delete a scenario
+- `GET /api/scenarios/templates` - Get preset scenario templates
+
 ### API Documentation
 
 Once running, visit:
@@ -146,8 +155,12 @@ for model in models:
 - **Pydantic request models with comprehensive validation**
 - **Pydantic response models for all API endpoints**
 - **File management utilities with security features**
+- **Scenarios API (complete CRUD operations)**
+- **Scenario service layer with business logic**
+- **Scenario templates (5 preset profiles)**
 
 🚧 **In Progress:**
-- API endpoint implementations (scenarios, training, simulation, models, reports)
-- WebSocket support for real-time training updates
-- Service layer business logic
+- Training API and WebSocket support
+- Simulation API
+- Models API
+- Reports API
